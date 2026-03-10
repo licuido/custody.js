@@ -1,5 +1,11 @@
 # custody
 
+## 0.4.0
+
+### Minor Changes
+
+- 8f814b2: compatible with 1.31. Removed MPT create, set, destroy and several API paths.
+
 ## 0.3.0
 
 ### Minor Changes
