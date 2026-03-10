@@ -1391,693 +1391,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/v1/domains/{domainId}/external-accounts/providers/{connectionId}/pairs": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Get available trade pairs */
-    get: {
-      parameters: {
-        query?: {
-          externalTickerName?: string
-        }
-        header?: never
-        path: {
-          domainId: string
-          connectionId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_PairOut"][]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/providers/{connectionId}/balances": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Get balance directly from a connection and a specified ticker name */
-    get: {
-      parameters: {
-        query?: {
-          externalTickerName?: string
-        }
-        header?: never
-        path: {
-          domainId: string
-          connectionId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_BalanceOut"][]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/providers/{connectionId}/pairs/{baseExternalTickerName}/{quoteExternalTickerName}/price": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Get pair price */
-    get: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-          connectionId: string
-          baseExternalTickerName: string
-          quoteExternalTickerName: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_PairPriceOut"]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/transactions/orders": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Get external account orders */
-    get: {
-      parameters: {
-        query?: {
-          limit?: number
-          externalAccountIds?: string[]
-          intentId?: string
-          createdBy?: string
-          lastModifiedBy?: string
-          description?: string
-          customProperties?: string[]
-          startingAfter?: string
-          sortOrder?: components["schemas"]["Flows_SortOrder"]
-          sortBy?: components["schemas"]["Flows_OrderOutSortBy"]
-        }
-        header?: never
-        path: {
-          domainId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_GuidNullableTransactionOrderOutPaginationResult"]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/transactions/transfers": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Get external account transfers */
-    get: {
-      parameters: {
-        query?: {
-          limit?: number
-          startingAfter?: string
-          sortOrder?: components["schemas"]["Flows_SortOrder"]
-          sortBy?: components["schemas"]["Flows_TransactionOutSortBy"]
-          kind?: components["schemas"]["Flows_TransactionKind"]
-          externalAccountId?: string
-          transactionOrderId?: string
-          type?: string
-          id?: string
-          startDate?: string
-          endDate?: string
-        }
-        header?: never
-        path: {
-          domainId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_GuidNullableTransferOutPaginationResult"]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/transactions/dry-run": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** @description Transaction dry run */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-        }
-        cookie?: never
-      }
-      requestBody?: {
-        content: {
-          "application/json": components["schemas"]["Flows_TransactionDryRunParametersTransactionDryRunIn"]
-          "text/json": components["schemas"]["Flows_TransactionDryRunParametersTransactionDryRunIn"]
-          "application/*+json": components["schemas"]["Flows_TransactionDryRunParametersTransactionDryRunIn"]
-        }
-      }
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_TransactionDryRunOut"]
-          }
-        }
-      }
-    }
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/providers": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description List external account provider connections */
-    get: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_ProviderConnectionOut"][]
-          }
-        }
-      }
-    }
-    put?: never
-    /** @description Connect an external account provider */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-        }
-        cookie?: never
-      }
-      requestBody?: {
-        content: {
-          "application/json": components["schemas"]["Flows_ProviderConnectionParametersInCreateProviderConnectionIn"]
-        }
-      }
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_ProviderConnectionOut"]
-          }
-        }
-      }
-    }
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/providers/{connectionId}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Get external account provider connections */
-    get: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-          connectionId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_ProviderConnectionOut"]
-          }
-        }
-      }
-    }
-    put?: never
-    /** @description Update an external account provider connection */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-          connectionId: string
-        }
-        cookie?: never
-      }
-      requestBody?: {
-        content: {
-          "application/json": components["schemas"]["Flows_ProviderConnectionParametersInUpdateProviderConnectionIn"]
-        }
-      }
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_ProviderConnectionOut"]
-          }
-        }
-      }
-    }
-    /** @description Disconnect an external account provider */
-    delete: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-          connectionId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content?: never
-        }
-      }
-    }
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description List external accounts */
-    get: {
-      parameters: {
-        query?: {
-          limit?: number
-          startingAfter?: string
-          sortOrder?: components["schemas"]["Flows_SortOrder"]
-          sortBy?: components["schemas"]["Flows_ExternalAccountSortBy"]
-          connectionId?: string
-          alias?: string
-          ledgerId?: string
-          externalTickerName?: string
-          connectionState?: components["schemas"]["Flows_ConnectionState"]
-        }
-        header?: never
-        path: {
-          domainId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_GuidNullableExternalAccountOutPaginationResult"]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/{externalAccountId}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Get external account details */
-    get: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-          externalAccountId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_ExternalAccountOut"]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/{externalAccountId}/balances": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Get external account balances */
-    get: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-          externalAccountId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_BalanceOut"][]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/{externalAccountId}/addresses/latest": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Retrieve latest external address */
-    get: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-          externalAccountId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_AdressesOut"]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/{externalAccountId}/addresses": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Retrieve all generated addresses */
-    get: {
-      parameters: {
-        query?: {
-          startingAfter?: string
-          limit?: number
-        }
-        header?: never
-        path: {
-          domainId: string
-          externalAccountId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_GuidNullableAdressesOutPaginationResult"]
-          }
-        }
-      }
-    }
-    put?: never
-    /** @description Generate new account external address */
-    post: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-          externalAccountId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_AdressesOut"]
-          }
-        }
-      }
-    }
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/external-accounts/{externalAccountId}/addresses/{externalAccountAddressId}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Retrieve account external address */
-    get: {
-      parameters: {
-        query?: never
-        header?: never
-        path: {
-          domainId: string
-          externalAccountId: string
-          externalAccountAddressId: string
-        }
-        cookie?: never
-      }
-      requestBody?: never
-      responses: {
-        /** @description Success */
-        200: {
-          headers: {
-            [name: string]: unknown
-          }
-          content: {
-            "application/json": components["schemas"]["Flows_AdressesOut"]
-          }
-        }
-      }
-    }
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   "/v1/domains/{domainId}/virtual-ledgers": {
     parameters: {
       query?: never
@@ -2743,40 +2056,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/v1/domains/{domainId}/compliance/providers/{provider}/toggle-preview-screening": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    /** Enables or disables the preview screening for an existing provider connection */
-    put: operations["TogglePreviewScreening"]
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/v1/domains/{domainId}/compliance/providers/{provider}/pause-connection": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    /** Pause/unpause an existing external provider connection */
-    put: operations["PauseProviderConnection"]
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   "/v1/domains/{domainId}/compliance/providers": {
     parameters: {
       query?: never
@@ -2807,6 +2086,40 @@ export interface paths {
     put?: never
     /** Creates screening rules for connected provider of the given domain */
     post: operations["ConfigureScreeningRulesForDomainAndProvider"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/domains/{domainId}/compliance/providers/{provider}/toggle-preview-screening": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Enables or disables the preview screening for an existing provider connection */
+    put: operations["TogglePreviewScreening"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/domains/{domainId}/compliance/providers/{provider}/pause-connection": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Pause/unpause an existing external provider connection */
+    put: operations["PauseProviderConnection"]
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -2967,6 +2280,91 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/v1/domains/{domainId}/compliance/travel-rule/providers/{provider}/messages": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Creates a TravelRule message for a transfer */
+    post: operations["CreateTravelRuleTransfer"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/domains/{domainId}/compliance/travel-rule/providers/{provider}/messages/{travelRuleId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get a travel rule transfer by ID */
+    get: operations["GetTravelRuleTransfer"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/domains/{domainId}/compliance/travel-rule/providers/{provider}/messages/{travelRuleId}/pii": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Append PII to a travel rule message */
+    post: operations["AppendPIIToTransfer"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/domains/{domainId}/compliance/travel-rule/providers/{provider}/messages/{travelRuleId}/encrypted-pii": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Present end-to-end encrypted PII to a travel rule message without policy */
+    post: operations["PresentEncryptedPIIToTransferWithoutPolicy"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/domains/{domainId}/compliance/travel-rule/providers/{provider}/messages/{travelRuleId}/policies/{travelRulePolicyId}/encrypted-pii": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Append end-to-end encrypted PII to a travel rule message */
+    post: operations["PresentEncryptedPIIToTransfer"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/v1/domains/{domainId}/channels": {
     parameters: {
       query?: never
@@ -2974,8 +2372,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
+    /** Get all channels */
     get: operations["getAllChannels"]
     put?: never
+    /** Create a channel */
     post: operations["createChannel"]
     delete?: never
     options?: never
@@ -2992,6 +2392,7 @@ export interface paths {
     }
     get?: never
     put?: never
+    /** Test a channel */
     post: operations["testChannel"]
     delete?: never
     options?: never
@@ -3006,12 +2407,15 @@ export interface paths {
       path?: never
       cookie?: never
     }
+    /** Get channel details */
     get: operations["getChannel"]
     put?: never
     post?: never
+    /** Delete a channel */
     delete: operations["deleteChannel"]
     options?: never
     head?: never
+    /** Update a channel */
     patch: operations["updateChannel"]
     trace?: never
   }
@@ -3022,6 +2426,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
+    /** Get all events for a channel */
     get: operations["getAllChannelEvents"]
     put?: never
     post?: never
@@ -3038,6 +2443,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
+    /** Get channel event details */
     get: operations["getEvent"]
     put?: never
     post?: never
@@ -3054,6 +2460,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
+    /** Get all events */
     get: operations["getAllEvents"]
     put?: never
     post?: never
@@ -8050,7 +7457,6 @@ export interface components {
     Core_WorkflowStepStatus: "Open" | "Approved" | "Failed" | "Rejected"
     Core_XrplClawbackCurrency:
       | components["schemas"]["Core_XrplClawbackCurrency_Currency"]
-      | components["schemas"]["Core_XrplClawbackCurrency_MultiPurposeToken"]
       | components["schemas"]["Core_XrplClawbackCurrency_TickerId"]
     Core_XrplClawbackCurrency_Currency: {
       code: string
@@ -8060,15 +7466,6 @@ export interface components {
        * @enum {string}
        */
       type: "Currency"
-    }
-    Core_XrplClawbackCurrency_MultiPurposeToken: {
-      /** @description XRPL MPToken Issuance ID (192-bit integer hex encoded) */
-      issuanceId: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "MultiPurposeToken"
     }
     Core_XrplClawbackCurrency_TickerId: {
       /** Format: uuid */
@@ -8137,9 +7534,6 @@ export interface components {
       | components["schemas"]["Core_XrplOperation_Clawback"]
       | components["schemas"]["Core_XrplOperation_DepositPreauth"]
       | components["schemas"]["Core_XrplOperation_MPTokenAuthorize"]
-      | components["schemas"]["Core_XrplOperation_MPTokenIssuanceCreate"]
-      | components["schemas"]["Core_XrplOperation_MPTokenIssuanceDestroy"]
-      | components["schemas"]["Core_XrplOperation_MPTokenIssuanceSet"]
       | components["schemas"]["Core_XrplOperation_OfferCreate"]
       | components["schemas"]["Core_XrplOperation_Payment"]
       | components["schemas"]["Core_XrplOperation_TrustSet"]
@@ -8175,54 +7569,13 @@ export interface components {
       type: "DepositPreauth"
     }
     Core_XrplOperation_MPTokenAuthorize: {
-      /** @description XRPL MPToken Issuance ID (192-bit integer hex encoded) */
-      issuanceId: string
+      tokenIdentifier: components["schemas"]["Core_Xrpl_MPTokenIdentifier"]
       flags: components["schemas"]["Core_Xrpl_MPTokenAuthorizeFlag"][]
-      holder?: string
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
       type: "MPTokenAuthorize"
-    }
-    Core_XrplOperation_MPTokenIssuanceCreate: {
-      flags: components["schemas"]["Core_Xrpl_MPTokenIssuanceCreateFlag"][]
-      /** Format: int32 */
-      assetScale?: number
-      /**
-       * Format: int32
-       * @description Transfer fee for MultiPurposeToken, must be from 0 to 50000
-       */
-      transferFee?: number
-      /** @description This field is a unsigned 64bit integer that can store values in range from 0 to 18446744073709551615.It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
-      maximumAmount?: string
-      /** @description Hex encoded string. */
-      metadata?: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "MPTokenIssuanceCreate"
-    }
-    Core_XrplOperation_MPTokenIssuanceDestroy: {
-      /** @description XRPL MPToken Issuance ID (192-bit integer hex encoded) */
-      issuanceId: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "MPTokenIssuanceDestroy"
-    }
-    Core_XrplOperation_MPTokenIssuanceSet: {
-      /** @description XRPL MPToken Issuance ID (192-bit integer hex encoded) */
-      issuanceId: string
-      holder?: string
-      flags: components["schemas"]["Core_Xrpl_MPTokenIssuanceSetFlag"][]
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "MPTokenIssuanceSet"
     }
     Core_XrplOperation_OfferCreate: {
       flags: components["schemas"]["Core_Xrpl_OfferCreateFlag"][]
@@ -8344,16 +7697,27 @@ export interface components {
     }
     /** @enum {string} */
     Core_Xrpl_MPTokenAuthorizeFlag: "tfMPTUnauthorize"
-    /** @enum {string} */
-    Core_Xrpl_MPTokenIssuanceCreateFlag:
-      | "tfMPTRequireAuth"
-      | "tfMPTCanClawback"
-      | "tfMPTCanTransfer"
-      | "tfMPTCanEscrow"
-      | "tfMPTCanLock"
-      | "tfMPTCanTrade"
-    /** @enum {string} */
-    Core_Xrpl_MPTokenIssuanceSetFlag: "tfMPTLock" | "tfMPTUnlock"
+    Core_Xrpl_MPTokenIdentifier:
+      | components["schemas"]["Core_Xrpl_MPTokenIdentifier_MPTokenIssuanceId"]
+      | components["schemas"]["Core_Xrpl_MPTokenIdentifier_TickerId"]
+    Core_Xrpl_MPTokenIdentifier_MPTokenIssuanceId: {
+      /** @description XRPL MPToken Issuance ID (192-bit integer hex encoded) */
+      issuanceId: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "MPTokenIssuanceId"
+    }
+    Core_Xrpl_MPTokenIdentifier_TickerId: {
+      /** Format: uuid */
+      tickerId: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "TickerId"
+    }
     /** @enum {string} */
     Core_Xrpl_OfferCreateFlag: "tfImmediateOrCancel" | "tfFillOrKill" | "tfSell"
     /** @enum {string} */
@@ -8600,7 +7964,9 @@ export interface components {
       type: "v0_CreateVault"
     }
     Core_v0_ExecuteExtension: {
-      payload: components["schemas"]["Core_v0_ExecuteExtension_Payloads"]
+      payload: {
+        [key: string]: Record<string, never>
+      }
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
@@ -9002,385 +8368,6 @@ export interface components {
       /** Format: uuid */
       domainId: string
     }
-    Flows_AdressesOut: {
-      /** Format: uuid */
-      readonly id: string
-      readonly address: string
-      readonly tag?: string | null
-      /** Format: date-time */
-      readonly createdAt: string
-    }
-    Flows_Author: {
-      /** Format: uuid */
-      id: string
-      /** Format: uuid */
-      domainId: string
-    }
-    Flows_BalanceOut: {
-      /** Format: uuid */
-      tickerId?: string | null
-      externalTickerName: string
-      totalAmount: string
-      /** Format: int32 */
-      decimals: number
-      /** Format: date-time */
-      lastUpdatedAt: string
-    }
-    Flows_BinanceConnectionOut: {
-      apiKey: string
-      secret: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Binance"
-    }
-    Flows_BinanceConnectionParametersIn: {
-      apiKey: string
-      secret: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Binance"
-    }
-    Flows_BitstampConnectionOut: {
-      apiKey: string
-      secret: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Bitstamp"
-    }
-    Flows_BitstampConnectionParametersIn: {
-      apiKey: string
-      secret: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Bitstamp"
-    }
-    Flows_CoinbaseProConnectionOut: {
-      apiKey: string
-      secret: string
-      password: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Coinbasepro"
-    }
-    Flows_CoinbaseProConnectionParametersIn: {
-      apiKey: string
-      secret: string
-      password: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Coinbasepro"
-    }
-    Flows_ConnectionOutParameters:
-      | components["schemas"]["Flows_KrakenConnectionOut"]
-      | components["schemas"]["Flows_BinanceConnectionOut"]
-      | components["schemas"]["Flows_CoinbaseProConnectionOut"]
-      | components["schemas"]["Flows_BitstampConnectionOut"]
-    /** @enum {string} */
-    Flows_ConnectionState: "Connected" | "Disconnected" | "ConnectionError" | "InvalidConnection"
-    /** @enum {string} */
-    Flows_ConnectionType: "Kraken" | "Binance" | "Bitstamp" | "Coinbasepro"
-    Flows_ExternalAccountOut: {
-      /** Format: uuid */
-      id: string
-      alias: string
-      ledgerId?: string | null
-      providerDetails: components["schemas"]["Flows_ProviderDetails"]
-      metadata: components["schemas"]["Flows_MetadataOut"]
-    }
-    /** @enum {string} */
-    Flows_ExternalAccountSortBy: "id" | "alias" | "createdAt" | "lastModifiedAt"
-    /** @enum {string} */
-    Flows_FlowsTransactionOrderType: "Transfer" | "Trade"
-    Flows_GuidNullableAdressesOutPaginationResult: {
-      items: components["schemas"]["Flows_AdressesOut"][]
-      /** Format: int32 */
-      count: number
-      /** Format: uuid */
-      currentStartingAfter?: string | null
-      /** Format: uuid */
-      nextStartingAfter?: string | null
-    }
-    Flows_GuidNullableExternalAccountOutPaginationResult: {
-      items: components["schemas"]["Flows_ExternalAccountOut"][]
-      /** Format: int32 */
-      count: number
-      /** Format: uuid */
-      currentStartingAfter?: string | null
-      /** Format: uuid */
-      nextStartingAfter?: string | null
-    }
-    Flows_GuidNullableTransactionOrderOutPaginationResult: {
-      items: components["schemas"]["Flows_TransactionOrderOut"][]
-      /** Format: int32 */
-      count: number
-      /** Format: uuid */
-      currentStartingAfter?: string | null
-      /** Format: uuid */
-      nextStartingAfter?: string | null
-    }
-    Flows_GuidNullableTransferOutPaginationResult: {
-      items: components["schemas"]["Flows_TransferOut"][]
-      /** Format: int32 */
-      count: number
-      /** Format: uuid */
-      currentStartingAfter?: string | null
-      /** Format: uuid */
-      nextStartingAfter?: string | null
-    }
-    Flows_KrakenConnectionOut: {
-      apiKey: string
-      secret: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Kraken"
-    }
-    Flows_KrakenConnectionParametersIn: {
-      apiKey: string
-      secret: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Kraken"
-    }
-    Flows_MetadataOut: {
-      description?: string | null
-      /** Format: date-time */
-      createdAt: string
-      createdBy: components["schemas"]["Flows_Author"]
-      /** Format: date-time */
-      lastModifiedAt: string
-      lastModifiedBy: components["schemas"]["Flows_Author"]
-      readonly customProperties?: {
-        [key: string]: string
-      } | null
-    }
-    /** @enum {string} */
-    Flows_OrderOutSortBy: "id" | "externalAccountId" | "createdAt" | "lastModifiedAt"
-    /** @enum {string} */
-    Flows_OrderStatus: "Failed" | "Pending" | "Processing" | "Completed"
-    Flows_PairOut: {
-      readonly externalPairName: string
-      readonly baseExternalTickerName: string
-      readonly quoteExternalTickerName: string
-      /** Format: int32 */
-      readonly basePrecision: number
-      /** Format: int32 */
-      readonly quotePrecision: number
-    }
-    Flows_PairPriceOut: {
-      baseExternalTickerName: string
-      quoteExternalTickerName: string
-      /** Format: date-time */
-      lastUpdatedAt: string
-      estimatedPrice: string
-    }
-    Flows_Processing: {
-      hint: string
-      status: components["schemas"]["Flows_OrderStatus"]
-    }
-    Flows_ProviderConnectionOut: {
-      /** Format: uuid */
-      readonly id: string
-      /** Format: uuid */
-      readonly domainId: string
-      readonly alias: string
-      parameters: components["schemas"]["Flows_ConnectionOutParameters"]
-      connectionState: components["schemas"]["Flows_ConnectionState"]
-    }
-    Flows_ProviderConnectionParametersIn:
-      | components["schemas"]["Flows_KrakenConnectionParametersIn"]
-      | components["schemas"]["Flows_BinanceConnectionParametersIn"]
-      | components["schemas"]["Flows_CoinbaseProConnectionParametersIn"]
-      | components["schemas"]["Flows_BitstampConnectionParametersIn"]
-    Flows_ProviderConnectionParametersInCreateProviderConnectionIn: {
-      /** Format: uuid */
-      id?: string | null
-      /** Format: uuid */
-      domainId: string
-      alias: string
-      parameters: components["schemas"]["Flows_ProviderConnectionParametersIn"]
-    }
-    Flows_ProviderConnectionParametersInUpdateProviderConnectionIn: {
-      alias: string
-      parameters: components["schemas"]["Flows_ProviderConnectionParametersIn"]
-    }
-    Flows_ProviderDetails: {
-      type: components["schemas"]["Flows_ProviderType"]
-      externalId: string
-      /** Format: uuid */
-      connectionId: string
-    }
-    /** @enum {string} */
-    Flows_ProviderType: "Flows"
-    /** @enum {string} */
-    Flows_SortOrder: "ASC" | "DESC"
-    /** @enum {string} */
-    Flows_TradeDirection: "Buy" | "Sell"
-    /** @enum {string} */
-    Flows_TransactionDestinationType: "Account" | "Endpoint" | "Address" | "ExternalAccount"
-    Flows_TransactionDryRunEstimate: {
-      fee: string
-      minimum: string
-      externalTickerName: string
-    }
-    Flows_TransactionDryRunOut: {
-      result: components["schemas"]["Flows_TransactionDryRunResult"]
-      estimate: components["schemas"]["Flows_TransactionDryRunEstimate"]
-    }
-    /** @enum {string} */
-    Flows_TransactionDryRunOutType: "Success" | "Failure"
-    Flows_TransactionDryRunParameters:
-      | components["schemas"]["Flows_TransactionDryRunTransferInParameters"]
-      | components["schemas"]["Flows_TransactionDryRunTradeInParameters"]
-    Flows_TransactionDryRunParametersTransactionDryRunIn: {
-      /** Format: uuid */
-      externalAccountId: string
-      parameters: components["schemas"]["Flows_TransactionDryRunParameters"]
-    }
-    Flows_TransactionDryRunResult: {
-      hint: string
-      type: components["schemas"]["Flows_TransactionDryRunOutType"]
-    }
-    Flows_TransactionDryRunTradeInParameters: {
-      baseExternalTickerName: string
-      quoteExternalTickerName: string
-      quantity: string
-      direction: components["schemas"]["Flows_TradeDirection"]
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Trade"
-    }
-    Flows_TransactionDryRunTransferInParameters: {
-      externalTickerName: string
-      amount: string
-      destination: components["schemas"]["Flows_TransactionOrderDestinationInOut"]
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Transfer"
-    }
-    /** @enum {string} */
-    Flows_TransactionDryRunType: "Transfer" | "Trade"
-    /** @enum {string} */
-    Flows_TransactionKind: "Fee" | "Transfer" | "Trade"
-    Flows_TransactionOrderAccountDestination: {
-      /** Format: uuid */
-      accountId: string
-      tag?: string | null
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Account"
-    }
-    Flows_TransactionOrderAddressDestination: {
-      address: string
-      tag?: string | null
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Address"
-    }
-    Flows_TransactionOrderDestinationInOut: {
-      tag?: string | null
-    } & (
-      | components["schemas"]["Flows_TransactionOrderAccountDestination"]
-      | components["schemas"]["Flows_TransactionOrderEndpointDestination"]
-      | components["schemas"]["Flows_TransactionOrderAddressDestination"]
-      | components["schemas"]["Flows_TransactionOrderExternalAccountDestination"]
-    )
-    Flows_TransactionOrderEndpointDestination: {
-      /** Format: uuid */
-      endpointId: string
-      tag?: string | null
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Endpoint"
-    }
-    Flows_TransactionOrderExternalAccountDestination: {
-      /** Format: uuid */
-      externalAccountId: string
-      tag?: string | null
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "ExternalAccount"
-    }
-    Flows_TransactionOrderOut: {
-      /** Format: uuid */
-      id: string
-      /** Format: uuid */
-      domainId: string
-      /** Format: uuid */
-      externalAccountId: string
-      parameters: components["schemas"]["Flows_TransactionOrderParametersOut"]
-      metadata: components["schemas"]["Flows_MetadataOut"]
-      processing: components["schemas"]["Flows_Processing"]
-    }
-    Flows_TransactionOrderParametersOut:
-      | components["schemas"]["Flows_TransactionTransferOrderParametersOut"]
-      | components["schemas"]["Flows_TransactionTradeOrderParametersOut"]
-    /** @enum {string} */
-    Flows_TransactionOutSortBy: "id" | "registeredAt"
-    Flows_TransactionTradeOrderParametersOut: {
-      baseExternalTickerName: string
-      quoteExternalTickerName: string
-      direction: components["schemas"]["Flows_TradeDirection"]
-      quantity: string
-      price?: string | null
-      cost?: string | null
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Trade"
-    }
-    Flows_TransactionTransferOrderParametersOut: {
-      amount: string
-      externalTickerName: string
-      destination: components["schemas"]["Flows_TransactionOrderDestinationInOut"]
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Transfer"
-    }
-    Flows_TransferOut: {
-      /** Format: uuid */
-      id: string
-      /** Format: uuid */
-      transactionOrderId?: string | null
-      ledgerTransactionId?: string | null
-      senders?: components["schemas"]["Flows_TransactionOrderDestinationInOut"][] | null
-      recipient?: components["schemas"]["Flows_TransactionOrderDestinationInOut"]
-      value: string
-      /** Format: date-time */
-      registeredAt: string
-      kind: components["schemas"]["Flows_TransactionKind"]
-      externalTickerName: string
-    }
     VirtualAccounting_Actor:
       | components["schemas"]["VirtualAccounting_ActorAddress"]
       | components["schemas"]["VirtualAccounting_ActorVirtualAccount"]
@@ -9667,171 +8654,50 @@ export interface components {
       reason: string
       message?: string
     }
+    Compliance_ProviderConnectRequest:
+      | {
+          /** @enum {string} */
+          provider: "ELLIPTIC"
+          credential: {
+            apiKey: string
+            secret: string
+          }
+        }
+      | {
+          /** @enum {string} */
+          provider: "CHAINALYSIS"
+          credential: {
+            apiKey: string
+          }
+        }
+      | {
+          /** @enum {string} */
+          provider: "NOTABENE"
+          credential: {
+            clientId: string
+            clientSecret: string
+            entityDid: string
+            audience: string
+          }
+        }
     Compliance_ProviderConnectionResponse: {
       /** Format: uuid */
       connectionId?: string
       /** @enum {string} */
-      provider?: "ELLIPTIC" | "CHAINALYSIS"
+      provider?: "ELLIPTIC" | "CHAINALYSIS" | "NOTABENE"
       /** @enum {string} */
       status?: "CONNECTED" | "PAUSED"
       readyForScreening?: boolean
       previewScreeningEnabled?: boolean
     }
-    Compliance_Credential: {
-      apiKey: string
-      apiSecret?: string
-    }
-    Compliance_ProviderConnectRequest: {
-      /** @enum {string} */
-      provider: "ELLIPTIC" | "CHAINALYSIS"
-      credential?: components["schemas"]["Compliance_Credential"]
-    }
-    Compliance_ConfigureScreeningRulesRequest: {
-      rules: components["schemas"]["Compliance_TransactionScreeningRule"][]
-    }
-    Compliance_RiskLevelAction: {
-      /** @enum {string} */
-      condition?:
-        | "EQUALS"
-        | "GREATER_THAN"
-        | "LESS_THAN"
-        | "GREATER_THAN_OR_EQUALS"
-        | "LESS_THAN_OR_EQUALS"
-      threshold?: number
-      /** @enum {string} */
-      action: "APPROVE" | "REJECT" | "REQUIRE_EXPLICIT_DECISION"
-    }
-    Compliance_TransactionScreeningRule: {
-      /** @enum {string} */
-      transactionType: "INCOMING" | "OUTGOING"
-      lowRisk: components["schemas"]["Compliance_RiskLevelAction"]
-      highRisk: components["schemas"]["Compliance_RiskLevelAction"]
-      mediumRisk?: components["schemas"]["Compliance_RiskLevelAction"]
-      severeRisk?: components["schemas"]["Compliance_RiskLevelAction"]
-      unknownRisk?: components["schemas"]["Compliance_RiskLevelAction"]
-      unknownCategory?: components["schemas"]["Compliance_RiskLevelAction"]
-    }
-    Compliance_PolicyPayloadRequest: {
-      /** @enum {string} */
-      policyType: "AUTOMATIC" | "EXCEPTION"
-      /** @enum {string} */
-      transactionType: "INCOMING" | "OUTGOING"
-      approvalWorkflow?: {
-        [key: string]: Record<string, never>
-      }
-      exceptionRole?: string
-      /** @enum {string} */
-      lockStatus: "Locked" | "Unlocked" | "Archived"
-    }
-    Compliance_DomainPayloadRequest: {
-      domainName: string
-      /** @enum {string} */
-      domainType: "COMPLIANCE" | "BUSINESS"
-      users?: components["schemas"]["Compliance_User"][]
-      permissions: {
-        [key: string]: Record<string, never>
-      }
-      childrenDomainIds?: string[]
-      additionalPolicies?: (
-        | "ADD_POLICY_FOR_OUTGOING_ORDERS"
-        | "ADD_POLICY_FOR_AUTOMATIC_RELEASE_QUARANTINED_TRANSFERS"
-      )[]
-    }
-    Compliance_LoginId: {
-      providerId: string
-      id: string
-    }
-    Compliance_User: {
-      /** Format: uuid */
-      id: string
-      alias: string
-      publicKey?: string
-      roles: string[]
-      /** @enum {string} */
-      lockStatus: "Locked" | "Unlocked" | "Archived"
-      loginIds?: components["schemas"]["Compliance_LoginId"][]
-    }
-    Compliance_ValidateComplianceDomainCreationRequest: {
-      childrenDomainIds?: string[]
-    }
-    Compliance_ValidateComplianceDomainCreationResponse: {
-      allowed?: boolean
-      reason?: string
-    }
-    Compliance_ComplianceAnalysisRequest: {
-      data: components["schemas"]["Compliance_ComplianceAnalysisRequestData"][]
-    }
-    Compliance_ComplianceAnalysisRequestData: {
+    Compliance_ProviderConnectionsResponse: {
       /** Format: uuid */
       domainId?: string
       /** Format: uuid */
-      id?: string
-    }
-    Compliance_ComplianceAnalysis: {
+      complianceDomainId?: string
       /** @enum {string} */
-      provider: "ELLIPTIC" | "CHAINALYSIS"
-      /** Format: uuid */
-      id?: string
-      /** Format: uuid */
-      domainId?: string
-      /** Format: uuid */
-      intentId?: string
-      /** Format: uuid */
-      transferId?: string
-      /** Format: uuid */
-      transactionOrderId?: string
-      transactionHash?: string
-      addressHash?: string
-      errorDetails?: string
-      warningDetails?: string
-      /** Format: date-time */
-      screenedAt?: string
-      ledgerId: string
-      /** @enum {string} */
-      analysisType: "WALLET" | "TRANSACTION"
-      screeningStatus: string
-      /** @enum {string} */
-      riskLevel?: "UNKNOWN" | "SEVERE" | "HIGH" | "MEDIUM" | "LOW" | "NO_RISK_DETECTED"
-      screeningDetail?: components["schemas"]["Compliance_JsonNode"]
-    }
-    Compliance_ComplianceAnalysisResponse: {
-      result: components["schemas"]["Compliance_ComplianceAnalysis"][]
-    }
-    Compliance_JsonNode: Record<string, never>
-    Compliance_WalletAnalysisRequest: {
-      /** @enum {string} */
-      provider: "ELLIPTIC" | "CHAINALYSIS"
-      walletAddress: string
-      transactionAmount?: number
-      ledger: string
-      tickerId: string
-    }
-    Compliance_WalletAnalysisResponse: {
-      /** @enum {string} */
-      provider: "ELLIPTIC" | "CHAINALYSIS"
-      walletAddress: string
-      transactionAmount?: number
-      ledger: string
-      /** @enum {string} */
-      transactionType: "INCOMING" | "OUTGOING"
-      /** Format: date-time */
-      screenedAt?: string
-      errorDetails?: string
-      warningDetails?: string
-      /** @enum {string} */
-      riskLevel?: "UNKNOWN" | "SEVERE" | "HIGH" | "MEDIUM" | "LOW" | "NO_RISK_DETECTED"
-      screeningDetail?: components["schemas"]["Compliance_JsonNode"]
-    }
-    Compliance_ExceptionRoleResponse: {
-      /** Format: uuid */
-      complianceDomainId: string
-      /** Format: uuid */
-      domainId: string
-      /** Format: uuid */
-      policyId: string
-      /** @enum {string} */
-      transactionType: "INCOMING" | "OUTGOING"
-      exceptionRole?: string
+      domainType?: "COMPLIANCE" | "BUSINESS"
+      data?: components["schemas"]["Compliance_ProviderConnectionResponse"][]
     }
     Compliance_ConfigurationDetailResponse: {
       /** Format: uuid */
@@ -9857,34 +8723,520 @@ export interface components {
       status?: "START" | "PENDING" | "VIEW"
     }
     Compliance_GetScreeningRulesResponse: {
-      rules?: components["schemas"]["Compliance_TransactionScreeningRule"][]
+      rules?: (
+        | components["schemas"]["Compliance_TransactionScreeningRule_Elliptic"]
+        | components["schemas"]["Compliance_TransactionScreeningRule_Chainalysis"]
+      )[]
     }
-    Compliance_ProviderConnectionsResponse: {
-      /** Format: uuid */
-      domainId?: string
-      /** Format: uuid */
-      complianceDomainId?: string
+    Compliance_ConfigureScreeningRulesRequest: {
+      rules: (
+        | components["schemas"]["Compliance_TransactionScreeningRule_Elliptic"]
+        | components["schemas"]["Compliance_TransactionScreeningRule_Chainalysis"]
+      )[]
+    }
+    Compliance_RiskLevelAction_Elliptic: {
       /** @enum {string} */
-      domainType?: "COMPLIANCE" | "BUSINESS"
-      data?: components["schemas"]["Compliance_ProviderConnectionResponse"][]
+      condition:
+        | "EQUALS"
+        | "GREATER_THAN"
+        | "LESS_THAN"
+        | "GREATER_THAN_OR_EQUALS"
+        | "LESS_THAN_OR_EQUALS"
+      threshold: number
+      /** @enum {string} */
+      action: "APPROVE" | "REJECT" | "REQUIRE_EXPLICIT_DECISION"
+    }
+    Compliance_RiskLevelAction_Chainalysis: {
+      /** @enum {string} */
+      action: "APPROVE" | "REJECT" | "REQUIRE_EXPLICIT_DECISION"
+    }
+    Compliance_TransactionScreeningRule_Elliptic: {
+      /** @enum {string} */
+      transactionType: "INCOMING" | "OUTGOING"
+      lowRisk: components["schemas"]["Compliance_RiskLevelAction_Elliptic"]
+      highRisk: components["schemas"]["Compliance_RiskLevelAction_Elliptic"]
+    }
+    Compliance_TransactionScreeningRule_Chainalysis: {
+      /** @enum {string} */
+      transactionType: "INCOMING" | "OUTGOING"
+      lowRisk: components["schemas"]["Compliance_RiskLevelAction_Chainalysis"]
+      highRisk: components["schemas"]["Compliance_RiskLevelAction_Chainalysis"]
+      mediumRisk?: components["schemas"]["Compliance_RiskLevelAction_Chainalysis"]
+      severeRisk?: components["schemas"]["Compliance_RiskLevelAction_Chainalysis"]
+      unknownRisk?: components["schemas"]["Compliance_RiskLevelAction_Chainalysis"]
+      unknownCategory?: components["schemas"]["Compliance_RiskLevelAction_Chainalysis"]
+    }
+    Compliance_PolicyPayloadRequest: {
+      /** @enum {string} */
+      policyType: "AUTOMATIC" | "EXCEPTION"
+      /** @enum {string} */
+      transactionType: "INCOMING" | "OUTGOING"
+      approvalWorkflow?: Record<string, never>
+      exceptionRole?: string
+      /** @enum {string} */
+      lockStatus: "Locked" | "Unlocked" | "Archived"
     }
     Compliance_PolicyResponse: {
+      policyId?: string
       policyName: string
       /** @enum {string} */
       policyType: "AUTOMATIC" | "EXCEPTION"
       /** @enum {string} */
       transactionType: "INCOMING" | "OUTGOING"
-      approvalWorkflow?: {
-        [key: string]: Record<string, never>
-      }
+      approvalWorkflow?: Record<string, never>
       exceptionRole?: string
-      /** Format: int32 */
       rank?: number
       error?: string
       /** @enum {string} */
       lockStatus: "Locked" | "Unlocked" | "Archived"
+    }
+    Compliance_ExceptionRoleResponse: {
       /** Format: uuid */
-      policyId?: string
+      complianceDomainId: string
+      /** Format: uuid */
+      domainId: string
+      /** Format: uuid */
+      policyId: string
+      /** @enum {string} */
+      transactionType: "INCOMING" | "OUTGOING"
+      exceptionRole?: string
+    }
+    Compliance_DomainPayloadRequest: {
+      domainName: string
+      /** @enum {string} */
+      domainType: "COMPLIANCE" | "BUSINESS"
+      users?: components["schemas"]["Compliance_User"][]
+      permissions: Record<string, never>
+      childrenDomainIds?: string[]
+      additionalPolicies?: (
+        | "ADD_POLICY_FOR_OUTGOING_ORDERS"
+        | "ADD_POLICY_FOR_AUTOMATIC_RELEASE_QUARANTINED_TRANSFERS"
+      )[]
+    }
+    Compliance_User: {
+      /** Format: uuid */
+      id: string
+      alias: string
+      publicKey?: string
+      roles: string[]
+      /** @enum {string} */
+      lockStatus: "Locked" | "Unlocked" | "Archived"
+      loginIds?: components["schemas"]["Compliance_LoginId"][]
+    }
+    Compliance_LoginId: {
+      providerId: string
+      id: string
+    }
+    Compliance_ValidateComplianceDomainCreationRequest: {
+      childrenDomainIds?: string[]
+    }
+    Compliance_ValidateComplianceDomainCreationResponse: {
+      allowed?: boolean
+      reason?: string
+    }
+    Compliance_ComplianceAnalysisRequest: {
+      data: components["schemas"]["Compliance_ComplianceAnalysisRequestData"][]
+    }
+    Compliance_ComplianceAnalysisRequestData: {
+      /** Format: uuid */
+      domainId?: string
+      /** Format: uuid */
+      id?: string
+    }
+    Compliance_ComplianceAnalysis:
+      | {
+          /** @enum {string} */
+          provider: "ELLIPTIC"
+          /** Format: uuid */
+          id?: string
+          /** Format: uuid */
+          domainId?: string
+          /** Format: uuid */
+          intentId?: string
+          /** Format: uuid */
+          transferId?: string
+          /** Format: uuid */
+          transactionOrderId?: string
+          transactionHash?: string
+          addressHash?: string
+          errorDetails?: string
+          warningDetails?: string
+          /** Format: date-time */
+          screenedAt?: string
+          ledgerId: string
+          /** @enum {string} */
+          analysisType: "WALLET" | "TRANSACTION"
+          screeningStatus: string
+          /** @enum {string} */
+          riskLevel?: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN"
+          screeningDetail?: components["schemas"]["Compliance_ScreeningDetail_Elliptic"]
+        }
+      | {
+          /** @enum {string} */
+          provider: "CHAINALYSIS"
+          /** Format: uuid */
+          id?: string
+          /** Format: uuid */
+          domainId?: string
+          /** Format: uuid */
+          intentId?: string
+          /** Format: uuid */
+          transferId?: string
+          /** Format: uuid */
+          transactionOrderId?: string
+          transactionHash?: string
+          addressHash?: string
+          errorDetails?: string
+          warningDetails?: string
+          /** Format: date-time */
+          screenedAt?: string
+          ledgerId: string
+          /** @enum {string} */
+          analysisType: "WALLET" | "TRANSACTION"
+          screeningStatus: string
+          /** @enum {string} */
+          riskLevel?: "UNKNOWN" | "SEVERE" | "HIGH" | "MEDIUM" | "LOW" | "NO_RISK_DETECTED"
+          screeningDetail?: components["schemas"]["Compliance_ScreeningDetail_Chainalysis"]
+        }
+    Compliance_ComplianceAnalysisResponse: {
+      result: components["schemas"]["Compliance_ComplianceAnalysis"][]
+    }
+    Compliance_WalletAnalysisRequest:
+      | {
+          /** @enum {string} */
+          provider: "ELLIPTIC"
+          walletAddress: string
+        }
+      | {
+          /** @enum {string} */
+          provider: "CHAINALYSIS"
+          walletAddress: string
+          transactionAmount: number
+          ledger: string
+          tickerId: string
+        }
+    Compliance_WalletAnalysisResponse:
+      | {
+          /** @enum {string} */
+          provider: "CHAINALYSIS"
+          walletAddress: string
+          transactionAmount?: number
+          ledger: string
+          /** @enum {string} */
+          transactionType: "INCOMING" | "OUTGOING"
+          /** Format: date-time */
+          screenedAt?: string
+          errorDetails?: string
+          warningDetails?: string
+          /** @enum {string} */
+          riskLevel?: "UNKNOWN" | "SEVERE" | "HIGH" | "MEDIUM" | "LOW" | "NO_RISK_DETECTED"
+          screeningDetail?: components["schemas"]["Compliance_ScreeningDetail_Chainalysis"]
+        }
+      | {
+          /** @enum {string} */
+          provider: "ELLIPTIC"
+          walletAddress: string
+          transactionAmount?: number
+          ledger: string
+          /** @enum {string} */
+          transactionType: "INCOMING" | "OUTGOING"
+          /** Format: date-time */
+          screenedAt?: string
+          errorDetails?: string
+          warningDetails?: string
+          /** @enum {string} */
+          riskLevel?: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN"
+          screeningDetail?: components["schemas"]["Compliance_ScreeningDetail_Elliptic"]
+        }
+    Compliance_ScreeningDetail_Elliptic: {
+      walletCategory?: string
+      referenceLink: string
+      referenceId: string
+      riskScoreValue: string
+    }
+    Compliance_ScreeningDetail_Chainalysis: {
+      alerts?: components["schemas"]["Compliance_ChainalysisAlert"][]
+      directCounterparty?: string
+    }
+    Compliance_ChainalysisAlert: {
+      /** @enum {string} */
+      alertLevel: "SEVERE" | "HIGH" | "MEDIUM" | "LOW" | "NO_RISK_DETECTED"
+      /** @enum {string} */
+      exposureType: "DIRECT"
+      externalLink: string
+      category?: string
+    }
+    /** @description Request to create a travel rule transfer */
+    Compliance_CreateTransferRequest: {
+      originator?: components["schemas"]["Compliance_TransferPartyIdentifier"]
+      beneficiary?: components["schemas"]["Compliance_TransferPartyIdentifier"]
+      /** @description Asset identifier (e.g., bip122:000000000019d6689c085ae165831e93/slip44:0) */
+      asset?: string
+      /** @description Transfer amount */
+      amount?: string
+      /** @description Reference identifier for the transfer */
+      ref?: string
+      /** @description Agents involved in the transfer (e.g., VASP, SourceAddress, SettlementAddress) */
+      agents?: components["schemas"]["Compliance_Agent"][]
+    }
+    /** @description Identifier for a party in a transfer */
+    Compliance_TransferPartyIdentifier: {
+      /** @description DID or identifier for the party */
+      "@id"?: string
+    }
+    /** @description Response from creating a travel rule transfer */
+    Compliance_InitiateTravelRuleResponse: {
+      createTransfer201Response?: components["schemas"]["Compliance_CreateTransfer201Response"]
+      /**
+       * Format: uuid
+       * @description The intentId the client needs to initiate the intent with
+       */
+      suggestedIntentId?: string
+      /**
+       * Format: uuid
+       * @description The id associated with this travel rule record on Compliance side
+       */
+      complianceTravelRuleId?: string
+    }
+    /** @description Direct response from the travel rule provider when creating a transfer */
+    Compliance_CreateTransfer201Response: {
+      transfer?: components["schemas"]["Compliance_Transfer"]
+    }
+    /** @description Response from getting a travel rule transfer */
+    Compliance_GetTravelRuleTransferResponse: {
+      transfer?: components["schemas"]["Compliance_Transfer"]
+      /**
+       * Format: uuid
+       * @description The intentId the client needs to initiate the intent with
+       */
+      suggestedIntentId?: string
+      /**
+       * Format: uuid
+       * @description The id associated with this travel rule record on Compliance side
+       */
+      complianceTravelRuleId?: string
+    }
+    /** @description Travel rule transfer details from the provider */
+    Compliance_Transfer: {
+      /**
+       * Format: uuid
+       * @description The ID of the transfer
+       */
+      "@id"?: string
+      /**
+       * Format: uuid
+       * @description The ID of the transfer (alternative field name)
+       */
+      id?: string
+      /**
+       * @description The status of the transfer
+       * @enum {string}
+       */
+      status?:
+        | "OUTGOING"
+        | "INCOMING"
+        | "REJECTED"
+        | "AUTHORIZED"
+        | "FLAGGED"
+        | "SETTLED"
+        | "FLAGGED-SETTLEMENT"
+        | "RETURNED"
+        | "FROZEN"
+        | "CLEARED"
+      /**
+       * @description The direction of the transfer
+       * @enum {string}
+       */
+      direction?: "INCOMING" | "OUTGOING"
+      /** @description The reference provided in the request */
+      ref?: string
+      /** @description The asset being transferred */
+      asset?: string
+      /** @description The amount being transferred */
+      amount?: string
+      originator?: components["schemas"]["Compliance_TransferParty"]
+      beneficiary?: components["schemas"]["Compliance_TransferParty"]
+      agents?: components["schemas"]["Compliance_Agent"][]
+      /** @description The transaction id of the settlement transaction */
+      settlementId?: string
+      /** @description Whether the transfer requires travel rule compliance */
+      isTravelRule?: boolean
+      /** @description URL for the presentation definition */
+      presentationDefinitionUrl?: string
+      /**
+       * Format: date-time
+       * @description When the transfer was created
+       */
+      createdAt?: string
+      /**
+       * Format: date-time
+       * @description When the transfer was last updated
+       */
+      updatedAt?: string
+      /**
+       * Format: date-time
+       * @description When the transfer was settled
+       */
+      settledAt?: string
+      /**
+       * Format: date-time
+       * @description When the transfer was rejected
+       */
+      rejectedAt?: string
+      /** @description Reason for rejection if the transfer was rejected */
+      rejectionReason?: string
+    }
+    /** @description Party information in a transfer */
+    Compliance_TransferParty: {
+      /** @description The DID identifier of the party */
+      "@id"?: string
+      /** @description The account number of the party */
+      accountNumber?: string
+      /** @description The name of the party */
+      name?: string
+    }
+    /** @description Agent involved in the transfer */
+    Compliance_Agent: {
+      /** @description The DID identifier of the agent */
+      "@id"?: string
+      /** @description The party this agent is acting for */
+      for?: string
+      /**
+       * @description The role of the agent
+       * @enum {string}
+       */
+      role?: "VASP" | "Custodian" | "SettlementAddress" | "SourceAddress" | "Gateway" | "Unknown"
+    }
+    /** @description Request to append PII to a travel rule transfer */
+    Compliance_AppendPIIRequest: {
+      ivms101: components["schemas"]["Compliance_IVMS101"]
+      originator?: components["schemas"]["Compliance_TransferPartyIdentifier"]
+      beneficiary?: components["schemas"]["Compliance_TransferPartyIdentifier"]
+    }
+    /** @description Response from appending PII to a travel rule transfer */
+    Compliance_AppendPIITravelRuleResponse: {
+      appendPIIResponse?: components["schemas"]["Compliance_AppendPIIResponse"]
+      /** Format: uuid */
+      suggestedIntentId?: string
+      /** Format: uuid */
+      complianceTravelRuleId?: string
+    }
+    /** @description Direct response from the provider for append PII */
+    Compliance_AppendPIIResponse: {
+      /** @description Success message */
+      message?: string
+    }
+    /** @description Request to present encrypted PII to a travel rule transfer */
+    Compliance_PresentPIIRequest: {
+      ivms101: components["schemas"]["Compliance_IVMS101"]
+    }
+    /** @description Response from presenting encrypted PII to a travel rule transfer */
+    Compliance_PresentPIITravelRuleResponse: {
+      presentPIIResponse?: components["schemas"]["Compliance_PresentPIIResponse"]
+      /** Format: uuid */
+      suggestedIntentId?: string
+      /** Format: uuid */
+      complianceTravelRuleId?: string
+    }
+    /** @description Direct response from the provider for present PII */
+    Compliance_PresentPIIResponse: {
+      /** @description Success message */
+      message?: string
+    }
+    /** @description IVMS101 data structure for travel rule compliance */
+    Compliance_IVMS101: {
+      originator?: components["schemas"]["Compliance_IVMS101Originator"]
+      beneficiary?: components["schemas"]["Compliance_IVMS101Beneficiary"]
+    }
+    /** @description Originator information in IVMS101 format */
+    Compliance_IVMS101Originator: {
+      originatorPerson?: components["schemas"]["Compliance_IVMS101Person"][]
+      accountNumber?: string
+    }
+    /** @description Beneficiary information in IVMS101 format */
+    Compliance_IVMS101Beneficiary: {
+      beneficiaryPerson?: components["schemas"]["Compliance_IVMS101Person"][]
+      accountNumber?: string
+    }
+    /** @description Person information in IVMS101 format */
+    Compliance_IVMS101Person: {
+      naturalPerson?: components["schemas"]["Compliance_IVMS101NaturalPerson"]
+      legalPerson?: components["schemas"]["Compliance_IVMS101LegalPerson"]
+    }
+    /** @description Natural person information */
+    Compliance_IVMS101NaturalPerson: {
+      name?: components["schemas"]["Compliance_IVMS101Name"]
+      dateAndPlaceOfBirth?: components["schemas"]["Compliance_IVMS101DateAndPlaceOfBirth"]
+      geographicAddress?: components["schemas"]["Compliance_IVMS101GeographicAddress"][]
+      nationalIdentification?: components["schemas"]["Compliance_IVMS101NationalIdentification"]
+      /** @description Customer identification number assigned by the VASP */
+      customerIdentification?: string
+    }
+    /** @description Legal person (organization) information */
+    Compliance_IVMS101LegalPerson: {
+      name?: components["schemas"]["Compliance_IVMS101LegalPersonName"]
+      geographicAddress?: components["schemas"]["Compliance_IVMS101GeographicAddress"][]
+      nationalIdentification?: components["schemas"]["Compliance_IVMS101NationalIdentification"]
+      /** @description Customer identification number assigned by the VASP */
+      customerIdentification?: string
+      /** @description ISO-3166-1 alpha-2 country code where the legal person is registered */
+      countryOfRegistration?: string
+    }
+    /** @description Name information for natural person */
+    Compliance_IVMS101Name: {
+      nameIdentifier?: components["schemas"]["Compliance_IVMS101NameIdentifier"][]
+    }
+    Compliance_IVMS101NameIdentifier: {
+      /** @description Primary name identifier (e.g., surname) */
+      primaryIdentifier?: string
+      /** @description Secondary name identifier (e.g., given name) */
+      secondaryIdentifier?: string
+      /** @description Type of name identifier (e.g., LEGL, BIRT, MAID, TRAD) */
+      naturalPersonNameIdentifierType?: string
+    }
+    /** @description Name information for legal person */
+    Compliance_IVMS101LegalPersonName: {
+      nameIdentifier?: components["schemas"]["Compliance_IVMS101LegalPersonNameIdentifier"][]
+    }
+    Compliance_IVMS101LegalPersonNameIdentifier: {
+      /** @description Legal person name */
+      legalPersonName?: string
+      /** @description Type of legal person name identifier (e.g., LEGL, SHRT, TRAD) */
+      legalPersonNameIdentifierType?: string
+    }
+    Compliance_IVMS101DateAndPlaceOfBirth: {
+      /** Format: date */
+      dateOfBirth?: string
+      placeOfBirth?: string
+    }
+    Compliance_IVMS101GeographicAddress: {
+      /** @description Type of address (e.g., HOME, BIZZ, GEOG) */
+      addressType?: string
+      /** @description Street name - required if addressLine not provided */
+      streetName?: string
+      /** @description Building number - required if addressLine not provided */
+      buildingNumber?: string
+      /** @description Full address line(s) - use this OR streetName/buildingNumber */
+      addressLine?: string[]
+      /** @description Postal code (optional) */
+      postCode?: string
+      /** @description Town or city name */
+      townName?: string
+      /** @description State, province, or region (e.g., NY) */
+      countrySubDivision?: string
+      /** @description Country code (ISO-3166 Alpha-2, e.g., US) */
+      country?: string
+    }
+    /** @description National identification information */
+    Compliance_IVMS101NationalIdentification: {
+      /** @description National identifier number */
+      nationalIdentifier?: string
+      /** @description Type of national identifier (e.g., ARNU, CCPT, RAID, DRLC, FIIN, TXID, SOCS, IDCD, LEIX, MISC) */
+      nationalIdentifierType?: string
+      /** @description Authority that issued the identifier (optional) */
+      registrationAuthority?: string
+      /** @description Country of issue (ISO-3166 Alpha-2) */
+      countryOfIssue?: string
     }
     EDS_ChannelCreate: {
       /** Format: uuid */
@@ -9964,102 +9316,6 @@ export interface components {
       retriedCount?: number
       payload?: string
     }
-    /** @enum {string} */
-    Flows_Intents_TransactionDestinationType: "Account" | "Endpoint" | "Address" | "ExternalAccount"
-    Flows_Intents_TransactionOrderAccountDestination: {
-      /** Format: uuid */
-      accountId: string
-      tag?: string | null
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Account"
-    }
-    Flows_Intents_TransactionOrderEndpointDestination: {
-      /** Format: uuid */
-      endpointId: string
-      tag?: string | null
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Endpoint"
-    }
-    Flows_Intents_TransactionOrderAddressDestination: {
-      address: string
-      tag?: string | null
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Address"
-    }
-    Flows_Intents_TransactionOrderExternalAccountDestination: {
-      /** Format: uuid */
-      externalAccountId: string
-      tag?: string | null
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "ExternalAccount"
-    }
-    Flows_Intents_TransactionOrderDestinationInOut: {
-      tag?: string | null
-    } & (
-      | components["schemas"]["Flows_Intents_TransactionOrderAccountDestination"]
-      | components["schemas"]["Flows_Intents_TransactionOrderEndpointDestination"]
-      | components["schemas"]["Flows_Intents_TransactionOrderAddressDestination"]
-      | components["schemas"]["Flows_Intents_TransactionOrderExternalAccountDestination"]
-    )
-    /** @enum {string} */
-    Flows_Intents_FlowsTransactionOrderType: "Transfer" | "Trade"
-    Flows_Intents_V0CreateFlowTransferOrderParameters: {
-      amount: string
-      externalTickerName: string
-      destination: components["schemas"]["Flows_Intents_TransactionOrderDestinationInOut"]
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Transfer"
-    }
-    /** @enum {string} */
-    Flows_Intents_TradeDirection: "Buy" | "Sell"
-    Flows_Intents_V0CreateFlowTradeOrderParameters: {
-      baseExternalTickerName: string
-      quoteExternalTickerName: string
-      direction: components["schemas"]["Flows_Intents_TradeDirection"]
-      quantity: string
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Trade"
-    }
-    Flows_Intents_V0CreateFlowTransactionOrderParameters:
-      | components["schemas"]["Flows_Intents_V0CreateFlowTransferOrderParameters"]
-      | components["schemas"]["Flows_Intents_V0CreateFlowTradeOrderParameters"]
-    /** @enum {string} */
-    Flows_Intents_TypeDiscriminator: "Flows_v0_CreateTransactionOrder"
-    Flows_Intents_V0CreateFlowTransactionOrder: {
-      /** Format: uuid */
-      id: string
-      /** Format: uuid */
-      externalAccountId: string
-      parameters: components["schemas"]["Flows_Intents_V0CreateFlowTransactionOrderParameters"]
-      description: string
-      customProperties: {
-        [key: string]: string
-      }
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: "Flows_v0_CreateTransactionOrder"
-    }
-    Core_v0_ExecuteExtension_Payloads: components["schemas"]["Flows_Intents_V0CreateFlowTransactionOrder"]
   }
   responses: never
   parameters: never
@@ -14062,72 +13318,6 @@ export interface operations {
       }
     }
   }
-  TogglePreviewScreening: {
-    parameters: {
-      query: {
-        enabled: boolean
-      }
-      header?: never
-      path: {
-        domainId: string
-        provider: "ELLIPTIC" | "CHAINALYSIS"
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["Compliance_ErrorResponse"]
-        }
-      }
-    }
-  }
-  PauseProviderConnection: {
-    parameters: {
-      query: {
-        paused: boolean
-      }
-      header?: never
-      path: {
-        domainId: string
-        provider: "ELLIPTIC" | "CHAINALYSIS"
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["Compliance_ProviderConnectionResponse"]
-        }
-      }
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "*/*": components["schemas"]["Compliance_ErrorResponse"]
-        }
-      }
-    }
-  }
   GetAllProvidersForDomain: {
     parameters: {
       query?: never
@@ -14139,7 +13329,7 @@ export interface operations {
     }
     requestBody?: never
     responses: {
-      /** @description Successful response */
+      /** @description OK */
       200: {
         headers: {
           [name: string]: unknown
@@ -14150,6 +13340,15 @@ export interface operations {
       }
       /** @description Bad Request */
       400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
         headers: {
           [name: string]: unknown
         }
@@ -14174,8 +13373,8 @@ export interface operations {
       }
     }
     responses: {
-      /** @description Successful response */
-      200: {
+      /** @description Accepted */
+      202: {
         headers: {
           [name: string]: unknown
         }
@@ -14185,6 +13384,51 @@ export interface operations {
       }
       /** @description Bad Request */
       400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
         headers: {
           [name: string]: unknown
         }
@@ -14206,7 +13450,7 @@ export interface operations {
     }
     requestBody?: never
     responses: {
-      /** @description Successful response */
+      /** @description OK */
       200: {
         headers: {
           [name: string]: unknown
@@ -14217,6 +13461,15 @@ export interface operations {
       }
       /** @description Bad Request */
       400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
         headers: {
           [name: string]: unknown
         }
@@ -14242,8 +13495,8 @@ export interface operations {
       }
     }
     responses: {
-      /** @description OK */
-      200: {
+      /** @description Created */
+      201: {
         headers: {
           [name: string]: unknown
         }
@@ -14251,6 +13504,106 @@ export interface operations {
       }
       /** @description Bad Request */
       400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+    }
+  }
+  TogglePreviewScreening: {
+    parameters: {
+      query: {
+        enabled: boolean
+      }
+      header?: never
+      path: {
+        domainId: string
+        provider: "ELLIPTIC" | "CHAINALYSIS"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Accepted */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Method Not Allowed */
+      405: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+    }
+  }
+  PauseProviderConnection: {
+    parameters: {
+      query: {
+        paused: boolean
+      }
+      header?: never
+      path: {
+        domainId: string
+        provider: "ELLIPTIC" | "CHAINALYSIS" | "NOTABENE"
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Accepted */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
         headers: {
           [name: string]: unknown
         }
@@ -14286,6 +13639,15 @@ export interface operations {
       }
       /** @description Bad Request */
       400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
         headers: {
           [name: string]: unknown
         }
@@ -14341,14 +13703,12 @@ export interface operations {
     }
     requestBody?: never
     responses: {
-      /** @description OK */
-      200: {
+      /** @description Accepted */
+      202: {
         headers: {
           [name: string]: unknown
         }
-        content: {
-          "*/*": components["schemas"]["Compliance_ValidateComplianceDomainCreationResponse"]
-        }
+        content?: never
       }
       /** @description Bad Request */
       400: {
@@ -14394,6 +13754,15 @@ export interface operations {
           "*/*": components["schemas"]["Compliance_ErrorResponse"]
         }
       }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
     }
   }
   analysis: {
@@ -14411,7 +13780,7 @@ export interface operations {
       }
     }
     responses: {
-      /** @description Successful response */
+      /** @description OK */
       200: {
         headers: {
           [name: string]: unknown
@@ -14422,6 +13791,24 @@ export interface operations {
       }
       /** @description Bad Request */
       400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
         headers: {
           [name: string]: unknown
         }
@@ -14446,7 +13833,7 @@ export interface operations {
       }
     }
     responses: {
-      /** @description Successful response */
+      /** @description OK */
       200: {
         headers: {
           [name: string]: unknown
@@ -14457,6 +13844,24 @@ export interface operations {
       }
       /** @description Bad Request */
       400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Method Not Allowed */
+      405: {
         headers: {
           [name: string]: unknown
         }
@@ -14478,7 +13883,7 @@ export interface operations {
     }
     requestBody?: never
     responses: {
-      /** @description Successful response */
+      /** @description OK */
       200: {
         headers: {
           [name: string]: unknown
@@ -14489,6 +13894,24 @@ export interface operations {
       }
       /** @description Bad Request */
       400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
         headers: {
           [name: string]: unknown
         }
@@ -14509,7 +13932,7 @@ export interface operations {
     }
     requestBody?: never
     responses: {
-      /** @description Successful response */
+      /** @description OK */
       200: {
         headers: {
           [name: string]: unknown
@@ -14542,7 +13965,7 @@ export interface operations {
     }
     requestBody?: never
     responses: {
-      /** @description Successful response */
+      /** @description OK */
       200: {
         headers: {
           [name: string]: unknown
@@ -14560,6 +13983,24 @@ export interface operations {
           "*/*": components["schemas"]["Compliance_ErrorResponse"]
         }
       }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
     }
   }
   DeleteProviderConnectionAndScreeningRules: {
@@ -14568,21 +14009,388 @@ export interface operations {
       header?: never
       path: {
         domainId: string
-        provider: "ELLIPTIC" | "CHAINALYSIS"
+        provider: "ELLIPTIC" | "CHAINALYSIS" | "NOTABENE"
       }
       cookie?: never
     }
     requestBody?: never
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+    }
+  }
+  CreateTravelRuleTransfer: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        domainId: string
+        provider: "NOTABENE"
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Compliance_CreateTransferRequest"]
+      }
+    }
     responses: {
       /** @description OK */
       200: {
         headers: {
           [name: string]: unknown
         }
-        content?: never
+        content: {
+          "application/json": components["schemas"]["Compliance_InitiateTravelRuleResponse"]
+        }
       }
       /** @description Bad Request */
       400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+    }
+  }
+  GetTravelRuleTransfer: {
+    parameters: {
+      query?: {
+        decrypt?: boolean
+      }
+      header?: never
+      path: {
+        domainId: string
+        provider: "NOTABENE"
+        travelRuleId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Transfer retrieved successfully */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Compliance_GetTravelRuleTransferResponse"]
+        }
+      }
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Transfer or domain not found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+    }
+  }
+  AppendPIIToTransfer: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        domainId: string
+        provider: "NOTABENE"
+        travelRuleId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Compliance_AppendPIIRequest"]
+      }
+    }
+    responses: {
+      /** @description PII appended successfully */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Compliance_AppendPIITravelRuleResponse"]
+        }
+      }
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Transfer or domain not found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+    }
+  }
+  PresentEncryptedPIIToTransferWithoutPolicy: {
+    parameters: {
+      query?: {
+        skipValidation?: boolean
+      }
+      header?: never
+      path: {
+        domainId: string
+        provider: "NOTABENE"
+        travelRuleId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Compliance_PresentPIIRequest"]
+      }
+    }
+    responses: {
+      /** @description Encrypted PII presented successfully */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Compliance_PresentPIITravelRuleResponse"]
+        }
+      }
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Transfer or domain not found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+    }
+  }
+  PresentEncryptedPIIToTransfer: {
+    parameters: {
+      query?: {
+        skipValidation?: boolean
+      }
+      header?: never
+      path: {
+        domainId: string
+        provider: "NOTABENE"
+        travelRuleId: string
+        travelRulePolicyId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Compliance_PresentPIIRequest"]
+      }
+    }
+    responses: {
+      /** @description Encrypted PII presented successfully */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Compliance_PresentPIITravelRuleResponse"]
+        }
+      }
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Transfer or domain not found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
         headers: {
           [name: string]: unknown
         }
