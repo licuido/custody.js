@@ -104,30 +104,6 @@ export const URLs = createURLs({
   userInvitationComplete: "/v1/domains/{domainId}/users/invitations/{id}/complete",
   publicUserInvitation: "/v1/users/invitations/{idOrCode}",
 
-  // External Accounts
-  externalAccounts: "/v1/domains/{domainId}/external-accounts",
-  externalAccount: "/v1/domains/{domainId}/external-accounts/{externalAccountId}",
-  externalAccountBalances: "/v1/domains/{domainId}/external-accounts/{externalAccountId}/balances",
-  externalAccountAddressesLatest:
-    "/v1/domains/{domainId}/external-accounts/{externalAccountId}/addresses/latest",
-  externalAccountAddresses:
-    "/v1/domains/{domainId}/external-accounts/{externalAccountId}/addresses",
-  externalAccountAddress:
-    "/v1/domains/{domainId}/external-accounts/{externalAccountId}/addresses/{externalAccountAddressId}",
-  externalAccountProviders: "/v1/domains/{domainId}/external-accounts/providers",
-  externalAccountProvider: "/v1/domains/{domainId}/external-accounts/providers/{connectionId}",
-  externalAccountProviderPairs:
-    "/v1/domains/{domainId}/external-accounts/providers/{connectionId}/pairs",
-  externalAccountProviderBalances:
-    "/v1/domains/{domainId}/external-accounts/providers/{connectionId}/balances",
-  externalAccountProviderPrice:
-    "/v1/domains/{domainId}/external-accounts/providers/{connectionId}/pairs/{baseExternalTickerName}/{quoteExternalTickerName}/price",
-  externalAccountTransactionOrders: "/v1/domains/{domainId}/external-accounts/transactions/orders",
-  externalAccountTransactionTransfers:
-    "/v1/domains/{domainId}/external-accounts/transactions/transfers",
-  externalAccountTransactionsDryRun:
-    "/v1/domains/{domainId}/external-accounts/transactions/dry-run",
-
   // Virtual Ledgers
   virtualLedgers: "/v1/domains/{domainId}/virtual-ledgers",
   virtualLedger: "/v1/domains/{domainId}/virtual-ledgers/{virtualLedgerId}",
