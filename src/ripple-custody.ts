@@ -149,6 +149,9 @@ import {
   type CustodyClawback,
   type CustodyDepositPreauth,
   type CustodyMpTokenAuthorize,
+  type CustodyMpTokenIssuanceCreate,
+  type CustodyMpTokenIssuanceDestroy,
+  type CustodyMpTokenIssuanceSet,
   type CustodyOfferCreate,
   type CustodyPayment,
   type CustodyTrustline,
@@ -844,10 +847,10 @@ export class RippleCustody {
      * @param options - Optional configuration for the MPTokenIssuanceCreate intent
      * @returns The proposed intent response
      */
-    // mpTokenIssuanceCreate: async (
-    //   params: CustodyMpTokenIssuanceCreate,
-    //   options?: XrplIntentOptions,
-    // ): Promise<Core_IntentResponse> => this.xrplService.mpTokenIssuanceCreate(params, options),
+    mpTokenIssuanceCreate: async (
+      params: CustodyMpTokenIssuanceCreate,
+      options?: XrplIntentOptions,
+    ): Promise<Core_IntentResponse> => this.xrplService.mpTokenIssuanceCreate(params, options),
 
     /**
      * Create an XRPL MPTokenIssuanceSet.
@@ -855,10 +858,10 @@ export class RippleCustody {
      * @param options - Optional configuration for the MPTokenIssuanceSet intent
      * @returns The proposed intent response
      */
-    // mpTokenIssuanceSet: async (
-    //   params: CustodyMpTokenIssuanceSet,
-    //   options?: XrplIntentOptions,
-    // ): Promise<Core_IntentResponse> => this.xrplService.mpTokenIssuanceSet(params, options),
+    mpTokenIssuanceSet: async (
+      params: CustodyMpTokenIssuanceSet,
+      options?: XrplIntentOptions,
+    ): Promise<Core_IntentResponse> => this.xrplService.mpTokenIssuanceSet(params, options),
 
     /**
      * Create an XRPL MPTokenIssuanceDestroy.
@@ -866,10 +869,10 @@ export class RippleCustody {
      * @param options - Optional configuration for the MPTokenIssuanceDestroy intent
      * @returns The proposed intent response
      */
-    // mpTokenIssuanceDestroy: async (
-    //   params: CustodyMpTokenIssuanceDestroy,
-    //   options?: XrplIntentOptions,
-    // ): Promise<Core_IntentResponse> => this.xrplService.mpTokenIssuanceDestroy(params, options),
+    mpTokenIssuanceDestroy: async (
+      params: CustodyMpTokenIssuanceDestroy,
+      options?: XrplIntentOptions,
+    ): Promise<Core_IntentResponse> => this.xrplService.mpTokenIssuanceDestroy(params, options),
 
     /**
      * Create an XRPL MPTokenAuthorize.
