@@ -7,9 +7,346 @@
       "url": "images/ripple-custody.png",
       "altText": "Ripple Custody logo"
     },
-    "x-app-version": "1.31.0"
+    "x-app-version": "1.32.0"
   },
   "paths": {
+    "/v1/domains/{domainId}/accounts/transferability": {
+      "get": {
+        "tags": ["Accounts"],
+        "summary": "Get transfer ticker info",
+        "operationId": "transferability",
+        "parameters": [
+          {
+            "name": "domainId",
+            "in": "path",
+            "description": "Unique identifier for the domain.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sourceAccountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destinationAccountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tickerId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_TransferabilityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value for: path parameter domainId, Invalid value for: query parameter sourceAccountId, Invalid value for: query parameter destinationAccountId, Invalid value for: query parameter tickerId",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity or Domain not found (EntityNotFoundError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "httpAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/domains/{domainId}/accounts/{accountId}/deposit-instructions/{instructions-id}": {
+      "get": {
+        "tags": ["Accounts"],
+        "summary": "Get deposit instructions by id",
+        "operationId": "deposit-instructions-by-id",
+        "parameters": [
+          {
+            "name": "domainId",
+            "in": "path",
+            "description": "Unique identifier for the domain.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "instructions-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_TrustedDepositInstructions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requester locked (RequesterLockedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity or Domain not found (EntityNotFoundError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "httpAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/domains/{domainId}/accounts/{accountId}/deposit-instructions": {
+      "get": {
+        "tags": ["Accounts"],
+        "summary": "Get deposit instructions",
+        "operationId": "deposit-instructions",
+        "parameters": [
+          {
+            "name": "domainId",
+            "in": "path",
+            "description": "Unique identifier for the domain.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The number of entities to return.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startingAfter",
+            "in": "query",
+            "description": "DepositInstructions id used to the determine beginning of query results.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Property name used to sort the query results.",
+            "schema": {
+              "enum": ["id", "tickerId", "instructions.address", "metadata.createdAt"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "Sort order applied to the query results.",
+            "schema": {
+              "$ref": "#/components/schemas/Core_SortOrder"
+            }
+          },
+          {
+            "name": "tickerId",
+            "in": "query",
+            "description": "Return entities matching given tickerId.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "fdeeeb4b-f987-4ec4-9880-1eb280581d49"
+          },
+          {
+            "name": "lastOnly",
+            "in": "query",
+            "description": "Return only last created instructions.",
+            "schema": {
+              "type": "boolean"
+            },
+            "example": "true"
+          },
+          {
+            "name": "metadata.createdBy",
+            "in": "query",
+            "description": "Return entities that were created by matching user.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "fdeeeb4b-f987-4ec4-9880-1eb280581d49"
+          },
+          {
+            "name": "metadata.lastModifiedBy",
+            "in": "query",
+            "description": "Return entities that were last modified by matching user.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "90c4cf2f-ebe0-4bf7-91cd-4c45cd02277b"
+          },
+          {
+            "name": "metadata.description",
+            "in": "query",
+            "description": "Return entities with descriptions that contains or equals to provided description.",
+            "schema": {
+              "minLength": 0,
+              "type": "string"
+            },
+            "example": "description1"
+          },
+          {
+            "name": "metadata.customProperties",
+            "in": "query",
+            "description": "Return entities that contains provided custom properties.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": ["key1:value1", "key2:value2"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_TrustedDepositInstructionsCollection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requester locked (RequesterLockedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "httpAuth": []
+          }
+        ]
+      }
+    },
     "/v1/backups/{backupId}": {
       "get": {
         "tags": ["Backups"],
@@ -1672,7 +2009,7 @@
     "/v1/addresses": {
       "get": {
         "tags": ["Accounts"],
-        "summary": "Get address from all generated addresses across domains",
+        "summary": "Get an address from all addresses including deposit instructions across domains",
         "operationId": "getAllDomainsAddresses",
         "parameters": [
           {
@@ -4867,7 +5204,7 @@
       "get": {
         "tags": ["Intents"],
         "summary": "Get remaining users",
-        "description": "This API will return the remaining user IDs able to approve for the currently open step of the intent approval process.",
+        "description": "This API operation will return the remaining user IDs able to approve for the currently open step of the intent approval process.",
         "operationId": "getRemainingUsers",
         "parameters": [
           {
@@ -6419,6 +6756,347 @@
           },
           "400": {
             "description": "Invalid value for: query parameter limit, Invalid value for: query parameter startingAfter, Invalid value for: query parameter sortBy, Invalid value for: query parameter sortOrder, Invalid value for: query parameter id",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity or Domain not found (EntityNotFoundError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "httpAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/providers/{providerId}": {
+      "get": {
+        "tags": ["Providers"],
+        "summary": "Get Provider details",
+        "operationId": "getProvider",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ApiProvider"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value for: path parameter providerId",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity or Domain not found (EntityNotFoundError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "httpAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/providers": {
+      "get": {
+        "tags": ["Providers"],
+        "summary": "List providers",
+        "operationId": "getProviders",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The number of entities to return.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startingAfter",
+            "in": "query",
+            "description": "Entity id used to the determine beginning of query results.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Property name used to sort the query results.",
+            "schema": {
+              "enum": ["id", "alias", "lock", "metadata.createdAt", "metadata.lastModifiedAt"],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "Sort order applied to the query results.",
+            "schema": {
+              "$ref": "#/components/schemas/Core_SortOrder"
+            }
+          },
+          {
+            "name": "alias",
+            "in": "query",
+            "description": "Return entities with aliases that contains or equals to provided alias.",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "example": "alias1"
+          },
+          {
+            "name": "lock",
+            "in": "query",
+            "description": "Return entities matching given lock status.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Core_LockStatus"
+              }
+            },
+            "example": ["Locked", "Unlocked"]
+          },
+          {
+            "name": "metadata.createdBy",
+            "in": "query",
+            "description": "Return entities that were created by matching user.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "fdeeeb4b-f987-4ec4-9880-1eb280581d49"
+          },
+          {
+            "name": "metadata.lastModifiedBy",
+            "in": "query",
+            "description": "Return entities that were last modified by matching user.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "90c4cf2f-ebe0-4bf7-91cd-4c45cd02277b"
+          },
+          {
+            "name": "metadata.description",
+            "in": "query",
+            "description": "Return entities with descriptions that contains or equals to provided description.",
+            "schema": {
+              "minLength": 0,
+              "type": "string"
+            },
+            "example": "description1"
+          },
+          {
+            "name": "metadata.customProperties",
+            "in": "query",
+            "description": "Return entities that contains provided custom properties.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": ["key1:value1", "key2:value2"]
+          },
+          {
+            "name": "additionalDetails.processingStatus",
+            "in": "query",
+            "description": "Return entities matching given processing status.",
+            "schema": {
+              "$ref": "#/components/schemas/Core_AccountProviderProcessingStatus"
+            },
+            "example": "Pending"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ProvidersCollection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value for: query parameter limit, Invalid value for: query parameter startingAfter, Invalid value for: query parameter sortBy, Invalid value for: query parameter sortOrder, Invalid value for: query parameter alias, Invalid value for: query parameter lock, Invalid value for: query parameter metadata.createdBy, Invalid value for: query parameter metadata.lastModifiedBy, Invalid value for: query parameter metadata.description, Invalid value for: query parameter metadata.customProperties, Invalid value for: query parameter additionalDetails.processingStatus",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "httpAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/providers/{providerId}/locations": {
+      "get": {
+        "tags": ["Providers"],
+        "summary": "Get Provider locations",
+        "operationId": "getProviderLocations",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The number of entities to return.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startingAfter",
+            "in": "query",
+            "description": "Entity id used to the determine beginning of query results.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Property name used to sort the query results.",
+            "schema": {
+              "enum": [
+                "data.id",
+                "data.alias",
+                "data.metadata.createdAt",
+                "data.metadata.lastModifiedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "Sort order applied to the query results.",
+            "schema": {
+              "$ref": "#/components/schemas/Core_SortOrder"
+            }
+          },
+          {
+            "name": "providerLocationId",
+            "in": "query",
+            "description": "Return entities matching given ProviderLocationId",
+            "schema": {
+              "type": "array",
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "example": ["portfolio-1", "portfolio-2"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Core_LocationsCollection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value for: path parameter providerId, Invalid value for: query parameter limit, Invalid value for: query parameter startingAfter, Invalid value for: query parameter sortBy, Invalid value for: query parameter sortOrder, Invalid value for: query parameter providerLocationId",
             "content": {
               "text/plain": {
                 "schema": {
@@ -9543,6 +10221,102 @@
         ]
       }
     },
+    "/v1/domains/{domainId}/compliance/travel-rule/details": {
+      "post": {
+        "tags": ["Compliance"],
+        "summary": "Get travel rule details for a batch of requests",
+        "description": "Retrieves travel rule message details for a batch of domain and ID pairs",
+        "operationId": "GetTravelRuleDetails",
+        "parameters": [
+          {
+            "name": "domainId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Compliance_TravelRuleDetailsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Travel rule details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Compliance_TravelRuleDetailsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Compliance_ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Compliance_ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Compliance_ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Domain or Travel rule details not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Compliance_ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Compliance_ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "httpAuth": []
+          }
+        ]
+      }
+    },
     "/v1/domains/{domainId}/channels": {
       "get": {
         "tags": ["Event Distribution Service"],
@@ -10309,8 +11083,84 @@
         "enum": ["Pending", "Preparing", "Tracked", "Recovering", "Completed", "Interrupted"],
         "type": "string"
       },
+      "Core_AccountProvider": {
+        "required": ["id", "provider", "alias", "lock", "metadata"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/Core_AccountProviderType"
+          },
+          "alias": {
+            "maxLength": 75,
+            "minLength": 1,
+            "type": "string"
+          },
+          "lock": {
+            "$ref": "#/components/schemas/Core_LockStatus"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Core_EntityMetadata"
+          }
+        }
+      },
+      "Core_AccountProviderAction": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_AccountProviderAction_External"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "External": "#/components/schemas/Core_AccountProviderAction_External"
+          }
+        }
+      },
+      "Core_AccountProviderAction_External": {
+        "required": ["publicKey", "type"],
+        "type": "object",
+        "properties": {
+          "publicKey": {
+            "$ref": "#/components/schemas/Core_ApiAccountProviderKey"
+          },
+          "type": {
+            "enum": ["External"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_AccountProviderAdditionalDetails": {
+        "required": ["processing"],
+        "type": "object",
+        "properties": {
+          "processing": {
+            "$ref": "#/components/schemas/Core_AccountProviderProcessingDetails"
+          }
+        }
+      },
+      "Core_AccountProviderCreated": {
+        "required": ["id", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["AccountProviderCreated"],
+            "type": "string"
+          }
+        }
+      },
       "Core_AccountProviderInformation": {
         "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_AccountProviderInformation_External"
+          },
           {
             "$ref": "#/components/schemas/Core_AccountProviderInformation_Vault"
           }
@@ -10318,7 +11168,30 @@
         "discriminator": {
           "propertyName": "type",
           "mapping": {
+            "External": "#/components/schemas/Core_AccountProviderInformation_External",
             "Vault": "#/components/schemas/Core_AccountProviderInformation_Vault"
+          }
+        }
+      },
+      "Core_AccountProviderInformation_External": {
+        "required": ["providerId", "locationId", "type"],
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["External"],
+            "type": "string"
           }
         }
       },
@@ -10344,6 +11217,137 @@
           },
           "type": {
             "enum": ["Vault"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_AccountProviderKey": {
+        "required": ["publicKey"],
+        "type": "object",
+        "properties": {
+          "publicKey": {
+            "type": "string",
+            "format": "base64"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Core_AccountProviderKeyStatus"
+          },
+          "predecessor": {
+            "type": "string",
+            "format": "base64"
+          },
+          "keySignature": {
+            "type": "string",
+            "format": "base64"
+          },
+          "validAfterSequenceId": {
+            "type": "string",
+            "description": "This field is a large integer and represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
+          },
+          "details": {
+            "type": "string"
+          }
+        }
+      },
+      "Core_AccountProviderKeyStatus": {
+        "enum": ["AwaitingActivation", "ActivationFailed", "Active", "Replaced"],
+        "type": "string"
+      },
+      "Core_AccountProviderProcessingDetails": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_AccountProviderProcessingDetails_Completed"
+          },
+          {
+            "$ref": "#/components/schemas/Core_AccountProviderProcessingDetails_Pending"
+          },
+          {
+            "$ref": "#/components/schemas/Core_AccountProviderProcessingDetails_Preparing"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Completed": "#/components/schemas/Core_AccountProviderProcessingDetails_Completed",
+            "Pending": "#/components/schemas/Core_AccountProviderProcessingDetails_Pending",
+            "Preparing": "#/components/schemas/Core_AccountProviderProcessingDetails_Preparing"
+          }
+        }
+      },
+      "Core_AccountProviderProcessingDetails_Completed": {
+        "required": ["type"],
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["Completed"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_AccountProviderProcessingDetails_Pending": {
+        "required": ["type"],
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["Pending"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_AccountProviderProcessingDetails_Preparing": {
+        "required": ["type"],
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["Preparing"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_AccountProviderProcessingStatus": {
+        "enum": ["Pending", "Preparing", "Completed"],
+        "type": "string"
+      },
+      "Core_AccountProviderType": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_AccountProviderType_ExternalProvider"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "ExternalProvider": "#/components/schemas/Core_AccountProviderType_ExternalProvider"
+          }
+        }
+      },
+      "Core_AccountProviderType_ExternalProvider": {
+        "required": ["publicKeys", "type"],
+        "type": "object",
+        "properties": {
+          "publicKeys": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_AccountProviderKey"
+            }
+          },
+          "type": {
+            "enum": ["ExternalProvider"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_AccountProviderUpdated": {
+        "required": ["id", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["AccountProviderUpdated"],
             "type": "string"
           }
         }
@@ -10592,12 +11596,16 @@
         "oneOf": [
           {
             "$ref": "#/components/schemas/Core_AccountAddressReference"
+          },
+          {
+            "$ref": "#/components/schemas/Core_DepositInstructionsReference"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "AccountAddressReference": "#/components/schemas/Core_AccountAddressReference"
+            "AccountAddressReference": "#/components/schemas/Core_AccountAddressReference",
+            "DepositInstructionsReference": "#/components/schemas/Core_DepositInstructionsReference"
           }
         }
       },
@@ -10816,6 +11824,16 @@
           }
         }
       },
+      "Core_ApiAccountProviderKey": {
+        "required": ["publicKey"],
+        "type": "object",
+        "properties": {
+          "publicKey": {
+            "type": "string",
+            "format": "base64"
+          }
+        }
+      },
       "Core_ApiBackup": {
         "required": ["id", "data", "metadata"],
         "type": "object",
@@ -10944,6 +11962,23 @@
         "enum": ["Cancellation", "Internal", "Replacement"],
         "type": "string"
       },
+      "Core_ApiLocation": {
+        "required": ["data", "signature", "signingKey"],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Core_Location"
+          },
+          "signature": {
+            "type": "string",
+            "format": "base64"
+          },
+          "signingKey": {
+            "type": "string",
+            "format": "base64"
+          }
+        }
+      },
       "Core_ApiManifest": {
         "required": ["data", "signature", "signingKey"],
         "type": "object",
@@ -10995,9 +12030,39 @@
         ],
         "type": "string"
       },
+      "Core_ApiProvider": {
+        "required": ["data", "signature", "signingKey"],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Core_AccountProvider"
+          },
+          "signature": {
+            "type": "string",
+            "format": "base64"
+          },
+          "signingKey": {
+            "type": "string",
+            "format": "base64"
+          },
+          "additionalDetails": {
+            "$ref": "#/components/schemas/Core_AccountProviderAdditionalDetails"
+          }
+        }
+      },
       "Core_ApiRecoveringAccountProcessingHint": {
         "enum": ["TransientIssue", "InternalError"],
         "type": "string"
+      },
+      "Core_ApiRelatedTransaction": {
+        "required": ["id"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
       },
       "Core_ApiRoles": {
         "required": ["roles"],
@@ -11103,7 +12168,7 @@
         }
       },
       "Core_ApiTransaction": {
-        "required": ["id", "ledgerId", "relatedAccounts", "registeredAt"],
+        "required": ["id", "ledgerId", "relatedAccounts", "relatedTransactions", "registeredAt"],
         "type": "object",
         "properties": {
           "id": {
@@ -11122,6 +12187,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Core_TransactionRelatedAccountReference"
+            }
+          },
+          "relatedTransactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_ApiRelatedTransaction"
             }
           },
           "processing": {
@@ -11629,6 +12700,7 @@
           "totalAmount",
           "reservedAmount",
           "quarantinedAmount",
+          "availableAmount",
           "lastUpdatedAt"
         ],
         "type": "object",
@@ -11651,6 +12723,11 @@
             "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
           },
           "quarantinedAmount": {
+            "minimum": 0,
+            "type": "string",
+            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
+          },
+          "availableAmount": {
             "minimum": 0,
             "type": "string",
             "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
@@ -12572,6 +13649,189 @@
           }
         }
       },
+      "Core_DepositInstructions": {
+        "required": ["id", "tickerId", "account", "metadata"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tickerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "account": {
+            "$ref": "#/components/schemas/Core_AccountReference"
+          },
+          "providerDetails": {
+            "$ref": "#/components/schemas/Core_DepositInstructionsProviderDetails"
+          },
+          "expiryAt": {
+            "type": "string",
+            "format": "date-time",
+            "deprecated": true
+          },
+          "instructions": {
+            "$ref": "#/components/schemas/Core_DepositInstructionsDetails"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Core_EntityMetadata"
+          }
+        }
+      },
+      "Core_DepositInstructionsCreated": {
+        "required": ["id", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["DepositInstructionsCreated"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_DepositInstructionsDetails": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_DepositInstructionsDetails_Address"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Address": "#/components/schemas/Core_DepositInstructionsDetails_Address"
+          }
+        }
+      },
+      "Core_DepositInstructionsDetails_Address": {
+        "required": ["address", "type"],
+        "type": "object",
+        "properties": {
+          "address": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "memo": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string"
+          },
+          "tag": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "type": {
+            "enum": ["Address"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_DepositInstructionsProviderDetails": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_DepositInstructionsProviderDetails_Completed"
+          },
+          {
+            "$ref": "#/components/schemas/Core_DepositInstructionsProviderDetails_Failed"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "status",
+          "mapping": {
+            "Completed": "#/components/schemas/Core_DepositInstructionsProviderDetails_Completed",
+            "Failed": "#/components/schemas/Core_DepositInstructionsProviderDetails_Failed"
+          }
+        }
+      },
+      "Core_DepositInstructionsProviderDetails_Completed": {
+        "required": ["expiryAt", "instructions", "status"],
+        "type": "object",
+        "properties": {
+          "expiryAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "instructions": {
+            "$ref": "#/components/schemas/Core_DepositInstructionsDetails"
+          },
+          "status": {
+            "enum": ["Completed"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_DepositInstructionsProviderDetails_Failed": {
+        "required": ["failureReason", "status"],
+        "type": "object",
+        "properties": {
+          "failureReason": {
+            "type": "string"
+          },
+          "status": {
+            "enum": ["Failed"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_DepositInstructionsReference": {
+        "required": ["id", "address", "domainId", "accountId", "createdAt", "custodyType", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "address": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ledgerId": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "custodyType": {
+            "$ref": "#/components/schemas/Core_CustodyType"
+          },
+          "type": {
+            "enum": ["DepositInstructionsReference"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_DepositInstructionsUpdated": {
+        "required": ["id", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["DepositInstructionsUpdated"],
+            "type": "string"
+          }
+        }
+      },
       "Core_Domain": {
         "required": ["id", "alias", "lock", "permissions", "metadata"],
         "type": "object",
@@ -12743,7 +14003,7 @@
         "properties": {
           "ABI": {
             "type": "string",
-            "description": "This field can be used to provide an Application Binary Interface (ABI) for EVM-based smart contracts, Harmonize's front-end uses the field to provide an extended support when interacting with smart contracts, therefore it is not recommended to submit invalid ABIs in this field but Harmonize will not prevent the submission of invalid ABIs to tolerate use cases outside of Harmonize's front-end."
+            "description": "This field can be used to provide an Application Binary Interface (ABI) for EVM-based smart contracts, Ripple Custody's front-end uses the field to provide an extended support when interacting with smart contracts, therefore it is not recommended to submit invalid ABIs in this field but Ripple Custody will not prevent the submission of invalid ABIs to tolerate use cases outside of Ripple Custody's front-end."
           },
           "type": {
             "enum": ["Ethereum"],
@@ -13181,6 +14441,88 @@
           }
         }
       },
+      "Core_ExternalOperation": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_ExternalOperation_Transfer"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Transfer": "#/components/schemas/Core_ExternalOperation_Transfer"
+          }
+        }
+      },
+      "Core_ExternalOperation_Transfer": {
+        "required": ["outputs", "tickerId", "type"],
+        "type": "object",
+        "properties": {
+          "outputs": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_Output"
+            }
+          },
+          "tickerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memo": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": ["Transfer"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_ExternalProviderTransactionReference": {
+        "required": ["id", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "Core_ExternalTickerProperties": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_ExternalTickerProperties_Asset"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Asset": "#/components/schemas/Core_ExternalTickerProperties_Asset"
+          }
+        }
+      },
+      "Core_ExternalTickerProperties_Asset": {
+        "required": ["providerAssetId", "type"],
+        "type": "object",
+        "properties": {
+          "providerAssetId": {
+            "maxLength": 75,
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": ["Asset"],
+            "type": "string"
+          }
+        }
+      },
       "Core_FeePriority": {
         "enum": ["High", "Medium", "Low"],
         "type": "string"
@@ -13346,6 +14688,12 @@
             "$ref": "#/components/schemas/Core_AccountCreated"
           },
           {
+            "$ref": "#/components/schemas/Core_AccountProviderCreated"
+          },
+          {
+            "$ref": "#/components/schemas/Core_AccountProviderUpdated"
+          },
+          {
             "$ref": "#/components/schemas/Core_AccountUpdated"
           },
           {
@@ -13359,6 +14707,12 @@
           },
           {
             "$ref": "#/components/schemas/Core_BalancesUpdated"
+          },
+          {
+            "$ref": "#/components/schemas/Core_DepositInstructionsCreated"
+          },
+          {
+            "$ref": "#/components/schemas/Core_DepositInstructionsUpdated"
           },
           {
             "$ref": "#/components/schemas/Core_DomainCreated"
@@ -13392,6 +14746,12 @@
           },
           {
             "$ref": "#/components/schemas/Core_LedgerUpdated"
+          },
+          {
+            "$ref": "#/components/schemas/Core_LocationCreated"
+          },
+          {
+            "$ref": "#/components/schemas/Core_LocationUpdated"
           },
           {
             "$ref": "#/components/schemas/Core_ManifestCreated"
@@ -13449,11 +14809,15 @@
           "propertyName": "type",
           "mapping": {
             "AccountCreated": "#/components/schemas/Core_AccountCreated",
+            "AccountProviderCreated": "#/components/schemas/Core_AccountProviderCreated",
+            "AccountProviderUpdated": "#/components/schemas/Core_AccountProviderUpdated",
             "AccountUpdated": "#/components/schemas/Core_AccountUpdated",
             "AddressCreated": "#/components/schemas/Core_AddressCreated",
             "BackupCreated": "#/components/schemas/Core_BackupCreated",
             "BackupUpdated": "#/components/schemas/Core_BackupUpdated",
             "BalancesUpdated": "#/components/schemas/Core_BalancesUpdated",
+            "DepositInstructionsCreated": "#/components/schemas/Core_DepositInstructionsCreated",
+            "DepositInstructionsUpdated": "#/components/schemas/Core_DepositInstructionsUpdated",
             "DomainCreated": "#/components/schemas/Core_DomainCreated",
             "DomainUpdated": "#/components/schemas/Core_DomainUpdated",
             "EndpointCreated": "#/components/schemas/Core_EndpointCreated",
@@ -13465,6 +14829,8 @@
             "IntentUpdated": "#/components/schemas/Core_IntentUpdated",
             "LedgerCreated": "#/components/schemas/Core_LedgerCreated",
             "LedgerUpdated": "#/components/schemas/Core_LedgerUpdated",
+            "LocationCreated": "#/components/schemas/Core_LocationCreated",
+            "LocationUpdated": "#/components/schemas/Core_LocationUpdated",
             "ManifestCreated": "#/components/schemas/Core_ManifestCreated",
             "ManifestUpdated": "#/components/schemas/Core_ManifestUpdated",
             "PolicyCreated": "#/components/schemas/Core_PolicyCreated",
@@ -13792,10 +15158,16 @@
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_AddAccountLedgers"
           },
           {
+            "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_AddProviderKey"
+          },
+          {
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_AddTrustedPublicKeysForMigration"
           },
           {
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_AttemptTransactionOrderCancellation"
+          },
+          {
+            "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_ConnectProvider"
           },
           {
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_CreateAccount"
@@ -13864,6 +15236,9 @@
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_ReleaseQuarantinedTransfers"
           },
           {
+            "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_RequestDepositInstructions"
+          },
+          {
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_SetSystemProperty"
           },
           {
@@ -13926,8 +15301,10 @@
           "mapping": {
             "v0_AcknowledgeBackup": "#/components/schemas/Core_IntentDryRunResponse_v0_AcknowledgeBackup",
             "v0_AddAccountLedgers": "#/components/schemas/Core_IntentDryRunResponse_v0_AddAccountLedgers",
+            "v0_AddProviderKey": "#/components/schemas/Core_IntentDryRunResponse_v0_AddProviderKey",
             "v0_AddTrustedPublicKeysForMigration": "#/components/schemas/Core_IntentDryRunResponse_v0_AddTrustedPublicKeysForMigration",
             "v0_AttemptTransactionOrderCancellation": "#/components/schemas/Core_IntentDryRunResponse_v0_AttemptTransactionOrderCancellation",
+            "v0_ConnectProvider": "#/components/schemas/Core_IntentDryRunResponse_v0_ConnectProvider",
             "v0_CreateAccount": "#/components/schemas/Core_IntentDryRunResponse_v0_CreateAccount",
             "v0_CreateBackup": "#/components/schemas/Core_IntentDryRunResponse_v0_CreateBackup",
             "v0_CreateDomain": "#/components/schemas/Core_IntentDryRunResponse_v0_CreateDomain",
@@ -13950,6 +15327,7 @@
             "v0_MigrateSilo3AccountBatch": "#/components/schemas/Core_IntentDryRunResponse_v0_MigrateSilo3AccountBatch",
             "v0_NotarizeData": "#/components/schemas/Core_IntentDryRunResponse_v0_NotarizeData",
             "v0_ReleaseQuarantinedTransfers": "#/components/schemas/Core_IntentDryRunResponse_v0_ReleaseQuarantinedTransfers",
+            "v0_RequestDepositInstructions": "#/components/schemas/Core_IntentDryRunResponse_v0_RequestDepositInstructions",
             "v0_SetSystemProperty": "#/components/schemas/Core_IntentDryRunResponse_v0_SetSystemProperty",
             "v0_SignManifest": "#/components/schemas/Core_IntentDryRunResponse_v0_SignManifest",
             "v0_UnlockAccount": "#/components/schemas/Core_IntentDryRunResponse_v0_UnlockAccount",
@@ -14012,6 +15390,26 @@
           }
         }
       },
+      "Core_IntentDryRunResponse_v0_AddProviderKey": {
+        "required": ["success", "type"],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "enum": ["v0_AddProviderKey"],
+            "type": "string"
+          }
+        }
+      },
       "Core_IntentDryRunResponse_v0_AddTrustedPublicKeysForMigration": {
         "required": ["success", "type"],
         "type": "object",
@@ -14051,6 +15449,26 @@
           },
           "type": {
             "enum": ["v0_AttemptTransactionOrderCancellation"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_IntentDryRunResponse_v0_ConnectProvider": {
+        "required": ["success", "type"],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "enum": ["v0_ConnectProvider"],
             "type": "string"
           }
         }
@@ -14506,6 +15924,26 @@
           },
           "type": {
             "enum": ["v0_ReleaseQuarantinedTransfers"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_IntentDryRunResponse_v0_RequestDepositInstructions": {
+        "required": ["success", "type"],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errors": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "enum": ["v0_RequestDepositInstructions"],
             "type": "string"
           }
         }
@@ -15049,9 +16487,12 @@
           "v0_CreateTransferOrder",
           "v0_SignManifest",
           "v0_SetSystemProperty",
+          "v0_ConnectProvider",
+          "v0_RequestDepositInstructions",
           "v0_CreateLedger",
           "v0_UpdateLedger",
           "v0_AddTrustedPublicKeysForMigration",
+          "v0_AddProviderKey",
           "v0_CreateBackup",
           "v0_AcknowledgeBackup"
         ],
@@ -15127,6 +16568,9 @@
             "$ref": "#/components/schemas/Core_LedgerParameters_Ethereum"
           },
           {
+            "$ref": "#/components/schemas/Core_LedgerParameters_External"
+          },
+          {
             "$ref": "#/components/schemas/Core_LedgerParameters_Hedera"
           },
           {
@@ -15155,6 +16599,7 @@
             "Bitcoin": "#/components/schemas/Core_LedgerParameters_Bitcoin",
             "Cardano": "#/components/schemas/Core_LedgerParameters_Cardano",
             "Ethereum": "#/components/schemas/Core_LedgerParameters_Ethereum",
+            "External": "#/components/schemas/Core_LedgerParameters_External",
             "Hedera": "#/components/schemas/Core_LedgerParameters_Hedera",
             "Solana": "#/components/schemas/Core_LedgerParameters_Solana",
             "Stellar": "#/components/schemas/Core_LedgerParameters_Stellar",
@@ -15307,6 +16752,16 @@
           },
           "type": {
             "enum": ["Ethereum"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_LedgerParameters_External": {
+        "required": ["type"],
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["External"],
             "type": "string"
           }
         }
@@ -15556,6 +17011,84 @@
           }
         }
       },
+      "Core_Location": {
+        "required": ["id", "providerId", "providerLocationId", "alias", "metadata"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerLocationId": {
+            "maxLength": 28,
+            "minLength": 1,
+            "type": "string",
+            "description": "ID of the location as reported by the provider"
+          },
+          "alias": {
+            "maxLength": 75,
+            "minLength": 1,
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Core_EntityMetadata"
+          }
+        }
+      },
+      "Core_LocationCreated": {
+        "required": ["id", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["LocationCreated"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_LocationUpdated": {
+        "required": ["id", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["LocationUpdated"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_LocationsCollection": {
+        "required": ["items", "count"],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_ApiLocation"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentStartingAfter": {
+            "type": "string"
+          },
+          "nextStartingAfter": {
+            "type": "string"
+          }
+        }
+      },
       "Core_LockStatus": {
         "enum": ["Unlocked", "Locked", "Archived"],
         "type": "string"
@@ -15575,6 +17108,34 @@
             "minLength": 1,
             "type": "string",
             "description": "Login provider. For internal login, set to `harmonize`. For external identity providers, must match the provider name."
+          }
+        }
+      },
+      "Core_MPTokenIssuanceMetadata": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_MPTokenIssuanceMetadata_HexEncodedMetadata"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "HexEncodedMetadata": "#/components/schemas/Core_MPTokenIssuanceMetadata_HexEncodedMetadata"
+          }
+        }
+      },
+      "Core_MPTokenIssuanceMetadata_HexEncodedMetadata": {
+        "required": ["value", "type"],
+        "type": "object",
+        "properties": {
+          "value": {
+            "pattern": "^[A-Fa-f0-9]*$",
+            "type": "string",
+            "description": "Hex encoded string."
+          },
+          "type": {
+            "enum": ["HexEncodedMetadata"],
+            "type": "string"
           }
         }
       },
@@ -15991,6 +17552,17 @@
           }
         }
       },
+      "Core_MultiPurposeToken": {
+        "required": ["issuanceId"],
+        "type": "object",
+        "properties": {
+          "issuanceId": {
+            "pattern": "^[A-Fa-f0-9]*$",
+            "type": "string",
+            "description": "XRPL MPToken Issuance ID (192-bit integer hex encoded)"
+          }
+        }
+      },
       "Core_Network": {
         "enum": ["mainnet", "testnet", "regtest"],
         "type": "string"
@@ -16080,13 +17652,21 @@
           },
           {
             "$ref": "#/components/schemas/Core_OnLedgerData_Ethereum"
+          },
+          {
+            "$ref": "#/components/schemas/Core_OnLedgerData_External"
+          },
+          {
+            "$ref": "#/components/schemas/Core_OnLedgerData_Xrpl"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "Bitcoin": "#/components/schemas/Core_OnLedgerData_Bitcoin",
-            "Ethereum": "#/components/schemas/Core_OnLedgerData_Ethereum"
+            "Ethereum": "#/components/schemas/Core_OnLedgerData_Ethereum",
+            "External": "#/components/schemas/Core_OnLedgerData_External",
+            "Xrpl": "#/components/schemas/Core_OnLedgerData_Xrpl"
           }
         }
       },
@@ -16141,6 +17721,62 @@
           "type": {
             "enum": ["Ethereum"],
             "type": "string"
+          }
+        }
+      },
+      "Core_OnLedgerData_External": {
+        "required": ["underlyingLedgerTransactionIds", "providerTransactions", "type"],
+        "type": "object",
+        "properties": {
+          "underlyingLedgerTransactionIds": {
+            "type": "array",
+            "items": {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "providerTransactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_ExternalProviderTransactionReference"
+            }
+          },
+          "type": {
+            "enum": ["External"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_OnLedgerData_Xrpl": {
+        "required": ["type"],
+        "type": "object",
+        "properties": {
+          "tokenData": {
+            "$ref": "#/components/schemas/Core_XrplOnLedgerTokenData"
+          },
+          "type": {
+            "enum": ["Xrpl"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_Output": {
+        "required": ["destination", "amount"],
+        "type": "object",
+        "properties": {
+          "destination": {
+            "$ref": "#/components/schemas/Core_TransactionDestination"
+          },
+          "destinationTag": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "amount": {
+            "minimum": 0,
+            "type": "string",
+            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
           }
         }
       },
@@ -16434,6 +18070,9 @@
             "$ref": "#/components/schemas/Core_TransactionOrderParameters_Ethereum"
           },
           {
+            "$ref": "#/components/schemas/Core_TransactionOrderParameters_External"
+          },
+          {
             "$ref": "#/components/schemas/Core_TransactionOrderParameters_Hedera"
           },
           {
@@ -16462,6 +18101,7 @@
             "Bitcoin": "#/components/schemas/Core_TransactionOrderParameters_Bitcoin",
             "Cardano": "#/components/schemas/Core_TransactionOrderParameters_Cardano",
             "Ethereum": "#/components/schemas/Core_TransactionOrderParameters_Ethereum",
+            "External": "#/components/schemas/Core_TransactionOrderParameters_External",
             "Hedera": "#/components/schemas/Core_TransactionOrderParameters_Hedera",
             "Solana": "#/components/schemas/Core_TransactionOrderParameters_Solana",
             "Stellar": "#/components/schemas/Core_TransactionOrderParameters_Stellar",
@@ -16484,10 +18124,16 @@
             "$ref": "#/components/schemas/Core_v0_AddAccountLedgers"
           },
           {
+            "$ref": "#/components/schemas/Core_v0_AddProviderKey"
+          },
+          {
             "$ref": "#/components/schemas/Core_v0_AddTrustedPublicKeysForMigration"
           },
           {
             "$ref": "#/components/schemas/Core_v0_AttemptTransactionOrderCancellation"
+          },
+          {
+            "$ref": "#/components/schemas/Core_v0_ConnectProvider"
           },
           {
             "$ref": "#/components/schemas/Core_v0_CreateAccount"
@@ -16553,6 +18199,9 @@
             "$ref": "#/components/schemas/Core_v0_ReleaseQuarantinedTransfers"
           },
           {
+            "$ref": "#/components/schemas/Core_v0_RequestDepositInstructions"
+          },
+          {
             "$ref": "#/components/schemas/Core_v0_SetSystemProperty"
           },
           {
@@ -16615,8 +18264,10 @@
           "mapping": {
             "v0_AcknowledgeBackup": "#/components/schemas/Core_v0_AcknowledgeBackup",
             "v0_AddAccountLedgers": "#/components/schemas/Core_v0_AddAccountLedgers",
+            "v0_AddProviderKey": "#/components/schemas/Core_v0_AddProviderKey",
             "v0_AddTrustedPublicKeysForMigration": "#/components/schemas/Core_v0_AddTrustedPublicKeysForMigration",
             "v0_AttemptTransactionOrderCancellation": "#/components/schemas/Core_v0_AttemptTransactionOrderCancellation",
+            "v0_ConnectProvider": "#/components/schemas/Core_v0_ConnectProvider",
             "v0_CreateAccount": "#/components/schemas/Core_v0_CreateAccount",
             "v0_CreateBackup": "#/components/schemas/Core_v0_CreateBackup",
             "v0_CreateDomain": "#/components/schemas/Core_v0_CreateDomain",
@@ -16639,6 +18290,7 @@
             "v0_MigrateSilo3AccountBatch": "#/components/schemas/Core_v0_MigrateSilo3AccountBatch",
             "v0_NotarizeData": "#/components/schemas/Core_v0_NotarizeData",
             "v0_ReleaseQuarantinedTransfers": "#/components/schemas/Core_v0_ReleaseQuarantinedTransfers",
+            "v0_RequestDepositInstructions": "#/components/schemas/Core_v0_RequestDepositInstructions",
             "v0_SetSystemProperty": "#/components/schemas/Core_v0_SetSystemProperty",
             "v0_SignManifest": "#/components/schemas/Core_v0_SignManifest",
             "v0_UnlockAccount": "#/components/schemas/Core_v0_UnlockAccount",
@@ -16691,6 +18343,28 @@
           },
           "type": {
             "enum": ["v0_CreateTransactionOrder"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_ProvidersCollection": {
+        "required": ["items", "count"],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_ApiProvider"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentStartingAfter": {
+            "type": "string"
+          },
+          "nextStartingAfter": {
             "type": "string"
           }
         }
@@ -18580,6 +20254,27 @@
           }
         }
       },
+      "Core_TickerBalances": {
+        "required": ["totalAmount", "reservedAmount", "quarantinedAmount"],
+        "type": "object",
+        "properties": {
+          "totalAmount": {
+            "minimum": 0,
+            "type": "string",
+            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
+          },
+          "reservedAmount": {
+            "minimum": 0,
+            "type": "string",
+            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
+          },
+          "quarantinedAmount": {
+            "minimum": 0,
+            "type": "string",
+            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
+          }
+        }
+      },
       "Core_TickerCreated": {
         "required": ["id", "type"],
         "type": "object",
@@ -18613,6 +20308,9 @@
             "$ref": "#/components/schemas/Core_TickerLedgerDetails_Ethereum"
           },
           {
+            "$ref": "#/components/schemas/Core_TickerLedgerDetails_External"
+          },
+          {
             "$ref": "#/components/schemas/Core_TickerLedgerDetails_Hedera"
           },
           {
@@ -18641,6 +20339,7 @@
             "Bitcoin": "#/components/schemas/Core_TickerLedgerDetails_Bitcoin",
             "Cardano": "#/components/schemas/Core_TickerLedgerDetails_Cardano",
             "Ethereum": "#/components/schemas/Core_TickerLedgerDetails_Ethereum",
+            "External": "#/components/schemas/Core_TickerLedgerDetails_External",
             "Hedera": "#/components/schemas/Core_TickerLedgerDetails_Hedera",
             "Solana": "#/components/schemas/Core_TickerLedgerDetails_Solana",
             "Stellar": "#/components/schemas/Core_TickerLedgerDetails_Stellar",
@@ -18699,6 +20398,19 @@
           },
           "type": {
             "enum": ["Ethereum"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_TickerLedgerDetails_External": {
+        "required": ["properties", "type"],
+        "type": "object",
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/Core_ExternalTickerProperties"
+          },
+          "type": {
+            "enum": ["External"],
             "type": "string"
           }
         }
@@ -19215,6 +20927,9 @@
             "$ref": "#/components/schemas/Core_TransactionEstimate_Ethereum"
           },
           {
+            "$ref": "#/components/schemas/Core_TransactionEstimate_External"
+          },
+          {
             "$ref": "#/components/schemas/Core_TransactionEstimate_Failure"
           },
           {
@@ -19246,6 +20961,7 @@
             "Bitcoin": "#/components/schemas/Core_TransactionEstimate_Bitcoin",
             "Cardano": "#/components/schemas/Core_TransactionEstimate_Cardano",
             "Ethereum": "#/components/schemas/Core_TransactionEstimate_Ethereum",
+            "External": "#/components/schemas/Core_TransactionEstimate_External",
             "Failure": "#/components/schemas/Core_TransactionEstimate_Failure",
             "Hedera": "#/components/schemas/Core_TransactionEstimate_Hedera",
             "Solana": "#/components/schemas/Core_TransactionEstimate_Solana",
@@ -19326,6 +21042,25 @@
           },
           "type": {
             "enum": ["Ethereum"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_TransactionEstimate_External": {
+        "required": ["fee", "tickerId", "type"],
+        "type": "object",
+        "properties": {
+          "fee": {
+            "minimum": 0,
+            "type": "string",
+            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
+          },
+          "tickerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["External"],
             "type": "string"
           }
         }
@@ -19503,6 +21238,7 @@
           "BitcoinRedirect",
           "Cardano",
           "Ethereum",
+          "External",
           "Hedera",
           "Solana",
           "Substrate",
@@ -19529,6 +21265,9 @@
           },
           {
             "$ref": "#/components/schemas/Core_TransactionOrderParameters_Ethereum"
+          },
+          {
+            "$ref": "#/components/schemas/Core_TransactionOrderParameters_External"
           },
           {
             "$ref": "#/components/schemas/Core_TransactionOrderParameters_Hedera"
@@ -19560,6 +21299,7 @@
             "BitcoinRedirect": "#/components/schemas/Core_TransactionOrderParameters_BitcoinRedirect",
             "Cardano": "#/components/schemas/Core_TransactionOrderParameters_Cardano",
             "Ethereum": "#/components/schemas/Core_TransactionOrderParameters_Ethereum",
+            "External": "#/components/schemas/Core_TransactionOrderParameters_External",
             "Hedera": "#/components/schemas/Core_TransactionOrderParameters_Hedera",
             "Solana": "#/components/schemas/Core_TransactionOrderParameters_Solana",
             "Stellar": "#/components/schemas/Core_TransactionOrderParameters_Stellar",
@@ -19707,6 +21447,19 @@
           },
           "type": {
             "enum": ["Ethereum"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_TransactionOrderParameters_External": {
+        "required": ["operation", "type"],
+        "type": "object",
+        "properties": {
+          "operation": {
+            "$ref": "#/components/schemas/Core_ExternalOperation"
+          },
+          "type": {
+            "enum": ["External"],
             "type": "string"
           }
         }
@@ -19862,7 +21615,7 @@
         "type": "object",
         "properties": {
           "destination": {
-            "$ref": "#/components/schemas/Core_Xrpl_DeprecatedTransactionDestination"
+            "$ref": "#/components/schemas/Core_TransactionDestination"
           },
           "amount": {
             "minimum": 0,
@@ -20069,6 +21822,9 @@
             "$ref": "#/components/schemas/Core_TransferMetadata_Ethereum"
           },
           {
+            "$ref": "#/components/schemas/Core_TransferMetadata_External"
+          },
+          {
             "$ref": "#/components/schemas/Core_TransferMetadata_Hedera"
           },
           {
@@ -20097,6 +21853,7 @@
             "Bitcoin": "#/components/schemas/Core_TransferMetadata_Bitcoin",
             "Cardano": "#/components/schemas/Core_TransferMetadata_Cardano",
             "Ethereum": "#/components/schemas/Core_TransferMetadata_Ethereum",
+            "External": "#/components/schemas/Core_TransferMetadata_External",
             "Hedera": "#/components/schemas/Core_TransferMetadata_Hedera",
             "Solana": "#/components/schemas/Core_TransferMetadata_Solana",
             "Stellar": "#/components/schemas/Core_TransferMetadata_Stellar",
@@ -20147,6 +21904,16 @@
         "properties": {
           "type": {
             "enum": ["Ethereum"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_TransferMetadata_External": {
+        "required": ["type"],
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["External"],
             "type": "string"
           }
         }
@@ -20243,6 +22010,116 @@
           },
           "type": {
             "enum": ["TransferUpdated"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_Transferability": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/Core_TransferabilitySource"
+          },
+          "underlying": {
+            "$ref": "#/components/schemas/Core_TransferabilityUnderlying"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/Core_TransferabilityDestination"
+          }
+        }
+      },
+      "Core_TransferabilityDestination": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_TransferabilityDestination_Ticker"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Ticker": "#/components/schemas/Core_TransferabilityDestination_Ticker"
+          }
+        }
+      },
+      "Core_TransferabilityDestination_Ticker": {
+        "required": ["tickerId", "type"],
+        "type": "object",
+        "properties": {
+          "tickerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["Ticker"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_TransferabilityResponse": {
+        "required": ["items"],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_Transferability"
+            }
+          }
+        }
+      },
+      "Core_TransferabilitySource": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_TransferabilitySource_Ticker"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Ticker": "#/components/schemas/Core_TransferabilitySource_Ticker"
+          }
+        }
+      },
+      "Core_TransferabilitySource_Ticker": {
+        "required": ["tickerId", "balances", "type"],
+        "type": "object",
+        "properties": {
+          "tickerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balances": {
+            "$ref": "#/components/schemas/Core_TickerBalances"
+          },
+          "type": {
+            "enum": ["Ticker"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_TransferabilityUnderlying": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_TransferabilityUnderlying_Ticker"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Ticker": "#/components/schemas/Core_TransferabilityUnderlying_Ticker"
+          }
+        }
+      },
+      "Core_TransferabilityUnderlying_Ticker": {
+        "required": ["tickerId", "type"],
+        "type": "object",
+        "properties": {
+          "tickerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["Ticker"],
             "type": "string"
           }
         }
@@ -20391,6 +22268,45 @@
           },
           "type": {
             "enum": ["TRC20"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_TrustedDepositInstructions": {
+        "required": ["data", "signature", "signingKey"],
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Core_DepositInstructions"
+          },
+          "signature": {
+            "type": "string",
+            "format": "base64"
+          },
+          "signingKey": {
+            "type": "string",
+            "format": "base64"
+          }
+        }
+      },
+      "Core_TrustedDepositInstructionsCollection": {
+        "required": ["items", "count"],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_TrustedDepositInstructions"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentStartingAfter": {
+            "type": "string"
+          },
+          "nextStartingAfter": {
             "type": "string"
           }
         }
@@ -20877,10 +22793,16 @@
             "$ref": "#/components/schemas/Core_v0_AddAccountLedgers"
           },
           {
+            "$ref": "#/components/schemas/Core_v0_AddProviderKey"
+          },
+          {
             "$ref": "#/components/schemas/Core_v0_AddTrustedPublicKeysForMigration"
           },
           {
             "$ref": "#/components/schemas/Core_v0_AttemptTransactionOrderCancellation"
+          },
+          {
+            "$ref": "#/components/schemas/Core_v0_ConnectProvider"
           },
           {
             "$ref": "#/components/schemas/Core_v0_CreateAccount"
@@ -20949,6 +22871,9 @@
             "$ref": "#/components/schemas/Core_v0_ReleaseQuarantinedTransfers"
           },
           {
+            "$ref": "#/components/schemas/Core_v0_RequestDepositInstructions"
+          },
+          {
             "$ref": "#/components/schemas/Core_v0_SetSystemProperty"
           },
           {
@@ -21011,8 +22936,10 @@
           "mapping": {
             "v0_AcknowledgeBackup": "#/components/schemas/Core_v0_AcknowledgeBackup",
             "v0_AddAccountLedgers": "#/components/schemas/Core_v0_AddAccountLedgers",
+            "v0_AddProviderKey": "#/components/schemas/Core_v0_AddProviderKey",
             "v0_AddTrustedPublicKeysForMigration": "#/components/schemas/Core_v0_AddTrustedPublicKeysForMigration",
             "v0_AttemptTransactionOrderCancellation": "#/components/schemas/Core_v0_AttemptTransactionOrderCancellation",
+            "v0_ConnectProvider": "#/components/schemas/Core_v0_ConnectProvider",
             "v0_CreateAccount": "#/components/schemas/Core_v0_CreateAccount",
             "v0_CreateBackup": "#/components/schemas/Core_v0_CreateBackup",
             "v0_CreateDomain": "#/components/schemas/Core_v0_CreateDomain",
@@ -21035,6 +22962,7 @@
             "v0_MigrateSilo3AccountBatch": "#/components/schemas/Core_v0_MigrateSilo3AccountBatch",
             "v0_NotarizeData": "#/components/schemas/Core_v0_NotarizeData",
             "v0_ReleaseQuarantinedTransfers": "#/components/schemas/Core_v0_ReleaseQuarantinedTransfers",
+            "v0_RequestDepositInstructions": "#/components/schemas/Core_v0_RequestDepositInstructions",
             "v0_SetSystemProperty": "#/components/schemas/Core_v0_SetSystemProperty",
             "v0_SignManifest": "#/components/schemas/Core_v0_SignManifest",
             "v0_UnlockAccount": "#/components/schemas/Core_v0_UnlockAccount",
@@ -21103,6 +23031,10 @@
           "UnsupportedAccountKeyStrategy",
           "VaultNotFound",
           "VaultLocked",
+          "ExternalProviderNotFound",
+          "ExternalProviderLocked",
+          "ExternalProviderUnexpectedState",
+          "LocationNotFound",
           "VaultNotReady",
           "InvalidDestination",
           "InvalidTransactionOrderState",
@@ -21119,6 +23051,7 @@
           "DuplicateTickerIdsToValidate",
           "DuplicateTickerLedgerDatasToValidate",
           "InvalidEntityId",
+          "TickerUnderlyingAssetIsNotInMetacoAssets",
           "MissingLoginIds",
           "DuplicatedLoginIds",
           "FeatureFlagDisabled",
@@ -21132,7 +23065,8 @@
           "InvalidVaultParameters",
           "BackupNotReady",
           "BackupAcknowledgeDenied",
-          "ValidateTickersPostProcessingFailure"
+          "ValidateTickersPostProcessingFailure",
+          "DepositInstructionPostProcessingFailure"
         ],
         "type": "string"
       },
@@ -21761,6 +23695,9 @@
             "$ref": "#/components/schemas/Core_XrplClawbackCurrency_Currency"
           },
           {
+            "$ref": "#/components/schemas/Core_XrplClawbackCurrency_MultiPurposeToken"
+          },
+          {
             "$ref": "#/components/schemas/Core_XrplClawbackCurrency_TickerId"
           }
         ],
@@ -21768,6 +23705,7 @@
           "propertyName": "type",
           "mapping": {
             "Currency": "#/components/schemas/Core_XrplClawbackCurrency_Currency",
+            "MultiPurposeToken": "#/components/schemas/Core_XrplClawbackCurrency_MultiPurposeToken",
             "TickerId": "#/components/schemas/Core_XrplClawbackCurrency_TickerId"
           }
         }
@@ -21788,6 +23726,21 @@
           },
           "type": {
             "enum": ["Currency"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_XrplClawbackCurrency_MultiPurposeToken": {
+        "required": ["issuanceId", "type"],
+        "type": "object",
+        "properties": {
+          "issuanceId": {
+            "pattern": "^[A-Fa-f0-9]*$",
+            "type": "string",
+            "description": "XRPL MPToken Issuance ID (192-bit integer hex encoded)"
+          },
+          "type": {
+            "enum": ["MultiPurposeToken"],
             "type": "string"
           }
         }
@@ -21931,6 +23884,13 @@
           }
         }
       },
+      "Core_XrplOnLedgerTokenData": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Core_MultiPurposeToken"
+          }
+        ]
+      },
       "Core_XrplOperation": {
         "oneOf": [
           {
@@ -21943,7 +23903,19 @@
             "$ref": "#/components/schemas/Core_XrplOperation_DepositPreauth"
           },
           {
+            "$ref": "#/components/schemas/Core_XrplOperation_EscrowFinish"
+          },
+          {
             "$ref": "#/components/schemas/Core_XrplOperation_MPTokenAuthorize"
+          },
+          {
+            "$ref": "#/components/schemas/Core_XrplOperation_MPTokenIssuanceCreate"
+          },
+          {
+            "$ref": "#/components/schemas/Core_XrplOperation_MPTokenIssuanceDestroy"
+          },
+          {
+            "$ref": "#/components/schemas/Core_XrplOperation_MPTokenIssuanceSet"
           },
           {
             "$ref": "#/components/schemas/Core_XrplOperation_OfferCreate"
@@ -21961,7 +23933,11 @@
             "AccountSet": "#/components/schemas/Core_XrplOperation_AccountSet",
             "Clawback": "#/components/schemas/Core_XrplOperation_Clawback",
             "DepositPreauth": "#/components/schemas/Core_XrplOperation_DepositPreauth",
+            "EscrowFinish": "#/components/schemas/Core_XrplOperation_EscrowFinish",
             "MPTokenAuthorize": "#/components/schemas/Core_XrplOperation_MPTokenAuthorize",
+            "MPTokenIssuanceCreate": "#/components/schemas/Core_XrplOperation_MPTokenIssuanceCreate",
+            "MPTokenIssuanceDestroy": "#/components/schemas/Core_XrplOperation_MPTokenIssuanceDestroy",
+            "MPTokenIssuanceSet": "#/components/schemas/Core_XrplOperation_MPTokenIssuanceSet",
             "OfferCreate": "#/components/schemas/Core_XrplOperation_OfferCreate",
             "Payment": "#/components/schemas/Core_XrplOperation_Payment",
             "TrustSet": "#/components/schemas/Core_XrplOperation_TrustSet"
@@ -22025,6 +24001,44 @@
           }
         }
       },
+      "Core_XrplOperation_EscrowFinish": {
+        "required": ["owner", "offerSequence", "type"],
+        "type": "object",
+        "properties": {
+          "owner": {
+            "$ref": "#/components/schemas/Core_TransactionDestination"
+          },
+          "offerSequence": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "condition": {
+            "pattern": "^[A-Fa-f0-9]*$",
+            "type": "string",
+            "description": "Hex encoded string."
+          },
+          "credentialIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "pattern": "^[A-Fa-f0-9]*$",
+              "type": "string",
+              "description": "Hex encoded string."
+            }
+          },
+          "fulfillment": {
+            "pattern": "^[A-Fa-f0-9]*$",
+            "type": "string",
+            "description": "Hex encoded string."
+          },
+          "type": {
+            "enum": ["EscrowFinish"],
+            "type": "string"
+          }
+        }
+      },
       "Core_XrplOperation_MPTokenAuthorize": {
         "required": ["tokenIdentifier", "flags", "type"],
         "type": "object",
@@ -22038,8 +24052,84 @@
               "$ref": "#/components/schemas/Core_Xrpl_MPTokenAuthorizeFlag"
             }
           },
+          "holder": {
+            "$ref": "#/components/schemas/Core_TransactionDestination"
+          },
           "type": {
             "enum": ["MPTokenAuthorize"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_XrplOperation_MPTokenIssuanceCreate": {
+        "required": ["flags", "type"],
+        "type": "object",
+        "properties": {
+          "flags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_Xrpl_MPTokenIssuanceCreateFlag"
+            }
+          },
+          "assetScale": {
+            "maximum": 255,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "transferFee": {
+            "maximum": 50000,
+            "minimum": 0,
+            "type": "integer",
+            "description": "Transfer fee for MultiPurposeToken, must be from 0 to 50000",
+            "format": "int32"
+          },
+          "maximumAmount": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "string",
+            "description": "This field is a unsigned 64bit integer that can store values in range from 0 to 18446744073709551615.It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Core_MPTokenIssuanceMetadata"
+          },
+          "type": {
+            "enum": ["MPTokenIssuanceCreate"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_XrplOperation_MPTokenIssuanceDestroy": {
+        "required": ["tokenIdentifier", "type"],
+        "type": "object",
+        "properties": {
+          "tokenIdentifier": {
+            "$ref": "#/components/schemas/Core_Xrpl_MPTokenIdentifier"
+          },
+          "type": {
+            "enum": ["MPTokenIssuanceDestroy"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_XrplOperation_MPTokenIssuanceSet": {
+        "required": ["tokenIdentifier", "flags", "type"],
+        "type": "object",
+        "properties": {
+          "tokenIdentifier": {
+            "$ref": "#/components/schemas/Core_Xrpl_MPTokenIdentifier"
+          },
+          "holder": {
+            "$ref": "#/components/schemas/Core_TransactionDestination"
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_Xrpl_MPTokenIssuanceSetFlag"
+            }
+          },
+          "type": {
+            "enum": ["MPTokenIssuanceSet"],
             "type": "string"
           }
         }
@@ -22278,28 +24368,6 @@
           }
         }
       },
-      "Core_Xrpl_DeprecatedTransactionDestination": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_TransactionDestination_Account"
-          },
-          {
-            "$ref": "#/components/schemas/Core_TransactionDestination_Address"
-          },
-          {
-            "$ref": "#/components/schemas/Core_TransactionDestination_Endpoint"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Account": "#/components/schemas/Core_TransactionDestination_Account",
-            "Address": "#/components/schemas/Core_TransactionDestination_Address",
-            "Endpoint": "#/components/schemas/Core_TransactionDestination_Endpoint"
-          }
-        },
-        "deprecated": true
-      },
       "Core_Xrpl_LimitAmount": {
         "required": ["currency", "value"],
         "type": "object",
@@ -22364,6 +24432,21 @@
           }
         }
       },
+      "Core_Xrpl_MPTokenIssuanceCreateFlag": {
+        "enum": [
+          "tfMPTRequireAuth",
+          "tfMPTCanClawback",
+          "tfMPTCanTransfer",
+          "tfMPTCanEscrow",
+          "tfMPTCanLock",
+          "tfMPTCanTrade"
+        ],
+        "type": "string"
+      },
+      "Core_Xrpl_MPTokenIssuanceSetFlag": {
+        "enum": ["tfMPTLock", "tfMPTUnlock"],
+        "type": "string"
+      },
       "Core_Xrpl_OfferCreateFlag": {
         "enum": ["tfImmediateOrCancel", "tfFillOrKill", "tfSell"],
         "type": "string"
@@ -22403,6 +24486,24 @@
           },
           "type": {
             "enum": ["v0_AddAccountLedgers"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_v0_AddProviderKey": {
+        "required": ["providerId", "publicKey", "type"],
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publicKey": {
+            "type": "string",
+            "format": "base64"
+          },
+          "type": {
+            "enum": ["v0_AddProviderKey"],
             "type": "string"
           }
         }
@@ -22478,6 +24579,39 @@
           }
         }
       },
+      "Core_v0_ConnectProvider": {
+        "required": ["id", "alias", "provider", "lock", "customProperties", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alias": {
+            "maxLength": 75,
+            "minLength": 1,
+            "type": "string"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/Core_AccountProviderAction"
+          },
+          "lock": {
+            "$ref": "#/components/schemas/Core_LockStatus"
+          },
+          "description": {
+            "maxLength": 250,
+            "minLength": 0,
+            "type": "string"
+          },
+          "customProperties": {
+            "$ref": "#/components/schemas/Core_StringsMap"
+          },
+          "type": {
+            "enum": ["v0_ConnectProvider"],
+            "type": "string"
+          }
+        }
+      },
       "Core_v0_CreateAccount": {
         "required": ["id", "alias", "providerDetails", "lock", "customProperties", "type"],
         "type": "object",
@@ -22528,13 +24662,35 @@
       "Core_v0_CreateAccountProviderDetailsPayload": {
         "oneOf": [
           {
+            "$ref": "#/components/schemas/Core_v0_CreateAccountProviderDetailsPayload_External"
+          },
+          {
             "$ref": "#/components/schemas/Core_v0_CreateAccountProviderDetailsPayload_Vault"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
+            "External": "#/components/schemas/Core_v0_CreateAccountProviderDetailsPayload_External",
             "Vault": "#/components/schemas/Core_v0_CreateAccountProviderDetailsPayload_Vault"
+          }
+        }
+      },
+      "Core_v0_CreateAccountProviderDetailsPayload_External": {
+        "required": ["providerId", "locationId", "type"],
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "enum": ["External"],
+            "type": "string"
           }
         }
       },
@@ -22909,6 +25065,11 @@
           "preferredAddressForChange": {
             "$ref": "#/components/schemas/Core_PreferredAddressForChange"
           },
+          "memo": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
           "description": {
             "maxLength": 250,
             "minLength": 0,
@@ -23176,6 +25337,36 @@
           },
           "type": {
             "enum": ["v0_ReleaseQuarantinedTransfers"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_v0_RequestDepositInstructions": {
+        "required": ["id", "accountId", "tickerId", "customProperties", "type"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tickerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "maxLength": 250,
+            "minLength": 0,
+            "type": "string"
+          },
+          "customProperties": {
+            "$ref": "#/components/schemas/Core_StringsMap"
+          },
+          "type": {
+            "enum": ["v0_RequestDepositInstructions"],
             "type": "string"
           }
         }
@@ -25593,6 +27784,7 @@
         }
       },
       "Compliance_CreateTransferRequest": {
+        "required": ["originator", "beneficiary", "asset", "amount", "ref", "agents"],
         "type": "object",
         "properties": {
           "originator": {
@@ -25610,20 +27802,53 @@
             "description": "Transfer amount"
           },
           "ref": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
             "type": "string",
             "description": "Reference identifier for the transfer"
           },
           "agents": {
+            "minItems": 1,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Compliance_Agent"
             },
             "description": "Agents involved in the transfer (e.g., VASP, SourceAddress, SettlementAddress)"
+          },
+          "settlementId": {
+            "type": "string",
+            "description": "Settlement identifier for the transfer"
+          },
+          "transactionValue": {
+            "required": ["amount", "currency"],
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "string",
+                "description": "The fiat amount",
+                "example": "150.75"
+              },
+              "currency": {
+                "maxLength": 3,
+                "minLength": 1,
+                "type": "string",
+                "description": "The currency code (e.g., USD)",
+                "example": "USD"
+              }
+            },
+            "description": "The fiat value of the transaction"
+          },
+          "blockchainAnalyticsAlias": {
+            "type": "string",
+            "description": "Optional analytics alias",
+            "example": "My Wallet"
           }
         },
         "description": "Request to create a travel rule transfer"
       },
       "Compliance_TransferPartyIdentifier": {
+        "required": ["@id"],
         "type": "object",
         "properties": {
           "@id": {
@@ -25796,6 +28021,7 @@
         "description": "Party information in a transfer"
       },
       "Compliance_Agent": {
+        "required": ["@id", "role"],
         "type": "object",
         "properties": {
           "@id": {
@@ -25956,6 +28182,7 @@
         "description": "Person information in IVMS101 format"
       },
       "Compliance_IVMS101NaturalPerson": {
+        "required": ["name"],
         "type": "object",
         "properties": {
           "name": {
@@ -25981,6 +28208,7 @@
         "description": "Natural person information"
       },
       "Compliance_IVMS101LegalPerson": {
+        "required": ["name"],
         "type": "object",
         "properties": {
           "name": {
@@ -26007,6 +28235,7 @@
         "description": "Legal person (organization) information"
       },
       "Compliance_IVMS101Name": {
+        "required": ["nameIdentifier"],
         "type": "object",
         "properties": {
           "nameIdentifier": {
@@ -26019,6 +28248,7 @@
         "description": "Name information for natural person"
       },
       "Compliance_IVMS101NameIdentifier": {
+        "required": ["primaryIdentifier", "naturalPersonNameIdentifierType"],
         "type": "object",
         "properties": {
           "primaryIdentifier": {
@@ -26036,6 +28266,7 @@
         }
       },
       "Compliance_IVMS101LegalPersonName": {
+        "required": ["nameIdentifier"],
         "type": "object",
         "properties": {
           "nameIdentifier": {
@@ -26048,6 +28279,7 @@
         "description": "Name information for legal person"
       },
       "Compliance_IVMS101LegalPersonNameIdentifier": {
+        "required": ["legalPersonName", "legalPersonNameIdentifierType"],
         "type": "object",
         "properties": {
           "legalPersonName": {
@@ -26061,6 +28293,7 @@
         }
       },
       "Compliance_IVMS101DateAndPlaceOfBirth": {
+        "required": ["dateOfBirth", "placeOfBirth"],
         "type": "object",
         "properties": {
           "dateOfBirth": {
@@ -26073,6 +28306,7 @@
         }
       },
       "Compliance_IVMS101GeographicAddress": {
+        "required": ["addressType", "townName", "country"],
         "type": "object",
         "properties": {
           "addressType": {
@@ -26113,6 +28347,7 @@
         }
       },
       "Compliance_IVMS101NationalIdentification": {
+        "required": ["nationalIdentifier", "nationalIdentifierType"],
         "type": "object",
         "properties": {
           "nationalIdentifier": {
@@ -26133,6 +28368,112 @@
           }
         },
         "description": "National identification information"
+      },
+      "Compliance_TravelRuleDetailsRequest": {
+        "required": ["data"],
+        "type": "object",
+        "properties": {
+          "data": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Compliance_TravelRuleDetailsRequestData"
+            }
+          }
+        },
+        "description": "Request to retrieve travel rule details for a batch of domain and ID pairs"
+      },
+      "Compliance_TravelRuleDetailsRequestData": {
+        "required": ["domainId", "id"],
+        "type": "object",
+        "properties": {
+          "domainId": {
+            "type": "string",
+            "description": "The custody domain ID",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "description": "The ID to look up. Can be an intent ID, transfer ID, or transaction order ID associated with a travel rule record",
+            "format": "uuid"
+          }
+        }
+      },
+      "Compliance_TravelRuleDetailsResponse": {
+        "required": ["result"],
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Compliance_TravelRuleDetail"
+            },
+            "description": "List of travel rule details"
+          }
+        },
+        "description": "Response containing travel rule details for a batch of requests"
+      },
+      "Compliance_TravelRuleDetail": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "enum": ["NOTABENE"],
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "domainId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transferId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transactionOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "travelRuleStatus": {
+            "enum": [
+              "OUTGOING",
+              "INCOMING",
+              "REJECTED",
+              "AUTHORIZED",
+              "FLAGGED",
+              "SETTLED",
+              "FLAGGED_SETTLEMENT",
+              "RETURNED",
+              "FROZEN",
+              "CLEARED"
+            ],
+            "type": "string"
+          },
+          "travelRuleMessageId": {
+            "type": "string"
+          },
+          "compliedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "errorDetails": {
+            "type": "string"
+          },
+          "direction": {
+            "enum": ["INCOMING", "OUTGOING"],
+            "type": "string"
+          },
+          "transfer": {
+            "$ref": "#/components/schemas/Compliance_Transfer"
+          }
+        },
+        "description": "Individual travel rule detail for a single request"
       },
       "EDS_ChannelCreate": {
         "required": ["createdBy", "id", "name", "supportedEventTypes", "type"],
@@ -26328,11 +28669,11 @@
   "tags": [
     {
       "name": "Overview",
-      "description": "*Ripple Custody* exposes a complete set of APIs to administer and operate the system programmatically. The below entities are at the core of the system:\r\n- **intents** represent requests to execute an action within the system that may eventually be executed if fully approved;\r\n- **domains** define segregated sets of entities (e.g., users, policies and accounts) with guaranteed isolation from each other;\r\n- **users** are human or technical consumers of the service;\r\n- **policies** are operational rules defining the required (multi-)approval workflow for the execution of particular intents;\r\n- **vaults** are logical key stores responsible for the building and signing of outgoing transactions;\r\n- **accounts** are particular sets of addresses within a vault for which balance(s) and transactions are tracked;\r\n- **transaction orders** are orders to transfer digital assets or request an operation on the ledger;\r\n- **transactions** are incoming or outgoing ledger transactions that have been detected on the ledger or shall be broadcast;\r\n- **transfers** are the financial representation of their corresponding **transactions**;\r\n- **endpoints** associate ledger addresses with human-readable aliases to keep track of whitelisted and blacklisted addresses;\r\n- **ledgers** are accounting systems that are supported and tracked;\r\n- **tickers** define the detected currencies and their respective symbols and parameters;\r\n- **events** are the notification payloads generated through user actions, system signals, and ledger updates.\r\n- **requests** allow to follow the progress of a user request and identify a possible failure.\r\n\r\nBecause the security of digital assets is paramount, *Harmonize* leverages multiple security protocols ensuring a proper management of the keys, of the signature process, of user authentication, of the application of governance policies and overall of data integrity system-wide. Notably, \r\n- every request to mutate the system, as modelled through an **intent**, must be signed by all parties involved, such that an end-to-end secure link is set between the API consumer and the core of *Harmonize*;\r\n- every request to mutate the system is subject to programmable **policies** that regulate the exact quorum of users being authorized to approve and execute the **intent**;\r\n- every critical entity is protected by a data integrity protocol. Entities are versioned and stored as part of a Merkle tree whose root is signed for any mutation of the data. Any data tampering attempt at the database level or in transit is identified and fails at runtime. All such protected entites are wrapped into a `data` envelope and augmented with a `signature` field at the API level to allow a validation of the data integrity from the outside the system. This is particularly relevant to validate, for instance, the integrity of deposit addresses of a given account.\r\n\r\nMost entity types rely on a common pattern exposing the following fields:\r\n - `id`: a user-defined unique identifier (UUID); once defined, an id cannot be modified\r\n - `metadata.revision`: a system-enforced revision number set to 1 for the creation of the entity, and incremented at every entity update\r\n - `metadata.description`: an optional user-defined description of the entity\r\n - `metadata.createdAt`: a system-enforced timestamp marking the creation time of the entity\r\n - `metadata.createdBy`: a system-enforced reference to the creator of the entity\r\n - `metadata.lastModifiedAt`: a system-enforced timestamp marking the last update time of the entity\r\n - `metadata.lastModifiedBy`: a system-enforced reference to the last updater of the entity\r\n - `metadata.customProperties`: a user-defined key-value store to attach arbitrary data to the entity, such as a correlation identifier; customProperties are part of the evaluation context of policies conditions and may be used to trigger particular approval workflows\r\n\r\nTogether, `id` and `metadata.revision` are the basis of the anti-replay model in *Harmonize*.\r\n\r\nMost entities also expose a `lock` flag to make the entity read-only and prevent its use during runtime:\r\n- `lock`: lock status of an entity, which may be `Locked` or `Unlocked`; an `Unlocked` entity inherits the lock of its hierarchical parent and a `Locked` entity (with its dependent entities) may not be used at runtime.\r\n\r\nLocking a **domain** will lock all its inner entities as well as subdomains; locking a **user** will prevent it from submitting any request to the system or to access the service; locking a **policy** will ignore it entirely in the context of the policy selection; locking a **vault** will lock all its related **accounts**; locking an **account** will prevent the execution of transactional operations; locking an **endpoint** will prevent its use as a transaction order destination.\r\n\r\nFor requests returning a list of entities, pagination is enabled by default. The request may include a `limit` parameter to properly quantify the size of the response, a `startingAfter` parameter to define the anchor point, `sortBy` to define a possible sorting property, `sortOrder` to specify the direction of the sorting (resp. \"ASC\", \"DESC\") and possibly filtering criterions that may be entity-specific.\r\n\r\nResponses are packaged within a list of `items` and a pointer to the next page is exposed as property `nextStartingAfter`.\r\n\r\n"
+      "description": "*Ripple Custody* exposes a complete set of API operations to administer and operate the system programmatically. The below entities are at the core of the system:\r\n- **intents** represent requests to execute an action within the system that may eventually be executed if fully approved;\r\n- **domains** define segregated sets of entities (e.g., users, policies and accounts) with guaranteed isolation from each other;\r\n- **users** are human or technical consumers of the service;\r\n- **policies** are operational rules defining the required (multi-)approval workflow for the execution of particular intents;\r\n- **vaults** are logical key stores responsible for the building and signing of outgoing transactions;\r\n- **accounts** are particular sets of addresses within a vault for which balance(s) and transactions are tracked;\r\n- **transaction orders** are orders to transfer digital assets or request an operation on the ledger;\r\n- **transactions** are incoming or outgoing ledger transactions that have been detected on the ledger or shall be broadcast;\r\n- **transfers** are the financial representation of their corresponding **transactions**;\r\n- **endpoints** associate ledger addresses with human-readable aliases to keep track of whitelisted and blacklisted addresses;\r\n- **ledgers** are accounting systems that are supported and tracked;\r\n- **tickers** define the detected currencies and their respective symbols and parameters;\r\n- **events** are the notification payloads generated through user actions, system signals, and ledger updates.\r\n- **requests** allow to follow the progress of a user request and identify a possible failure.\r\n\r\nBecause the security of digital assets is paramount, Ripple Custody leverages multiple security protocols ensuring a proper management of the keys, of the signature process, of user authentication, of the application of governance policies and overall of data integrity system-wide. Notably, \r\n- every request to mutate the system, as modelled through an **intent**, must be signed by all parties involved, such that an end-to-end secure link is set between the API consumer and the core of Ripple Custody;\r\n- every request to mutate the system is subject to programmable **policies** that regulate the exact quorum of users being authorized to approve and execute the **intent**;\r\n- every critical entity is protected by a data integrity protocol. Entities are versioned and stored as part of a Merkle tree whose root is signed for any mutation of the data. Any data tampering attempt at the database level or in transit is identified and fails at runtime. All such protected entites are wrapped into a `data` envelope and augmented with a `signature` field at the API level to allow a validation of the data integrity from the outside the system. This is particularly relevant to validate, for instance, the integrity of deposit addresses of a given account.\r\n\r\nMost entity types rely on a common pattern exposing the following fields:\r\n - `id`: a user-defined unique identifier (UUID); once defined, an id cannot be modified\r\n - `metadata.revision`: a system-enforced revision number set to 1 for the creation of the entity, and incremented at every entity update\r\n - `metadata.description`: an optional user-defined description of the entity\r\n - `metadata.createdAt`: a system-enforced timestamp marking the creation time of the entity\r\n - `metadata.createdBy`: a system-enforced reference to the creator of the entity\r\n - `metadata.lastModifiedAt`: a system-enforced timestamp marking the last update time of the entity\r\n - `metadata.lastModifiedBy`: a system-enforced reference to the last updater of the entity\r\n - `metadata.customProperties`: a user-defined key-value store to attach arbitrary data to the entity, such as a correlation identifier; customProperties are part of the evaluation context of policies conditions and may be used to trigger particular approval workflows\r\n\r\nTogether, `id` and `metadata.revision` are the basis of the anti-replay model in Ripple Custody.\r\n\r\nMost entities also expose a `lock` flag to make the entity read-only and prevent its use during runtime:\r\n- `lock`: lock status of an entity, which may be `Locked` or `Unlocked`; an `Unlocked` entity inherits the lock of its hierarchical parent and a `Locked` entity (with its dependent entities) may not be used at runtime.\r\n\r\nLocking a **domain** will lock all its inner entities as well as subdomains; locking a **user** will prevent it from submitting any request to the system or to access the service; locking a **policy** will ignore it entirely in the context of the policy selection; locking a **vault** will lock all its related **accounts**; locking an **account** will prevent the execution of transactional operations; locking an **endpoint** will prevent its use as a transaction order destination.\r\n\r\nFor requests returning a list of entities, pagination is enabled by default. The request may include a `limit` parameter to properly quantify the size of the response, a `startingAfter` parameter to define the anchor point, `sortBy` to define a possible sorting property, `sortOrder` to specify the direction of the sorting (resp. \"ASC\", \"DESC\") and possibly filtering criterions that may be entity-specific.\r\n\r\nResponses are packaged within a list of `items` and a pointer to the next page is exposed as property `nextStartingAfter`.\r\n\r\n"
     },
     {
       "name": "Genesis",
-      "description": "The **genesis** is the process by which an Harmonize environment is initialized. Upon system deployment, it is mandatory to define a **primary domain**, together with a suitable set of **users** and **policies**, such that the system can be operated using regular workflows. At minimum, one user and one policy must be defined, but a whole array of users and policies can be defined in order to render the Harmonize bootstrapping an atomic process.\r\n\r\nThe input request body contains two sections, namely the `rootDomainSetup` and the `cryptoSetup`. The former is akin to a regular new domain creation payload, while the latter is used to select the cryptographic algorithms to be used by the system.\r\n\r\nOf particular importance, at genesis level, is the setting up of a **breakglass**, i.e., a protection mechanism against possible mis-usage of the policy engine that will allow to restore the system in case of wrong user manipulation. Enabling this feature is achieved by setting the property `governingStrategy` to `CoerceDescendants`. More information on this feature can be found in the developer documentation.\r\n\r\nCalls to the genesis route are not authenticated, since the system has no active users at this stage.\r\n\r\nRunning Genesis on a new installation includes two properties in the `GenesisSucceeded` notary event:\r\n- `genesis`: a data structure holding the notary signed original genesis payload\r\n- `createdEntitiesReferences`: with key information on the data created"
+      "description": "The **genesis** is the process by which a Ripple Custody environment is initialized. Upon system deployment, it is mandatory to define a **primary domain**, together with a suitable set of **users** and **policies**, such that the system can be operated using regular workflows. At minimum, one user and one policy must be defined, but a whole array of users and policies can be defined in order to render the Ripple Custody bootstrapping an atomic process.\r\n\r\nThe input request body contains two sections, namely the `rootDomainSetup` and the `cryptoSetup`. The former is akin to a regular new domain creation payload, while the latter is used to select the cryptographic algorithms to be used by the system.\r\n\r\nOf particular importance, at genesis level, is the setting up of a **breakglass**, i.e., a protection mechanism against possible mis-usage of the policy engine that will allow to restore the system in case of wrong user manipulation. Enabling this feature is achieved by setting the property `governingStrategy` to `CoerceDescendants`. More information on this feature can be found in the developer documentation.\r\n\r\nCalls to the genesis route are not authenticated, since the system has no active users at this stage.\r\n\r\nRunning Genesis on a new installation includes two properties in the `GenesisSucceeded` notary event:\r\n- `genesis`: a data structure holding the notary signed original genesis payload\r\n- `createdEntitiesReferences`: with key information on the data created"
     },
     {
       "name": "Domains",
@@ -26340,11 +28681,11 @@
     },
     {
       "name": "Vaults",
-      "description": "A **vault** is a component that maintains secret key material and is responsible for the creation and signing process of outgoing ledger transactions.\r\n\r\nA **vault** executes **transaction orders** once they are fully approved and delivers the signed ledger **transaction** to the system for broadcast. A single instance of *Harmonize* can hold multiple **vaults**, which may provide complementary features (e.g., various distributed ledger protocols), key stores (e.g., different hardware vendors or multi-party computation-based algorithms), or key isolation (e.g., connected, or air-gapped). For example, a system can leverage a hot vault (for hot accounts) and an air-gapped vault (for cold accounts). **Accounts** within the system are associated with specific vaults.\r\n\r\nThe registration of the public key of a vault, `publicKey`, allows the system to verify any information returned by the vault.\r\n\r\nThe locking of a **vault** prevents the execution of any **transaction order** related to the specific **vault**."
+      "description": "A **vault** is a component that maintains secret key material and is responsible for the creation and signing process of outgoing ledger transactions.\r\n\r\nA **vault** executes **transaction orders** once they are fully approved and delivers the signed ledger **transaction** to the system for broadcast. A single instance of Ripple Custody can hold multiple **vaults**, which may provide complementary features (e.g., various distributed ledger protocols), key stores (e.g., different hardware vendors or multi-party computation-based algorithms), or key isolation (e.g., connected, or air-gapped). For example, a system can leverage a hot vault (for hot accounts) and an air-gapped vault (for cold accounts). **Accounts** within the system are associated with specific vaults.\r\n\r\nThe registration of the public key of a vault, `publicKey`, allows the system to verify any information returned by the vault.\r\n\r\nThe locking of a **vault** prevents the execution of any **transaction order** related to the specific **vault**."
     },
     {
       "name": "Ledgers",
-      "description": "A **ledger** is an accounting system, such as a blockchain, that is supported and tracked.\r\n\r\nA **ledger** is defined by its `parameters`, which describe its protocol and configuration. For any supported protocol, multiple ledgers instances may be registered. This allows derivative ledgers, such as testnets, forks, or permissioned instances to be connected to *Harmonize* natively. "
+      "description": "A **ledger** is an accounting system, such as a blockchain, that is supported and tracked.\r\n\r\nA **ledger** is defined by its `parameters`, which describe its protocol and configuration. For any supported protocol, multiple ledgers instances may be registered. This allows derivative ledgers, such as testnets, forks, or permissioned instances to be connected to Ripple Custody natively. "
     },
     {
       "name": "Tickers",
@@ -26356,15 +28697,15 @@
     },
     {
       "name": "Endpoints",
-      "description": "An **endpoint** associates ledger addresses with human-readable aliases to keep track of whitelisted and blacklisted addresses. It is also used to register smart contract addresses and possibly associate an ABI to them.\r\n\r\nAn **endpoint** may be used as a destination to a **transaction order**, therefore acting as a form of address book entry. *Harmonize* ensures a secure mapping of the **endpoint** to its underlying address when preparing the **transaction** for execution.\r\n\r\nAn **endpoint** may also be used to validate the destination of a **transaction order** within a policy and to trigger specific approval workflows depending on the attributes of the **endpoint**. For instance, a **policy** may enforce a simplified approval workflow when the destination **endpoint** is marked as whitelisted, or may require an exceptional set of approvers when it is marked as blacklisted.\r\n\r\nLastly, endpoints may also be used to attach meta information to an address. This is the case of smart contract addresses, for instance, which may be attached to the interface, or ABI, of the contract, such that the methods and properties of the contract are known to the system.\r\n\r\nThe locking of an **endpoint** prevents its use in any context."
+      "description": "An **endpoint** associates ledger addresses with human-readable aliases to keep track of whitelisted and blacklisted addresses. It is also used to register smart contract addresses and possibly associate an ABI to them.\r\n\r\nAn **endpoint** may be used as a destination to a **transaction order**, therefore acting as a form of address book entry. Ripple Custody ensures a secure mapping of the **endpoint** to its underlying address when preparing the **transaction** for execution.\r\n\r\nAn **endpoint** may also be used to validate the destination of a **transaction order** within a policy and to trigger specific approval workflows depending on the attributes of the **endpoint**. For instance, a **policy** may enforce a simplified approval workflow when the destination **endpoint** is marked as whitelisted, or may require an exceptional set of approvers when it is marked as blacklisted.\r\n\r\nLastly, endpoints may also be used to attach meta information to an address. This is the case of smart contract addresses, for instance, which may be attached to the interface, or ABI, of the contract, such that the methods and properties of the contract are known to the system.\r\n\r\nThe locking of an **endpoint** prevents its use in any context."
     },
     {
       "name": "Transactions",
-      "description": "A **transaction order** is an order to transfer assets or request an operation on the ledger. In the simplest case, it relates to the transfer of a native cryptocurrency; in more advanced cases, it can apply to the execution of smart contract methods and other on-ledger features.\r\n\r\n**Transaction orders** may differ from one ledger protocol to another, but they at least define the account origin, and normally have an amount and a destination address; for some protocols, a single transaction may include multiple destinations and amounts, possibly denominated in various currencies.\r\n\r\n**Transaction orders** rely on property `parameters` to define ledger-specific transaction order parameters.\r\n\r\nWe present below the transaction order parameters for Bitcoin:\r\n - `outputs`: sequence of pairs of destination and amount;\r\n - `feeStrategy`: fee calculation strategy, which may be `Low`, `Medium` or `High`; the actual fee amount corresponding to the selected strategy is automatically set by the system at execution time based on a network metrics;\r\n - `maximumFee`: maximum fee the user is willing to pay to execute the transaction; in rare occasions, *Harmonize* may decide to rebroadcast a transaction with higher fees to ensure inclusion within the ledger, as long as `maximumFee` has not been reached.\r\n\r\nFor an exhaustive list corresponding to each respective ledger protocol, we refer to the reference manual.\r\n\r\n*Harmonize* supports multiple types of destinations for **transaction orders**:\r\n - ledger address: a ledger address is a protocol-level address, whose format may differ from one ledger protocol to another;\r\n - account: an account destination is an **account** `id`, which is guaranteed to implicitly resolve to an address of the account; for protocols supporting multiple addresses per account, no guarantee is provided over which account address the resolution leads to;\r\n - endpoint: an endpoint destination is an **endpoint** `id`, which is guaranteed to implicitly resolve to the address of the endpoint.\r\n\r\nOnce a **transaction order** is fully approved the order becomes executable. The corresponding **vault** may capture the pending **transaction order** and build and sign a corresponding ledger transaction.\r\n\r\n**Transactions** are incoming or outgoing ledger transactions that have been detected on the ledger or shall be broadcast. **Transfers** are the financial representation of their corresponding **transactions**. "
+      "description": "A **transaction order** is an order to transfer assets or request an operation on the ledger. In the simplest case, it relates to the transfer of a native cryptocurrency; in more advanced cases, it can apply to the execution of smart contract methods and other on-ledger features.\r\n\r\n**Transaction orders** may differ from one ledger protocol to another, but they at least define the account origin, and normally have an amount and a destination address; for some protocols, a single transaction may include multiple destinations and amounts, possibly denominated in various currencies.\r\n\r\n**Transaction orders** rely on property `parameters` to define ledger-specific transaction order parameters.\r\n\r\nWe present below the transaction order parameters for Bitcoin:\r\n - `outputs`: sequence of pairs of destination and amount;\r\n - `feeStrategy`: fee calculation strategy, which may be `Low`, `Medium` or `High`; the actual fee amount corresponding to the selected strategy is automatically set by the system at execution time based on a network metrics;\r\n - `maximumFee`: maximum fee the user is willing to pay to execute the transaction; in rare occasions, Ripple Custody may decide to rebroadcast a transaction with higher fees to ensure inclusion within the ledger, as long as `maximumFee` has not been reached.\r\n\r\nFor an exhaustive list corresponding to each respective ledger protocol, we refer to the reference manual.\r\n\r\nRipple Custody supports multiple types of destinations for **transaction orders**:\r\n - ledger address: a ledger address is a protocol-level address, whose format may differ from one ledger protocol to another;\r\n - account: an account destination is an **account** `id`, which is guaranteed to implicitly resolve to an address of the account; for protocols supporting multiple addresses per account, no guarantee is provided over which account address the resolution leads to;\r\n - endpoint: an endpoint destination is an **endpoint** `id`, which is guaranteed to implicitly resolve to the address of the endpoint.\r\n\r\nOnce a **transaction order** is fully approved the order becomes executable. The corresponding **vault** may capture the pending **transaction order** and build and sign a corresponding ledger transaction.\r\n\r\n**Transactions** are incoming or outgoing ledger transactions that have been detected on the ledger or shall be broadcast. **Transfers** are the financial representation of their corresponding **transactions**. "
     },
     {
       "name": "Intents",
-      "description": "An **intent** represents a request to execute an action within the system, which shall eventually be executed if fully approved. In *Harmonize*, all security-critical operations follow the below execution lifecycle:\r\n1. a user submits a properly signed intent to execute an action;\r\n2. *Harmonize* browses through the **policies**, sorted by `rank`, and selects the first **policy** with matching `intentTypes` and `condition`;\r\n3. *Harmonize* validates that the **policy** authorizes the author of the intent to submit it and sets the full approval `workflow` required for execution;\r\n4. *Harmonize* waits for the required quorum of approvals as defined in the selected **policy** `workflow`;\r\n5. Once fully approved, *Harmonize* executes the intent and mutates the state of the system, possibly triggering the execution of a side effect such as the processing of a transaction.\r\n\r\nThe author of an intent defines, in particular, the following fields:\r\n- `payload`, which sets the `type` of the intent and the details of the operation to process;\r\n- `expiry`, which sets an expiration time to the intent;\r\n- `targetDomainId`, which sets the domain in which to execute the intent (either in the current domain or within a descendant domain);\r\n- `type`, which defines whether the intent is an original submission (`Propose`), an intention to approve an existing intent (`Approve`) or an intention to reject an existing intent (`Reject`).\r\n\r\nThere exist four intent types for most entities in the system, as prefixed by:\r\n- **Create** to create an entity of a given type;\r\n- **Update** to update the definition of an entity;\r\n- **Lock** to lock an entity;\r\n- **Unlock** to unlock an entity.\r\n\r\nExceptions exist, such as for the release of quarantined **transfers**, which has its dedicated intent called **ReleaseQuarantinedTransfers**.\r\n\r\nA generic intent, named **NotarizeData**, allows the submission of intents not related to internal processes of *Harmonize*. Such **intents** may be used to trigger external effects to extend the capabilities of the system, such as to initiate fiat payment orders or trading orders."
+      "description": "An **intent** represents a request to execute an action within the system, which shall eventually be executed if fully approved. In Ripple Custody, all security-critical operations follow the below execution lifecycle:\r\n1. a user submits a properly signed intent to execute an action;\r\n2. Ripple Custody browses through the **policies**, sorted by `rank`, and selects the first **policy** with matching `intentTypes` and `condition`;\r\n3. Ripple Custody validates that the **policy** authorizes the author of the intent to submit it and sets the full approval `workflow` required for execution;\r\n4. Ripple Custody waits for the required quorum of approvals as defined in the selected **policy** `workflow`;\r\n5. Once fully approved, Ripple Custody executes the intent and mutates the state of the system, possibly triggering the execution of a side effect such as the processing of a transaction.\r\n\r\nThe author of an intent defines, in particular, the following fields:\r\n- `payload`, which sets the `type` of the intent and the details of the operation to process;\r\n- `expiry`, which sets an expiration time to the intent;\r\n- `targetDomainId`, which sets the domain in which to execute the intent (either in the current domain or within a descendant domain);\r\n- `type`, which defines whether the intent is an original submission (`Propose`), an intention to approve an existing intent (`Approve`) or an intention to reject an existing intent (`Reject`).\r\n\r\nThere exist four intent types for most entities in the system, as prefixed by:\r\n- **Create** to create an entity of a given type;\r\n- **Update** to update the definition of an entity;\r\n- **Lock** to lock an entity;\r\n- **Unlock** to unlock an entity.\r\n\r\nExceptions exist, such as for the release of quarantined **transfers**, which has its dedicated intent called **ReleaseQuarantinedTransfers**.\r\n\r\nA generic intent, named **NotarizeData**, allows the submission of intents not related to internal processes of Ripple Custody. Such **intents** may be used to trigger external effects to extend the capabilities of the system, such as to initiate fiat payment orders or trading orders."
     },
     {
       "name": "Policies",
@@ -26372,7 +28713,7 @@
     },
     {
       "name": "Users",
-      "description": "A **user** is a human or technical consumer of the *Harmonize* service. \r\n\r\nA user is associated with a public key, which is registered into the system alongside a set of roles. The roles relate to the permissions a user has to access the various entities within the system (as defined within a particular **domain**) as well as to propose, approve and reject the execution of intents (as defined by the approval workflow of a policy).\r\n\r\nUsers have, in particular, the following properties:\r\n - `publicKey`: the public key used to authenticate any user request\r\n - `roles`: a collection of human-readable strings defining the roles of a user\r\n\r\nThe private key corresponding to `publicKey` is generated on the user-side, either within the mobile approval terminal or programmatically, and is never communicated to the system. We emphasize here that a user key pair is merely used to authenticate the user and approve the execution of **intents**; it is unrelated to the account keys securing the accounts on the ledger. The loss of a **user** key is dealt with by locking the user and creating a new user with a rotated key.\r\n\r\nThe locking of a **user** prevents its access to the platform entirely."
+      "description": "A **user** is a human or technical consumer of the Ripple Custody service. \r\n\r\nA user is associated with a public key, which is registered into the system alongside a set of roles. The roles relate to the permissions a user has to access the various entities within the system (as defined within a particular **domain**) as well as to propose, approve and reject the execution of intents (as defined by the approval workflow of a policy).\r\n\r\nUsers have, in particular, the following properties:\r\n - `publicKey`: the public key used to authenticate any user request\r\n - `roles`: a collection of human-readable strings defining the roles of a user\r\n\r\nThe private key corresponding to `publicKey` is generated on the user-side, either within the mobile approval terminal or programmatically, and is never communicated to the system. We emphasize here that a user key pair is merely used to authenticate the user and approve the execution of **intents**; it is unrelated to the account keys securing the accounts on the ledger. The loss of a **user** key is dealt with by locking the user and creating a new user with a rotated key.\r\n\r\nThe locking of a **user** prevents its access to the platform entirely."
     },
     {
       "name": "User invitations",
@@ -26384,7 +28725,7 @@
     },
     {
       "name": "Requests",
-      "description": "A **request** allows to follow the progress of a user request and identify a possible failure. \r\n\r\nMost requests to the system return a `requestId` in the response body, which may be used to inquire on the status of the request.\r\n\r\nIt is also possible and encouraged to provide a user-defined requestId using the `requestId` HTTP header when submitting intents or when approving/refusing them, this has several advantages:\r\n- If the connection is interrupted between the request and the response the `requestId` will still be known by the caller, which can then check if the request has been submitted to Harmonize or not\r\n- If the caller retries to submit another request with an already-used `requestId`, Harmonize will prevent this by returning an error, in order to avoid the involuntary replay of a request\r\n\r\n**Users** satisfying any of the below conditions are allowed to read a **request** status:\r\n- user is the originator of the request (even if it does not have a read access to `requests`)\r\n- user is in the originator domain and has a role granting him read access to `requests`\r\n- user is in the target domain and has a role granting him read access to `requests`\r\n\r\nA **request** will return, in particular, the following fields:\r\n- `lastModifiedAt`, which tracks the last update timestamp of the request;\r\n- `status`, which may be `Processing`, `Succeeded` or `Failed`; a `Failed` status also exposes an additional field detailing the failure reason.\r\n- `history`, which tracks all the intermediate steps of the user request, with details regarding the source component, the status, an eventual hint in case of failure, and a timestamp;"
+      "description": "A **request** allows to follow the progress of a user request and identify a possible failure. \r\n\r\nMost requests to the system return a `requestId` in the response body, which may be used to inquire on the status of the request.\r\n\r\nIt is also possible and encouraged to provide a user-defined requestId using the `requestId` HTTP header when submitting intents or when approving/refusing them, this has several advantages:\r\n- If the connection is interrupted between the request and the response the `requestId` will still be known by the caller, which can then check if the request has been submitted to Ripple Custody or not\r\n- If the caller retries to submit another request with an already-used `requestId`, Ripple Custody will prevent this by returning an error, in order to avoid the involuntary replay of a request\r\n\r\n**Users** satisfying any of the below conditions are allowed to read a **request** status:\r\n- user is the originator of the request (even if it does not have a read access to `requests`)\r\n- user is in the originator domain and has a role granting him read access to `requests`\r\n- user is in the target domain and has a role granting him read access to `requests`\r\n\r\nA **request** will return, in particular, the following fields:\r\n- `lastModifiedAt`, which tracks the last update timestamp of the request;\r\n- `status`, which may be `Processing`, `Succeeded` or `Failed`; a `Failed` status also exposes an additional field detailing the failure reason.\r\n- `history`, which tracks all the intermediate steps of the user request, with details regarding the source component, the status, an eventual hint in case of failure, and a timestamp;"
     },
     {
       "name": "SystemProperties",
