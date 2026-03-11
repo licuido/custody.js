@@ -1,5 +1,11 @@
 # custody
 
+## 0.5.0
+
+### Minor Changes
+
+- e4eeb7b: compatible with 1.32
+
 ## 0.4.0
 
 ### Minor Changes
