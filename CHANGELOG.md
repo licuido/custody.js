@@ -1,5 +1,11 @@
 # custody
 
+## 0.5.1
+
+### Patch Changes
+
+- 3b1dd1e: export mpt types
+
 ## 0.5.0
 
 ### Minor Changes
