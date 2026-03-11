@@ -4,6 +4,57 @@
  */
 
 export interface paths {
+  "/v1/domains/{domainId}/accounts/transferability": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get transfer ticker info */
+    get: operations["transferability"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/domains/{domainId}/accounts/{accountId}/deposit-instructions/{instructions-id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get deposit instructions by id */
+    get: operations["deposit-instructions-by-id"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/domains/{domainId}/accounts/{accountId}/deposit-instructions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get deposit instructions */
+    get: operations["deposit-instructions"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/v1/backups/{backupId}": {
     parameters: {
       query?: never
@@ -249,7 +300,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** Get address from all generated addresses across domains */
+    /** Get an address from all addresses including deposit instructions across domains */
     get: operations["getAllDomainsAddresses"]
     put?: never
     post?: never
@@ -703,7 +754,7 @@ export interface paths {
     }
     /**
      * Get remaining users
-     * @description This API will return the remaining user IDs able to approve for the currently open step of the intent approval process.
+     * @description This API operation will return the remaining user IDs able to approve for the currently open step of the intent approval process.
      */
     get: operations["getRemainingUsers"]
     put?: never
@@ -995,6 +1046,57 @@ export interface paths {
     }
     /** List system properties */
     get: operations["getSystemProperties"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/providers/{providerId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Provider details */
+    get: operations["getProvider"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/providers": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List providers */
+    get: operations["getProviders"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/v1/providers/{providerId}/locations": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Provider locations */
+    get: operations["getProviderLocations"]
     put?: never
     post?: never
     delete?: never
@@ -2365,6 +2467,26 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/v1/domains/{domainId}/compliance/travel-rule/details": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Get travel rule details for a batch of requests
+     * @description Retrieves travel rule message details for a batch of domain and ID pairs
+     */
+    post: operations["GetTravelRuleDetails"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/v1/domains/{domainId}/channels": {
     parameters: {
       query?: never
@@ -2697,7 +2819,51 @@ export interface components {
       | "Recovering"
       | "Completed"
       | "Interrupted"
-    Core_AccountProviderInformation: components["schemas"]["Core_AccountProviderInformation_Vault"]
+    Core_AccountProvider: {
+      /** Format: uuid */
+      id: string
+      provider: components["schemas"]["Core_AccountProviderType"]
+      alias: string
+      lock: components["schemas"]["Core_LockStatus"]
+      metadata: components["schemas"]["Core_EntityMetadata"]
+    }
+    Core_AccountProviderAction: components["schemas"]["Core_AccountProviderAction_External"]
+    Core_AccountProviderAction_External: {
+      publicKey: components["schemas"]["Core_ApiAccountProviderKey"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "External"
+    }
+    Core_AccountProviderAdditionalDetails: {
+      processing: components["schemas"]["Core_AccountProviderProcessingDetails"]
+    }
+    Core_AccountProviderCreated: {
+      /** Format: uuid */
+      id: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "AccountProviderCreated"
+    }
+    Core_AccountProviderInformation:
+      | components["schemas"]["Core_AccountProviderInformation_External"]
+      | components["schemas"]["Core_AccountProviderInformation_Vault"]
+    Core_AccountProviderInformation_External: {
+      /** Format: uuid */
+      providerId: string
+      /** Format: uuid */
+      locationId: string
+      /** Format: uuid */
+      providerAccountId?: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "External"
+    }
     Core_AccountProviderInformation_Vault: {
       /** Format: uuid */
       vaultId: string
@@ -2709,6 +2875,65 @@ export interface components {
        * @enum {string}
        */
       type: "Vault"
+    }
+    Core_AccountProviderKey: {
+      /** Format: base64 */
+      publicKey: string
+      status?: components["schemas"]["Core_AccountProviderKeyStatus"]
+      /** Format: base64 */
+      predecessor?: string
+      /** Format: base64 */
+      keySignature?: string
+      /** @description This field is a large integer and represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
+      validAfterSequenceId?: string
+      details?: string
+    }
+    /** @enum {string} */
+    Core_AccountProviderKeyStatus: "AwaitingActivation" | "ActivationFailed" | "Active" | "Replaced"
+    Core_AccountProviderProcessingDetails:
+      | components["schemas"]["Core_AccountProviderProcessingDetails_Completed"]
+      | components["schemas"]["Core_AccountProviderProcessingDetails_Pending"]
+      | components["schemas"]["Core_AccountProviderProcessingDetails_Preparing"]
+    Core_AccountProviderProcessingDetails_Completed: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Completed"
+    }
+    Core_AccountProviderProcessingDetails_Pending: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Pending"
+    }
+    Core_AccountProviderProcessingDetails_Preparing: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Preparing"
+    }
+    /** @enum {string} */
+    Core_AccountProviderProcessingStatus: "Pending" | "Preparing" | "Completed"
+    Core_AccountProviderType: components["schemas"]["Core_AccountProviderType_ExternalProvider"]
+    Core_AccountProviderType_ExternalProvider: {
+      publicKeys: components["schemas"]["Core_AccountProviderKey"][]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "ExternalProvider"
+    }
+    Core_AccountProviderUpdated: {
+      /** Format: uuid */
+      id: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "AccountProviderUpdated"
     }
     Core_AccountPublicKey:
       | components["schemas"]["Core_AccountPublicKey_ExtendedPublicKey"]
@@ -2810,7 +3035,9 @@ export interface components {
       currentStartingAfter?: string
       nextStartingAfter?: string
     }
-    Core_AddressesReference: components["schemas"]["Core_AccountAddressReference"]
+    Core_AddressesReference:
+      | components["schemas"]["Core_AccountAddressReference"]
+      | components["schemas"]["Core_DepositInstructionsReference"]
     Core_AlgorandFeeStrategy: components["schemas"]["Core_AlgorandFeeStrategy_Priority"]
     Core_AlgorandFeeStrategy_Priority: {
       priority: components["schemas"]["Core_FeePriority"]
@@ -2898,6 +3125,10 @@ export interface components {
        */
       status: "Unavailable"
     }
+    Core_ApiAccountProviderKey: {
+      /** Format: base64 */
+      publicKey: string
+    }
     Core_ApiBackup: {
       /** Format: uuid */
       id: string
@@ -2975,6 +3206,13 @@ export interface components {
       | "TransientIssue"
     /** @enum {string} */
     Core_ApiInterruptedTransactionCause: "Cancellation" | "Internal" | "Replacement"
+    Core_ApiLocation: {
+      data: components["schemas"]["Core_Location"]
+      /** Format: base64 */
+      signature: string
+      /** Format: base64 */
+      signingKey: string
+    }
     Core_ApiManifest: {
       data: components["schemas"]["Core_Manifest"]
       /** Format: base64 */
@@ -3005,8 +3243,20 @@ export interface components {
       | "OnLedgerFailure"
       | "TransactionEstimationFailure"
       | "TransientIssue"
+    Core_ApiProvider: {
+      data: components["schemas"]["Core_AccountProvider"]
+      /** Format: base64 */
+      signature: string
+      /** Format: base64 */
+      signingKey: string
+      additionalDetails?: components["schemas"]["Core_AccountProviderAdditionalDetails"]
+    }
     /** @enum {string} */
     Core_ApiRecoveringAccountProcessingHint: "TransientIssue" | "InternalError"
+    Core_ApiRelatedTransaction: {
+      /** Format: uuid */
+      id: string
+    }
     Core_ApiRoles: {
       roles: string[]
     }
@@ -3052,6 +3302,7 @@ export interface components {
       ledgerId: string
       orderReference?: components["schemas"]["Core_TransactionOrderReference"]
       relatedAccounts: components["schemas"]["Core_TransactionRelatedAccountReference"][]
+      relatedTransactions: components["schemas"]["Core_ApiRelatedTransaction"][]
       processing?: components["schemas"]["Core_ApiTransactionProcessingDetails"]
       /** Format: date-time */
       registeredAt: string
@@ -3289,6 +3540,8 @@ export interface components {
       reservedAmount: string
       /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
       quarantinedAmount: string
+      /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
+      availableAmount: string
       /** Format: date-time */
       lastUpdatedAt: string
     }
@@ -3619,6 +3872,89 @@ export interface components {
        */
       type: "AlwaysAbstain"
     }
+    Core_DepositInstructions: {
+      /** Format: uuid */
+      id: string
+      /** Format: uuid */
+      tickerId: string
+      account: components["schemas"]["Core_AccountReference"]
+      providerDetails?: components["schemas"]["Core_DepositInstructionsProviderDetails"]
+      /**
+       * Format: date-time
+       * @deprecated
+       */
+      expiryAt?: string
+      instructions?: components["schemas"]["Core_DepositInstructionsDetails"]
+      metadata: components["schemas"]["Core_EntityMetadata"]
+    }
+    Core_DepositInstructionsCreated: {
+      /** Format: uuid */
+      id: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "DepositInstructionsCreated"
+    }
+    Core_DepositInstructionsDetails: components["schemas"]["Core_DepositInstructionsDetails_Address"]
+    Core_DepositInstructionsDetails_Address: {
+      address: string
+      memo?: string
+      tag?: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Address"
+    }
+    Core_DepositInstructionsProviderDetails:
+      | components["schemas"]["Core_DepositInstructionsProviderDetails_Completed"]
+      | components["schemas"]["Core_DepositInstructionsProviderDetails_Failed"]
+    Core_DepositInstructionsProviderDetails_Completed: {
+      /** Format: date-time */
+      expiryAt: string
+      instructions: components["schemas"]["Core_DepositInstructionsDetails"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      status: "Completed"
+    }
+    Core_DepositInstructionsProviderDetails_Failed: {
+      failureReason: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      status: "Failed"
+    }
+    Core_DepositInstructionsReference: {
+      /** Format: uuid */
+      id: string
+      address: string
+      ledgerId?: string
+      /** Format: uuid */
+      domainId: string
+      /** Format: uuid */
+      accountId: string
+      /** Format: date-time */
+      createdAt: string
+      custodyType: components["schemas"]["Core_CustodyType"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "DepositInstructionsReference"
+    }
+    Core_DepositInstructionsUpdated: {
+      /** Format: uuid */
+      id: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "DepositInstructionsUpdated"
+    }
     Core_Domain: {
       /** Format: uuid */
       id: string
@@ -3683,7 +4019,7 @@ export interface components {
     }
     Core_EndpointLedgerParameters: components["schemas"]["Core_EndpointLedgerParameters_Ethereum"]
     Core_EndpointLedgerParameters_Ethereum: {
-      /** @description This field can be used to provide an Application Binary Interface (ABI) for EVM-based smart contracts, Harmonize's front-end uses the field to provide an extended support when interacting with smart contracts, therefore it is not recommended to submit invalid ABIs in this field but Harmonize will not prevent the submission of invalid ABIs to tolerate use cases outside of Harmonize's front-end. */
+      /** @description This field can be used to provide an Application Binary Interface (ABI) for EVM-based smart contracts, Ripple Custody's front-end uses the field to provide an extended support when interacting with smart contracts, therefore it is not recommended to submit invalid ABIs in this field but Ripple Custody will not prevent the submission of invalid ABIs to tolerate use cases outside of Ripple Custody's front-end. */
       ABI?: string
       /**
        * @description discriminator enum property added by openapi-typescript
@@ -3870,6 +4206,32 @@ export interface components {
       currentStartingAfter?: string
       nextStartingAfter?: string
     }
+    Core_ExternalOperation: components["schemas"]["Core_ExternalOperation_Transfer"]
+    Core_ExternalOperation_Transfer: {
+      outputs: components["schemas"]["Core_Output"][]
+      /** Format: uuid */
+      tickerId: string
+      memo?: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Transfer"
+    }
+    Core_ExternalProviderTransactionReference: {
+      /** Format: uuid */
+      id: string
+      type: string
+    }
+    Core_ExternalTickerProperties: components["schemas"]["Core_ExternalTickerProperties_Asset"]
+    Core_ExternalTickerProperties_Asset: {
+      providerAssetId: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Asset"
+    }
     /** @enum {string} */
     Core_FeePriority: "High" | "Medium" | "Low"
     /** @description Complete genesis payload, copied in and signed by the notary at genesis. */
@@ -3930,11 +4292,15 @@ export interface components {
     }
     Core_HarmonizeEventPayload:
       | components["schemas"]["Core_AccountCreated"]
+      | components["schemas"]["Core_AccountProviderCreated"]
+      | components["schemas"]["Core_AccountProviderUpdated"]
       | components["schemas"]["Core_AccountUpdated"]
       | components["schemas"]["Core_AddressCreated"]
       | components["schemas"]["Core_BackupCreated"]
       | components["schemas"]["Core_BackupUpdated"]
       | components["schemas"]["Core_BalancesUpdated"]
+      | components["schemas"]["Core_DepositInstructionsCreated"]
+      | components["schemas"]["Core_DepositInstructionsUpdated"]
       | components["schemas"]["Core_DomainCreated"]
       | components["schemas"]["Core_DomainUpdated"]
       | components["schemas"]["Core_EndpointCreated"]
@@ -3946,6 +4312,8 @@ export interface components {
       | components["schemas"]["Core_IntentUpdated"]
       | components["schemas"]["Core_LedgerCreated"]
       | components["schemas"]["Core_LedgerUpdated"]
+      | components["schemas"]["Core_LocationCreated"]
+      | components["schemas"]["Core_LocationUpdated"]
       | components["schemas"]["Core_ManifestCreated"]
       | components["schemas"]["Core_ManifestUpdated"]
       | components["schemas"]["Core_PolicyCreated"]
@@ -4091,8 +4459,10 @@ export interface components {
     Core_IntentDryRunResponse:
       | components["schemas"]["Core_IntentDryRunResponse_v0_AcknowledgeBackup"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_AddAccountLedgers"]
+      | components["schemas"]["Core_IntentDryRunResponse_v0_AddProviderKey"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_AddTrustedPublicKeysForMigration"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_AttemptTransactionOrderCancellation"]
+      | components["schemas"]["Core_IntentDryRunResponse_v0_ConnectProvider"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_CreateAccount"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_CreateBackup"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_CreateDomain"]
@@ -4115,6 +4485,7 @@ export interface components {
       | components["schemas"]["Core_IntentDryRunResponse_v0_MigrateSilo3AccountBatch"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_NotarizeData"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_ReleaseQuarantinedTransfers"]
+      | components["schemas"]["Core_IntentDryRunResponse_v0_RequestDepositInstructions"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_SetSystemProperty"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_SignManifest"]
       | components["schemas"]["Core_IntentDryRunResponse_v0_UnlockAccount"]
@@ -4152,6 +4523,15 @@ export interface components {
        */
       type: "v0_AddAccountLedgers"
     }
+    Core_IntentDryRunResponse_v0_AddProviderKey: {
+      success: boolean
+      errors?: string[]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "v0_AddProviderKey"
+    }
     Core_IntentDryRunResponse_v0_AddTrustedPublicKeysForMigration: {
       success: boolean
       errors?: string[]
@@ -4170,6 +4550,15 @@ export interface components {
        * @enum {string}
        */
       type: "v0_AttemptTransactionOrderCancellation"
+    }
+    Core_IntentDryRunResponse_v0_ConnectProvider: {
+      success: boolean
+      errors?: string[]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "v0_ConnectProvider"
     }
     Core_IntentDryRunResponse_v0_CreateAccount: {
       success: boolean
@@ -4373,6 +4762,15 @@ export interface components {
        * @enum {string}
        */
       type: "v0_ReleaseQuarantinedTransfers"
+    }
+    Core_IntentDryRunResponse_v0_RequestDepositInstructions: {
+      success: boolean
+      errors?: string[]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "v0_RequestDepositInstructions"
     }
     Core_IntentDryRunResponse_v0_SetSystemProperty: {
       success: boolean
@@ -4640,9 +5038,12 @@ export interface components {
       | "v0_CreateTransferOrder"
       | "v0_SignManifest"
       | "v0_SetSystemProperty"
+      | "v0_ConnectProvider"
+      | "v0_RequestDepositInstructions"
       | "v0_CreateLedger"
       | "v0_UpdateLedger"
       | "v0_AddTrustedPublicKeysForMigration"
+      | "v0_AddProviderKey"
       | "v0_CreateBackup"
       | "v0_AcknowledgeBackup"
     Core_IntentUpdated: {
@@ -4675,6 +5076,7 @@ export interface components {
       | components["schemas"]["Core_LedgerParameters_Bitcoin"]
       | components["schemas"]["Core_LedgerParameters_Cardano"]
       | components["schemas"]["Core_LedgerParameters_Ethereum"]
+      | components["schemas"]["Core_LedgerParameters_External"]
       | components["schemas"]["Core_LedgerParameters_Hedera"]
       | components["schemas"]["Core_LedgerParameters_Solana"]
       | components["schemas"]["Core_LedgerParameters_Stellar"]
@@ -4732,6 +5134,13 @@ export interface components {
        * @enum {string}
        */
       type: "Ethereum"
+    }
+    Core_LedgerParameters_External: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "External"
     }
     Core_LedgerParameters_Hedera: {
       nativeTickerSymbol: string
@@ -4836,6 +5245,41 @@ export interface components {
        */
       type: "LedgerUpdated"
     }
+    Core_Location: {
+      /** Format: uuid */
+      id: string
+      /** Format: uuid */
+      providerId: string
+      /** @description ID of the location as reported by the provider */
+      providerLocationId: string
+      alias: string
+      metadata: components["schemas"]["Core_EntityMetadata"]
+    }
+    Core_LocationCreated: {
+      /** Format: uuid */
+      id: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "LocationCreated"
+    }
+    Core_LocationUpdated: {
+      /** Format: uuid */
+      id: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "LocationUpdated"
+    }
+    Core_LocationsCollection: {
+      items: components["schemas"]["Core_ApiLocation"][]
+      /** Format: int32 */
+      count: number
+      currentStartingAfter?: string
+      nextStartingAfter?: string
+    }
     /** @enum {string} */
     Core_LockStatus: "Unlocked" | "Locked" | "Archived"
     Core_LoginId: {
@@ -4843,6 +5287,16 @@ export interface components {
       id: string
       /** @description Login provider. For internal login, set to `harmonize`. For external identity providers, must match the provider name. */
       providerId: string
+    }
+    Core_MPTokenIssuanceMetadata: components["schemas"]["Core_MPTokenIssuanceMetadata_HexEncodedMetadata"]
+    Core_MPTokenIssuanceMetadata_HexEncodedMetadata: {
+      /** @description Hex encoded string. */
+      value: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "HexEncodedMetadata"
     }
     Core_Manifest: {
       /** Format: uuid */
@@ -5014,6 +5468,10 @@ export interface components {
       alias: string
       roles: string[]
     }
+    Core_MultiPurposeToken: {
+      /** @description XRPL MPToken Issuance ID (192-bit integer hex encoded) */
+      issuanceId: string
+    }
     /** @enum {string} */
     Core_Network: "mainnet" | "testnet" | "regtest"
     Core_NonFungibleTokenDestination:
@@ -5051,6 +5509,8 @@ export interface components {
     Core_OnLedgerData:
       | components["schemas"]["Core_OnLedgerData_Bitcoin"]
       | components["schemas"]["Core_OnLedgerData_Ethereum"]
+      | components["schemas"]["Core_OnLedgerData_External"]
+      | components["schemas"]["Core_OnLedgerData_Xrpl"]
     Core_OnLedgerData_Bitcoin: {
       inputs: components["schemas"]["Core_BitcoinOnLedgerDataInput"][]
       outputs: components["schemas"]["Core_BitcoinOnLedgerDataOutput"][]
@@ -5069,6 +5529,29 @@ export interface components {
        * @enum {string}
        */
       type: "Ethereum"
+    }
+    Core_OnLedgerData_External: {
+      underlyingLedgerTransactionIds: string[]
+      providerTransactions: components["schemas"]["Core_ExternalProviderTransactionReference"][]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "External"
+    }
+    Core_OnLedgerData_Xrpl: {
+      tokenData?: components["schemas"]["Core_XrplOnLedgerTokenData"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Xrpl"
+    }
+    Core_Output: {
+      destination: components["schemas"]["Core_TransactionDestination"]
+      destinationTag?: string
+      /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
+      amount: string
     }
     Core_Permissions: {
       readAccess: components["schemas"]["Core_ReadAccess"]
@@ -5200,6 +5683,7 @@ export interface components {
       | components["schemas"]["Core_TransactionOrderParameters_Bitcoin"]
       | components["schemas"]["Core_TransactionOrderParameters_Cardano"]
       | components["schemas"]["Core_TransactionOrderParameters_Ethereum"]
+      | components["schemas"]["Core_TransactionOrderParameters_External"]
       | components["schemas"]["Core_TransactionOrderParameters_Hedera"]
       | components["schemas"]["Core_TransactionOrderParameters_Solana"]
       | components["schemas"]["Core_TransactionOrderParameters_Stellar"]
@@ -5211,8 +5695,10 @@ export interface components {
       | components["schemas"]["Core_Propose_v0_CreateTransactionOrder"]
       | components["schemas"]["Core_v0_AcknowledgeBackup"]
       | components["schemas"]["Core_v0_AddAccountLedgers"]
+      | components["schemas"]["Core_v0_AddProviderKey"]
       | components["schemas"]["Core_v0_AddTrustedPublicKeysForMigration"]
       | components["schemas"]["Core_v0_AttemptTransactionOrderCancellation"]
+      | components["schemas"]["Core_v0_ConnectProvider"]
       | components["schemas"]["Core_v0_CreateAccount"]
       | components["schemas"]["Core_v0_CreateBackup"]
       | components["schemas"]["Core_v0_CreateDomain"]
@@ -5234,6 +5720,7 @@ export interface components {
       | components["schemas"]["Core_v0_MigrateSilo3AccountBatch"]
       | components["schemas"]["Core_v0_NotarizeData"]
       | components["schemas"]["Core_v0_ReleaseQuarantinedTransfers"]
+      | components["schemas"]["Core_v0_RequestDepositInstructions"]
       | components["schemas"]["Core_v0_SetSystemProperty"]
       | components["schemas"]["Core_v0_SignManifest"]
       | components["schemas"]["Core_v0_UnlockAccount"]
@@ -5267,6 +5754,13 @@ export interface components {
        * @enum {string}
        */
       type: "v0_CreateTransactionOrder"
+    }
+    Core_ProvidersCollection: {
+      items: components["schemas"]["Core_ApiProvider"][]
+      /** Format: int32 */
+      count: number
+      currentStartingAfter?: string
+      nextStartingAfter?: string
     }
     Core_ReadAccess: {
       domains: string[]
@@ -6026,6 +6520,14 @@ export interface components {
        */
       type: "Native"
     }
+    Core_TickerBalances: {
+      /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
+      totalAmount: string
+      /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
+      reservedAmount: string
+      /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
+      quarantinedAmount: string
+    }
     Core_TickerCreated: {
       /** Format: uuid */
       id: string
@@ -6042,6 +6544,7 @@ export interface components {
       | components["schemas"]["Core_TickerLedgerDetails_Bitcoin"]
       | components["schemas"]["Core_TickerLedgerDetails_Cardano"]
       | components["schemas"]["Core_TickerLedgerDetails_Ethereum"]
+      | components["schemas"]["Core_TickerLedgerDetails_External"]
       | components["schemas"]["Core_TickerLedgerDetails_Hedera"]
       | components["schemas"]["Core_TickerLedgerDetails_Solana"]
       | components["schemas"]["Core_TickerLedgerDetails_Stellar"]
@@ -6080,6 +6583,14 @@ export interface components {
        * @enum {string}
        */
       type: "Ethereum"
+    }
+    Core_TickerLedgerDetails_External: {
+      properties: components["schemas"]["Core_ExternalTickerProperties"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "External"
     }
     Core_TickerLedgerDetails_Hedera: {
       properties: components["schemas"]["Core_HederaTickerProperties"]
@@ -6317,6 +6828,7 @@ export interface components {
       | components["schemas"]["Core_TransactionEstimate_Bitcoin"]
       | components["schemas"]["Core_TransactionEstimate_Cardano"]
       | components["schemas"]["Core_TransactionEstimate_Ethereum"]
+      | components["schemas"]["Core_TransactionEstimate_External"]
       | components["schemas"]["Core_TransactionEstimate_Failure"]
       | components["schemas"]["Core_TransactionEstimate_Hedera"]
       | components["schemas"]["Core_TransactionEstimate_Solana"]
@@ -6366,6 +6878,17 @@ export interface components {
        * @enum {string}
        */
       type: "Ethereum"
+    }
+    Core_TransactionEstimate_External: {
+      /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
+      fee: string
+      /** Format: uuid */
+      tickerId: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "External"
     }
     Core_TransactionEstimate_Failure: {
       hint: components["schemas"]["Core_ApiDryRunTransactionProcessingHint"]
@@ -6462,6 +6985,7 @@ export interface components {
       | "BitcoinRedirect"
       | "Cardano"
       | "Ethereum"
+      | "External"
       | "Hedera"
       | "Solana"
       | "Substrate"
@@ -6475,6 +6999,7 @@ export interface components {
       | components["schemas"]["Core_TransactionOrderParameters_BitcoinRedirect"]
       | components["schemas"]["Core_TransactionOrderParameters_Cardano"]
       | components["schemas"]["Core_TransactionOrderParameters_Ethereum"]
+      | components["schemas"]["Core_TransactionOrderParameters_External"]
       | components["schemas"]["Core_TransactionOrderParameters_Hedera"]
       | components["schemas"]["Core_TransactionOrderParameters_Solana"]
       | components["schemas"]["Core_TransactionOrderParameters_Stellar"]
@@ -6544,6 +7069,14 @@ export interface components {
        * @enum {string}
        */
       type: "Ethereum"
+    }
+    Core_TransactionOrderParameters_External: {
+      operation: components["schemas"]["Core_ExternalOperation"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "External"
     }
     Core_TransactionOrderParameters_Hedera: {
       operation: components["schemas"]["Core_HederaOperation"]
@@ -6617,7 +7150,7 @@ export interface components {
       type: "Tron"
     }
     Core_TransactionOrderParameters_XRPL: {
-      destination?: components["schemas"]["Core_Xrpl_DeprecatedTransactionDestination"]
+      destination?: components["schemas"]["Core_TransactionDestination"]
       /**
        * @deprecated
        * @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision.
@@ -6712,6 +7245,7 @@ export interface components {
       | components["schemas"]["Core_TransferMetadata_Bitcoin"]
       | components["schemas"]["Core_TransferMetadata_Cardano"]
       | components["schemas"]["Core_TransferMetadata_Ethereum"]
+      | components["schemas"]["Core_TransferMetadata_External"]
       | components["schemas"]["Core_TransferMetadata_Hedera"]
       | components["schemas"]["Core_TransferMetadata_Solana"]
       | components["schemas"]["Core_TransferMetadata_Stellar"]
@@ -6748,6 +7282,13 @@ export interface components {
        * @enum {string}
        */
       type: "Ethereum"
+    }
+    Core_TransferMetadata_External: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "External"
     }
     Core_TransferMetadata_Hedera: {
       /**
@@ -6811,6 +7352,45 @@ export interface components {
        */
       type: "TransferUpdated"
     }
+    Core_Transferability: {
+      source?: components["schemas"]["Core_TransferabilitySource"]
+      underlying?: components["schemas"]["Core_TransferabilityUnderlying"]
+      destination?: components["schemas"]["Core_TransferabilityDestination"]
+    }
+    Core_TransferabilityDestination: components["schemas"]["Core_TransferabilityDestination_Ticker"]
+    Core_TransferabilityDestination_Ticker: {
+      /** Format: uuid */
+      tickerId: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Ticker"
+    }
+    Core_TransferabilityResponse: {
+      items: components["schemas"]["Core_Transferability"][]
+    }
+    Core_TransferabilitySource: components["schemas"]["Core_TransferabilitySource_Ticker"]
+    Core_TransferabilitySource_Ticker: {
+      /** Format: uuid */
+      tickerId: string
+      balances: components["schemas"]["Core_TickerBalances"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Ticker"
+    }
+    Core_TransferabilityUnderlying: components["schemas"]["Core_TransferabilityUnderlying_Ticker"]
+    Core_TransferabilityUnderlying_Ticker: {
+      /** Format: uuid */
+      tickerId: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "Ticker"
+    }
     Core_TransfersCollection: {
       items: components["schemas"]["Core_ApiTransfer"][]
       /** Format: int32 */
@@ -6868,6 +7448,20 @@ export interface components {
        * @enum {string}
        */
       type: "TRC20"
+    }
+    Core_TrustedDepositInstructions: {
+      data: components["schemas"]["Core_DepositInstructions"]
+      /** Format: base64 */
+      signature: string
+      /** Format: base64 */
+      signingKey: string
+    }
+    Core_TrustedDepositInstructionsCollection: {
+      items: components["schemas"]["Core_TrustedDepositInstructions"][]
+      /** Format: int32 */
+      count: number
+      currentStartingAfter?: string
+      nextStartingAfter?: string
     }
     Core_TrustedDomain: {
       data: components["schemas"]["Core_Domain"]
@@ -7056,8 +7650,10 @@ export interface components {
     Core_UserIntentPayload:
       | components["schemas"]["Core_v0_AcknowledgeBackup"]
       | components["schemas"]["Core_v0_AddAccountLedgers"]
+      | components["schemas"]["Core_v0_AddProviderKey"]
       | components["schemas"]["Core_v0_AddTrustedPublicKeysForMigration"]
       | components["schemas"]["Core_v0_AttemptTransactionOrderCancellation"]
+      | components["schemas"]["Core_v0_ConnectProvider"]
       | components["schemas"]["Core_v0_CreateAccount"]
       | components["schemas"]["Core_v0_CreateBackup"]
       | components["schemas"]["Core_v0_CreateDomain"]
@@ -7080,6 +7676,7 @@ export interface components {
       | components["schemas"]["Core_v0_MigrateSilo3AccountBatch"]
       | components["schemas"]["Core_v0_NotarizeData"]
       | components["schemas"]["Core_v0_ReleaseQuarantinedTransfers"]
+      | components["schemas"]["Core_v0_RequestDepositInstructions"]
       | components["schemas"]["Core_v0_SetSystemProperty"]
       | components["schemas"]["Core_v0_SignManifest"]
       | components["schemas"]["Core_v0_UnlockAccount"]
@@ -7145,6 +7742,10 @@ export interface components {
       | "UnsupportedAccountKeyStrategy"
       | "VaultNotFound"
       | "VaultLocked"
+      | "ExternalProviderNotFound"
+      | "ExternalProviderLocked"
+      | "ExternalProviderUnexpectedState"
+      | "LocationNotFound"
       | "VaultNotReady"
       | "InvalidDestination"
       | "InvalidTransactionOrderState"
@@ -7161,6 +7762,7 @@ export interface components {
       | "DuplicateTickerIdsToValidate"
       | "DuplicateTickerLedgerDatasToValidate"
       | "InvalidEntityId"
+      | "TickerUnderlyingAssetIsNotInMetacoAssets"
       | "MissingLoginIds"
       | "DuplicatedLoginIds"
       | "FeatureFlagDisabled"
@@ -7175,6 +7777,7 @@ export interface components {
       | "BackupNotReady"
       | "BackupAcknowledgeDenied"
       | "ValidateTickersPostProcessingFailure"
+      | "DepositInstructionPostProcessingFailure"
     Core_UserReference: {
       /** Format: uuid */
       id: string
@@ -7457,6 +8060,7 @@ export interface components {
     Core_WorkflowStepStatus: "Open" | "Approved" | "Failed" | "Rejected"
     Core_XrplClawbackCurrency:
       | components["schemas"]["Core_XrplClawbackCurrency_Currency"]
+      | components["schemas"]["Core_XrplClawbackCurrency_MultiPurposeToken"]
       | components["schemas"]["Core_XrplClawbackCurrency_TickerId"]
     Core_XrplClawbackCurrency_Currency: {
       code: string
@@ -7466,6 +8070,15 @@ export interface components {
        * @enum {string}
        */
       type: "Currency"
+    }
+    Core_XrplClawbackCurrency_MultiPurposeToken: {
+      /** @description XRPL MPToken Issuance ID (192-bit integer hex encoded) */
+      issuanceId: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "MultiPurposeToken"
     }
     Core_XrplClawbackCurrency_TickerId: {
       /** Format: uuid */
@@ -7529,11 +8142,16 @@ export interface components {
       /** @description Hex encoded string. The encoded string must only characters defined in RFC 3986 URLs */
       memoType?: string
     }
+    Core_XrplOnLedgerTokenData: components["schemas"]["Core_MultiPurposeToken"]
     Core_XrplOperation:
       | components["schemas"]["Core_XrplOperation_AccountSet"]
       | components["schemas"]["Core_XrplOperation_Clawback"]
       | components["schemas"]["Core_XrplOperation_DepositPreauth"]
+      | components["schemas"]["Core_XrplOperation_EscrowFinish"]
       | components["schemas"]["Core_XrplOperation_MPTokenAuthorize"]
+      | components["schemas"]["Core_XrplOperation_MPTokenIssuanceCreate"]
+      | components["schemas"]["Core_XrplOperation_MPTokenIssuanceDestroy"]
+      | components["schemas"]["Core_XrplOperation_MPTokenIssuanceSet"]
       | components["schemas"]["Core_XrplOperation_OfferCreate"]
       | components["schemas"]["Core_XrplOperation_Payment"]
       | components["schemas"]["Core_XrplOperation_TrustSet"]
@@ -7568,14 +8186,66 @@ export interface components {
        */
       type: "DepositPreauth"
     }
+    Core_XrplOperation_EscrowFinish: {
+      owner: components["schemas"]["Core_TransactionDestination"]
+      /** Format: int64 */
+      offerSequence: number
+      /** @description Hex encoded string. */
+      condition?: string
+      credentialIds?: string[]
+      /** @description Hex encoded string. */
+      fulfillment?: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "EscrowFinish"
+    }
     Core_XrplOperation_MPTokenAuthorize: {
       tokenIdentifier: components["schemas"]["Core_Xrpl_MPTokenIdentifier"]
       flags: components["schemas"]["Core_Xrpl_MPTokenAuthorizeFlag"][]
+      holder?: components["schemas"]["Core_TransactionDestination"]
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
       type: "MPTokenAuthorize"
+    }
+    Core_XrplOperation_MPTokenIssuanceCreate: {
+      flags: components["schemas"]["Core_Xrpl_MPTokenIssuanceCreateFlag"][]
+      /** Format: int32 */
+      assetScale?: number
+      /**
+       * Format: int32
+       * @description Transfer fee for MultiPurposeToken, must be from 0 to 50000
+       */
+      transferFee?: number
+      /** @description This field is a unsigned 64bit integer that can store values in range from 0 to 18446744073709551615.It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
+      maximumAmount?: string
+      metadata?: components["schemas"]["Core_MPTokenIssuanceMetadata"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "MPTokenIssuanceCreate"
+    }
+    Core_XrplOperation_MPTokenIssuanceDestroy: {
+      tokenIdentifier: components["schemas"]["Core_Xrpl_MPTokenIdentifier"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "MPTokenIssuanceDestroy"
+    }
+    Core_XrplOperation_MPTokenIssuanceSet: {
+      tokenIdentifier: components["schemas"]["Core_Xrpl_MPTokenIdentifier"]
+      holder?: components["schemas"]["Core_TransactionDestination"]
+      flags: components["schemas"]["Core_Xrpl_MPTokenIssuanceSetFlag"][]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "MPTokenIssuanceSet"
     }
     Core_XrplOperation_OfferCreate: {
       flags: components["schemas"]["Core_Xrpl_OfferCreateFlag"][]
@@ -7685,11 +8355,6 @@ export interface components {
       /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
       amount: string
     }
-    /** @deprecated */
-    Core_Xrpl_DeprecatedTransactionDestination:
-      | components["schemas"]["Core_TransactionDestination_Account"]
-      | components["schemas"]["Core_TransactionDestination_Address"]
-      | components["schemas"]["Core_TransactionDestination_Endpoint"]
     Core_Xrpl_LimitAmount: {
       currency: components["schemas"]["Core_XrplIouCurrency"]
       /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
@@ -7719,6 +8384,16 @@ export interface components {
       type: "TickerId"
     }
     /** @enum {string} */
+    Core_Xrpl_MPTokenIssuanceCreateFlag:
+      | "tfMPTRequireAuth"
+      | "tfMPTCanClawback"
+      | "tfMPTCanTransfer"
+      | "tfMPTCanEscrow"
+      | "tfMPTCanLock"
+      | "tfMPTCanTrade"
+    /** @enum {string} */
+    Core_Xrpl_MPTokenIssuanceSetFlag: "tfMPTLock" | "tfMPTUnlock"
+    /** @enum {string} */
     Core_Xrpl_OfferCreateFlag: "tfImmediateOrCancel" | "tfFillOrKill" | "tfSell"
     /** @enum {string} */
     Core_Xrpl_TrustSetFlag: "tfSetFreeze" | "tfClearFreeze" | "tfSetfAuth"
@@ -7739,6 +8414,17 @@ export interface components {
        * @enum {string}
        */
       type: "v0_AddAccountLedgers"
+    }
+    Core_v0_AddProviderKey: {
+      /** Format: uuid */
+      providerId: string
+      /** Format: base64 */
+      publicKey: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "v0_AddProviderKey"
     }
     Core_v0_AddTrustedPublicKeysForMigration: {
       /** Format: base64 */
@@ -7772,6 +8458,20 @@ export interface components {
        */
       type: "v0_AttemptTransactionOrderCancellation"
     }
+    Core_v0_ConnectProvider: {
+      /** Format: uuid */
+      id: string
+      alias: string
+      provider: components["schemas"]["Core_AccountProviderAction"]
+      lock: components["schemas"]["Core_LockStatus"]
+      description?: string
+      customProperties: components["schemas"]["Core_StringsMap"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "v0_ConnectProvider"
+    }
     Core_v0_CreateAccount: {
       /** Format: uuid */
       id: string
@@ -7789,7 +8489,20 @@ export interface components {
        */
       type: "v0_CreateAccount"
     }
-    Core_v0_CreateAccountProviderDetailsPayload: components["schemas"]["Core_v0_CreateAccountProviderDetailsPayload_Vault"]
+    Core_v0_CreateAccountProviderDetailsPayload:
+      | components["schemas"]["Core_v0_CreateAccountProviderDetailsPayload_External"]
+      | components["schemas"]["Core_v0_CreateAccountProviderDetailsPayload_Vault"]
+    Core_v0_CreateAccountProviderDetailsPayload_External: {
+      /** Format: uuid */
+      providerId: string
+      /** Format: uuid */
+      locationId: string
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "External"
+    }
     Core_v0_CreateAccountProviderDetailsPayload_Vault: {
       /** Format: uuid */
       vaultId: string
@@ -7921,6 +8634,7 @@ export interface components {
       /** @description This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision. */
       maximumFee?: string
       preferredAddressForChange?: components["schemas"]["Core_PreferredAddressForChange"]
+      memo?: string
       description?: string
       customProperties: components["schemas"]["Core_StringsMap"]
       /**
@@ -8058,6 +8772,21 @@ export interface components {
        * @enum {string}
        */
       type: "v0_ReleaseQuarantinedTransfers"
+    }
+    Core_v0_RequestDepositInstructions: {
+      /** Format: uuid */
+      id: string
+      /** Format: uuid */
+      accountId: string
+      /** Format: uuid */
+      tickerId: string
+      description?: string
+      customProperties: components["schemas"]["Core_StringsMap"]
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "v0_RequestDepositInstructions"
     }
     Core_v0_SetSystemProperty: {
       /** Format: int64 */
@@ -8968,21 +9697,41 @@ export interface components {
     }
     /** @description Request to create a travel rule transfer */
     Compliance_CreateTransferRequest: {
-      originator?: components["schemas"]["Compliance_TransferPartyIdentifier"]
-      beneficiary?: components["schemas"]["Compliance_TransferPartyIdentifier"]
+      originator: components["schemas"]["Compliance_TransferPartyIdentifier"]
+      beneficiary: components["schemas"]["Compliance_TransferPartyIdentifier"]
       /** @description Asset identifier (e.g., bip122:000000000019d6689c085ae165831e93/slip44:0) */
-      asset?: string
+      asset: string
       /** @description Transfer amount */
-      amount?: string
+      amount: string
       /** @description Reference identifier for the transfer */
-      ref?: string
+      ref: string
       /** @description Agents involved in the transfer (e.g., VASP, SourceAddress, SettlementAddress) */
-      agents?: components["schemas"]["Compliance_Agent"][]
+      agents: components["schemas"]["Compliance_Agent"][]
+      /** @description Settlement identifier for the transfer */
+      settlementId?: string
+      /** @description The fiat value of the transaction */
+      transactionValue?: {
+        /**
+         * @description The fiat amount
+         * @example 150.75
+         */
+        amount: string
+        /**
+         * @description The currency code (e.g., USD)
+         * @example USD
+         */
+        currency: string
+      }
+      /**
+       * @description Optional analytics alias
+       * @example My Wallet
+       */
+      blockchainAnalyticsAlias?: string
     }
     /** @description Identifier for a party in a transfer */
     Compliance_TransferPartyIdentifier: {
       /** @description DID or identifier for the party */
-      "@id"?: string
+      "@id": string
     }
     /** @description Response from creating a travel rule transfer */
     Compliance_InitiateTravelRuleResponse: {
@@ -9098,14 +9847,14 @@ export interface components {
     /** @description Agent involved in the transfer */
     Compliance_Agent: {
       /** @description The DID identifier of the agent */
-      "@id"?: string
+      "@id": string
       /** @description The party this agent is acting for */
       for?: string
       /**
        * @description The role of the agent
        * @enum {string}
        */
-      role?: "VASP" | "Custodian" | "SettlementAddress" | "SourceAddress" | "Gateway" | "Unknown"
+      role: "VASP" | "Custodian" | "SettlementAddress" | "SourceAddress" | "Gateway" | "Unknown"
     }
     /** @description Request to append PII to a travel rule transfer */
     Compliance_AppendPIIRequest: {
@@ -9165,7 +9914,7 @@ export interface components {
     }
     /** @description Natural person information */
     Compliance_IVMS101NaturalPerson: {
-      name?: components["schemas"]["Compliance_IVMS101Name"]
+      name: components["schemas"]["Compliance_IVMS101Name"]
       dateAndPlaceOfBirth?: components["schemas"]["Compliance_IVMS101DateAndPlaceOfBirth"]
       geographicAddress?: components["schemas"]["Compliance_IVMS101GeographicAddress"][]
       nationalIdentification?: components["schemas"]["Compliance_IVMS101NationalIdentification"]
@@ -9174,7 +9923,7 @@ export interface components {
     }
     /** @description Legal person (organization) information */
     Compliance_IVMS101LegalPerson: {
-      name?: components["schemas"]["Compliance_IVMS101LegalPersonName"]
+      name: components["schemas"]["Compliance_IVMS101LegalPersonName"]
       geographicAddress?: components["schemas"]["Compliance_IVMS101GeographicAddress"][]
       nationalIdentification?: components["schemas"]["Compliance_IVMS101NationalIdentification"]
       /** @description Customer identification number assigned by the VASP */
@@ -9184,34 +9933,34 @@ export interface components {
     }
     /** @description Name information for natural person */
     Compliance_IVMS101Name: {
-      nameIdentifier?: components["schemas"]["Compliance_IVMS101NameIdentifier"][]
+      nameIdentifier: components["schemas"]["Compliance_IVMS101NameIdentifier"][]
     }
     Compliance_IVMS101NameIdentifier: {
       /** @description Primary name identifier (e.g., surname) */
-      primaryIdentifier?: string
+      primaryIdentifier: string
       /** @description Secondary name identifier (e.g., given name) */
       secondaryIdentifier?: string
       /** @description Type of name identifier (e.g., LEGL, BIRT, MAID, TRAD) */
-      naturalPersonNameIdentifierType?: string
+      naturalPersonNameIdentifierType: string
     }
     /** @description Name information for legal person */
     Compliance_IVMS101LegalPersonName: {
-      nameIdentifier?: components["schemas"]["Compliance_IVMS101LegalPersonNameIdentifier"][]
+      nameIdentifier: components["schemas"]["Compliance_IVMS101LegalPersonNameIdentifier"][]
     }
     Compliance_IVMS101LegalPersonNameIdentifier: {
       /** @description Legal person name */
-      legalPersonName?: string
+      legalPersonName: string
       /** @description Type of legal person name identifier (e.g., LEGL, SHRT, TRAD) */
-      legalPersonNameIdentifierType?: string
+      legalPersonNameIdentifierType: string
     }
     Compliance_IVMS101DateAndPlaceOfBirth: {
       /** Format: date */
-      dateOfBirth?: string
-      placeOfBirth?: string
+      dateOfBirth: string
+      placeOfBirth: string
     }
     Compliance_IVMS101GeographicAddress: {
       /** @description Type of address (e.g., HOME, BIZZ, GEOG) */
-      addressType?: string
+      addressType: string
       /** @description Street name - required if addressLine not provided */
       streetName?: string
       /** @description Building number - required if addressLine not provided */
@@ -9221,22 +9970,77 @@ export interface components {
       /** @description Postal code (optional) */
       postCode?: string
       /** @description Town or city name */
-      townName?: string
+      townName: string
       /** @description State, province, or region (e.g., NY) */
       countrySubDivision?: string
       /** @description Country code (ISO-3166 Alpha-2, e.g., US) */
-      country?: string
+      country: string
     }
     /** @description National identification information */
     Compliance_IVMS101NationalIdentification: {
       /** @description National identifier number */
-      nationalIdentifier?: string
+      nationalIdentifier: string
       /** @description Type of national identifier (e.g., ARNU, CCPT, RAID, DRLC, FIIN, TXID, SOCS, IDCD, LEIX, MISC) */
-      nationalIdentifierType?: string
+      nationalIdentifierType: string
       /** @description Authority that issued the identifier (optional) */
       registrationAuthority?: string
       /** @description Country of issue (ISO-3166 Alpha-2) */
       countryOfIssue?: string
+    }
+    /** @description Request to retrieve travel rule details for a batch of domain and ID pairs */
+    Compliance_TravelRuleDetailsRequest: {
+      data: components["schemas"]["Compliance_TravelRuleDetailsRequestData"][]
+    }
+    Compliance_TravelRuleDetailsRequestData: {
+      /**
+       * Format: uuid
+       * @description The custody domain ID
+       */
+      domainId: string
+      /**
+       * Format: uuid
+       * @description The ID to look up. Can be an intent ID, transfer ID, or transaction order ID associated with a travel rule record
+       */
+      id: string
+    }
+    /** @description Response containing travel rule details for a batch of requests */
+    Compliance_TravelRuleDetailsResponse: {
+      /** @description List of travel rule details */
+      result: components["schemas"]["Compliance_TravelRuleDetail"][]
+    }
+    /** @description Individual travel rule detail for a single request */
+    Compliance_TravelRuleDetail: {
+      /** @enum {string} */
+      provider?: "NOTABENE"
+      /** Format: uuid */
+      id?: string
+      /** Format: uuid */
+      domainId?: string
+      /** Format: uuid */
+      intentId?: string
+      /** Format: uuid */
+      transferId?: string
+      /** Format: uuid */
+      transactionOrderId?: string
+      /** @enum {string} */
+      travelRuleStatus?:
+        | "OUTGOING"
+        | "INCOMING"
+        | "REJECTED"
+        | "AUTHORIZED"
+        | "FLAGGED"
+        | "SETTLED"
+        | "FLAGGED_SETTLEMENT"
+        | "RETURNED"
+        | "FROZEN"
+        | "CLEARED"
+      travelRuleMessageId?: string
+      /** Format: date-time */
+      compliedAt?: string
+      errorDetails?: string
+      /** @enum {string} */
+      direction?: "INCOMING" | "OUTGOING"
+      transfer?: components["schemas"]["Compliance_Transfer"]
     }
     EDS_ChannelCreate: {
       /** Format: uuid */
@@ -9325,6 +10129,193 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  transferability: {
+    parameters: {
+      query?: {
+        sourceAccountId?: string
+        destinationAccountId?: string
+        tickerId?: string
+      }
+      header?: never
+      path: {
+        /** @description Unique identifier for the domain. */
+        domainId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_TransferabilityResponse"]
+        }
+      }
+      /** @description Invalid value for: path parameter domainId, Invalid value for: query parameter sourceAccountId, Invalid value for: query parameter destinationAccountId, Invalid value for: query parameter tickerId */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "text/plain": string
+        }
+      }
+      /** @description One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError) */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+      /** @description Entity or Domain not found (EntityNotFoundError) */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+    }
+  }
+  "deposit-instructions-by-id": {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description Unique identifier for the domain. */
+        domainId: string
+        accountId: string
+        "instructions-id": string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_TrustedDepositInstructions"]
+        }
+      }
+      /** @description Requester locked (RequesterLockedError) */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+      /** @description One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError) */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+      /** @description Entity or Domain not found (EntityNotFoundError) */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+    }
+  }
+  "deposit-instructions": {
+    parameters: {
+      query?: {
+        /** @description The number of entities to return. */
+        limit?: number
+        /** @description DepositInstructions id used to the determine beginning of query results. */
+        startingAfter?: string
+        /** @description Property name used to sort the query results. */
+        sortBy?: "id" | "tickerId" | "instructions.address" | "metadata.createdAt"
+        /** @description Sort order applied to the query results. */
+        sortOrder?: components["schemas"]["Core_SortOrder"]
+        /**
+         * @description Return entities matching given tickerId.
+         * @example fdeeeb4b-f987-4ec4-9880-1eb280581d49
+         */
+        tickerId?: string
+        /**
+         * @description Return only last created instructions.
+         * @example true
+         */
+        lastOnly?: boolean
+        /**
+         * @description Return entities that were created by matching user.
+         * @example fdeeeb4b-f987-4ec4-9880-1eb280581d49
+         */
+        "metadata.createdBy"?: string
+        /**
+         * @description Return entities that were last modified by matching user.
+         * @example 90c4cf2f-ebe0-4bf7-91cd-4c45cd02277b
+         */
+        "metadata.lastModifiedBy"?: string
+        /**
+         * @description Return entities with descriptions that contains or equals to provided description.
+         * @example description1
+         */
+        "metadata.description"?: string
+        /**
+         * @description Return entities that contains provided custom properties.
+         * @example [
+         *       "key1:value1",
+         *       "key2:value2"
+         *     ]
+         */
+        "metadata.customProperties"?: string[]
+      }
+      header?: never
+      path: {
+        /** @description Unique identifier for the domain. */
+        domainId: string
+        accountId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_TrustedDepositInstructionsCollection"]
+        }
+      }
+      /** @description Requester locked (RequesterLockedError) */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+      /** @description One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError) */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+    }
+  }
   getBackup: {
     parameters: {
       query?: never
@@ -13318,6 +14309,210 @@ export interface operations {
       }
     }
   }
+  getProvider: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        providerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ApiProvider"]
+        }
+      }
+      /** @description Invalid value for: path parameter providerId */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "text/plain": string
+        }
+      }
+      /** @description One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError) */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+      /** @description Entity or Domain not found (EntityNotFoundError) */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+    }
+  }
+  getProviders: {
+    parameters: {
+      query?: {
+        /** @description The number of entities to return. */
+        limit?: number
+        /** @description Entity id used to the determine beginning of query results. */
+        startingAfter?: string
+        /** @description Property name used to sort the query results. */
+        sortBy?: "id" | "alias" | "lock" | "metadata.createdAt" | "metadata.lastModifiedAt"
+        /** @description Sort order applied to the query results. */
+        sortOrder?: components["schemas"]["Core_SortOrder"]
+        /**
+         * @description Return entities with aliases that contains or equals to provided alias.
+         * @example alias1
+         */
+        alias?: string
+        /**
+         * @description Return entities matching given lock status.
+         * @example [
+         *       "Locked",
+         *       "Unlocked"
+         *     ]
+         */
+        lock?: components["schemas"]["Core_LockStatus"][]
+        /**
+         * @description Return entities that were created by matching user.
+         * @example fdeeeb4b-f987-4ec4-9880-1eb280581d49
+         */
+        "metadata.createdBy"?: string
+        /**
+         * @description Return entities that were last modified by matching user.
+         * @example 90c4cf2f-ebe0-4bf7-91cd-4c45cd02277b
+         */
+        "metadata.lastModifiedBy"?: string
+        /**
+         * @description Return entities with descriptions that contains or equals to provided description.
+         * @example description1
+         */
+        "metadata.description"?: string
+        /**
+         * @description Return entities that contains provided custom properties.
+         * @example [
+         *       "key1:value1",
+         *       "key2:value2"
+         *     ]
+         */
+        "metadata.customProperties"?: string[]
+        /**
+         * @description Return entities matching given processing status.
+         * @example Pending
+         */
+        "additionalDetails.processingStatus"?: components["schemas"]["Core_AccountProviderProcessingStatus"]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ProvidersCollection"]
+        }
+      }
+      /** @description Invalid value for: query parameter limit, Invalid value for: query parameter startingAfter, Invalid value for: query parameter sortBy, Invalid value for: query parameter sortOrder, Invalid value for: query parameter alias, Invalid value for: query parameter lock, Invalid value for: query parameter metadata.createdBy, Invalid value for: query parameter metadata.lastModifiedBy, Invalid value for: query parameter metadata.description, Invalid value for: query parameter metadata.customProperties, Invalid value for: query parameter additionalDetails.processingStatus */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "text/plain": string
+        }
+      }
+      /** @description One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError) */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+    }
+  }
+  getProviderLocations: {
+    parameters: {
+      query?: {
+        /** @description The number of entities to return. */
+        limit?: number
+        /** @description Entity id used to the determine beginning of query results. */
+        startingAfter?: string
+        /** @description Property name used to sort the query results. */
+        sortBy?:
+          | "data.id"
+          | "data.alias"
+          | "data.metadata.createdAt"
+          | "data.metadata.lastModifiedAt"
+        /** @description Sort order applied to the query results. */
+        sortOrder?: components["schemas"]["Core_SortOrder"]
+        /**
+         * @description Return entities matching given ProviderLocationId
+         * @example [
+         *       "portfolio-1",
+         *       "portfolio-2"
+         *     ]
+         */
+        providerLocationId?: string[]
+      }
+      header?: never
+      path: {
+        providerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_LocationsCollection"]
+        }
+      }
+      /** @description Invalid value for: path parameter providerId, Invalid value for: query parameter limit, Invalid value for: query parameter startingAfter, Invalid value for: query parameter sortBy, Invalid value for: query parameter sortOrder, Invalid value for: query parameter providerLocationId */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "text/plain": string
+        }
+      }
+      /** @description One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError) */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+      /** @description Entity or Domain not found (EntityNotFoundError) */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Core_ErrorMessage"]
+        }
+      }
+    }
+  }
   GetAllProvidersForDomain: {
     parameters: {
       query?: never
@@ -14381,6 +15576,77 @@ export interface operations {
         }
       }
       /** @description Transfer or domain not found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+    }
+  }
+  GetTravelRuleDetails: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        domainId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Compliance_TravelRuleDetailsRequest"]
+      }
+    }
+    responses: {
+      /** @description Travel rule details retrieved successfully */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Compliance_TravelRuleDetailsResponse"]
+        }
+      }
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "*/*": components["schemas"]["Compliance_ErrorResponse"]
+        }
+      }
+      /** @description Domain or Travel rule details not found */
       404: {
         headers: {
           [name: string]: unknown

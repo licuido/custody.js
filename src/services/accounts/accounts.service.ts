@@ -216,7 +216,7 @@ export class AccountsService {
 
     return {
       accountId: account.accountId,
-      ledgerId: account.ledgerId,
+      ledgerId: account.ledgerId ?? "",
       address: account.address,
     }
   }

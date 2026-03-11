@@ -16,6 +16,9 @@ import type {
   CustodyClawback,
   CustodyDepositPreauth,
   CustodyMpTokenAuthorize,
+  CustodyMpTokenIssuanceCreate,
+  CustodyMpTokenIssuanceDestroy,
+  CustodyMpTokenIssuanceSet,
   CustodyOfferCreate,
   CustodyPayment,
   CustodyTrustline,
@@ -139,15 +142,15 @@ export class XrplService {
    * @returns The proposed intent response
    * @throws {CustodyError} If validation fails or the sender account is not found
    */
-  // public async mpTokenIssuanceCreate(
-  //   mpTokenIssuanceCreate: CustodyMpTokenIssuanceCreate,
-  //   options: XrplIntentOptions = {},
-  // ): Promise<Core_IntentResponse> {
-  //   return this.proposeXrplIntent(
-  //     { ...mpTokenIssuanceCreate, type: "MPTokenIssuanceCreate" },
-  //     options,
-  //   )
-  // }
+  public async mpTokenIssuanceCreate(
+    mpTokenIssuanceCreate: CustodyMpTokenIssuanceCreate,
+    options: XrplIntentOptions = {},
+  ): Promise<Core_IntentResponse> {
+    return this.proposeXrplIntent(
+      { ...mpTokenIssuanceCreate, type: "MPTokenIssuanceCreate" },
+      options,
+    )
+  }
 
   /**
    * Creates and proposes a MPTokenIssuanceSet intent for an XRPL MPTokenIssuanceSet transaction.
@@ -156,12 +159,12 @@ export class XrplService {
    * @returns The proposed intent response
    * @throws {CustodyError} If validation fails or the sender account is not found
    */
-  // public async mpTokenIssuanceSet(
-  //   params: CustodyMpTokenIssuanceSet,
-  //   options: XrplIntentOptions = {},
-  // ): Promise<Core_IntentResponse> {
-  //   return this.proposeXrplIntent({ ...params, type: "MPTokenIssuanceSet" }, options)
-  // }
+  public async mpTokenIssuanceSet(
+    params: CustodyMpTokenIssuanceSet,
+    options: XrplIntentOptions = {},
+  ): Promise<Core_IntentResponse> {
+    return this.proposeXrplIntent({ ...params, type: "MPTokenIssuanceSet" }, options)
+  }
 
   /**
    * Creates and proposes a MPTokenIssuanceDestroy intent for an XRPL MPTokenIssuanceDestroy transaction.
@@ -170,12 +173,12 @@ export class XrplService {
    * @returns The proposed intent response
    * @throws {CustodyError} If validation fails or the sender account is not found
    */
-  // public async mpTokenIssuanceDestroy(
-  //   params: CustodyMpTokenIssuanceDestroy,
-  //   options: XrplIntentOptions = {},
-  // ): Promise<Core_IntentResponse> {
-  //   return this.proposeXrplIntent({ ...params, type: "MPTokenIssuanceDestroy" }, options)
-  // }
+  public async mpTokenIssuanceDestroy(
+    params: CustodyMpTokenIssuanceDestroy,
+    options: XrplIntentOptions = {},
+  ): Promise<Core_IntentResponse> {
+    return this.proposeXrplIntent({ ...params, type: "MPTokenIssuanceDestroy" }, options)
+  }
 
   /**
    * Creates and proposes a raw sign intent for an XRPL transaction.
