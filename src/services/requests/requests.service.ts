@@ -33,8 +33,8 @@ export class RequestsService {
    */
   async getAllUserRequestsState(
     query?: GetAllUserRequestsStateQueryParams,
-  ): Promise<Core_RequestState> {
-    return this.api.get<Core_RequestState>(URLs.meRequests, query)
+  ): Promise<Core_RequestState[]> {
+    return this.api.get<Core_RequestState[]>(URLs.meRequests, query)
   }
 
   /**
@@ -46,7 +46,7 @@ export class RequestsService {
   async getAllUserRequestsStateInDomain(
     params: GetAllUserRequestsStateInDomainPathParams,
     query?: GetAllUserRequestsStateInDomainQueryParams,
-  ): Promise<Core_RequestState> {
-    return this.api.get<Core_RequestState>(replacePathParams(URLs.requests, params), query)
+  ): Promise<Core_RequestState[]> {
+    return this.api.get<Core_RequestState[]>(replacePathParams(URLs.requests, params), query)
   }
 }

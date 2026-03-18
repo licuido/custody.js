@@ -4,13 +4,14 @@ export type { RippleCustodyClientOptions } from "./ripple-custody.types.js"
 
 // keypairs types
 export { KeypairService } from "./services/keypairs/index.js"
-export type { KeyPair, KeypairAlgorithm, KeypairDefinition } from "./services/keypairs/keypairs.types.js"
+export type {
+  KeyPair,
+  KeypairAlgorithm,
+  KeypairDefinition,
+} from "./services/keypairs/keypairs.types.js"
 
 // intents types
-export {
-  PENDING_STATUSES,
-  TERMINAL_STATUSES,
-} from "./services/intents/index.js"
+export { PENDING_STATUSES, TERMINAL_STATUSES } from "./services/intents/index.js"
 export type {
   Core_ApproveIntentBody,
   Core_GetIntentPathParams,
@@ -131,10 +132,7 @@ export type {
 } from "./services/user-invitations/index.js"
 
 // domain resolver types
-export type {
-  DomainResolveOptions,
-  DomainUserReference,
-} from "./services/domain-resolver/index.js"
+export type { DomainResolveOptions, DomainUserReference } from "./services/domain-resolver/index.js"
 
 // tickers types
 export type {

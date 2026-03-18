@@ -784,7 +784,7 @@ export class RippleCustody {
      * @param query - The query parameters for the request
      * @returns The request state
      */
-    userStates: async (query?: GetAllUserRequestsStateQueryParams): Promise<Core_RequestState> =>
+    userStates: async (query?: GetAllUserRequestsStateQueryParams): Promise<Core_RequestState[]> =>
       this.requestsService.getAllUserRequestsState(query),
 
     /**
@@ -796,7 +796,7 @@ export class RippleCustody {
     userStatesInDomain: async (
       params: GetAllUserRequestsStateInDomainPathParams,
       query?: GetAllUserRequestsStateInDomainQueryParams,
-    ): Promise<Core_RequestState> =>
+    ): Promise<Core_RequestState[]> =>
       this.requestsService.getAllUserRequestsStateInDomain(params, query),
   }
 
