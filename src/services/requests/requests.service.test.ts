@@ -53,19 +53,19 @@ describe("RequestsService", () => {
   })
 
   describe("getAllUserRequestsState", () => {
-    it("should call api.get with correct URL and return request state", async () => {
-      const mockState = { state: "PENDING" }
-      mockApiService.get.mockResolvedValue(mockState)
+    it("should call api.get with correct URL and return request states", async () => {
+      const mockStates = [{ state: "PENDING" }, { state: "APPROVED" }]
+      mockApiService.get.mockResolvedValue(mockStates)
 
       const result = await requestsService.getAllUserRequestsState()
 
       expect(mockApiService.get).toHaveBeenCalledWith(URLs.meRequests, undefined)
-      expect(result).toEqual(mockState)
+      expect(result).toEqual(mockStates)
     })
 
     it("should pass query parameters to api.get", async () => {
-      const mockState = { state: "PENDING" }
-      mockApiService.get.mockResolvedValue(mockState)
+      const mockStates = [{ state: "PENDING" }]
+      mockApiService.get.mockResolvedValue(mockStates)
 
       const query = { limit: 10, offset: 0 }
       await requestsService.getAllUserRequestsState(query as any)
@@ -75,9 +75,9 @@ describe("RequestsService", () => {
   })
 
   describe("getAllUserRequestsStateInDomain", () => {
-    it("should call api.get with correct URL and return request state", async () => {
-      const mockState = { state: "PENDING" }
-      mockApiService.get.mockResolvedValue(mockState)
+    it("should call api.get with correct URL and return request states", async () => {
+      const mockStates = [{ state: "PENDING" }, { state: "APPROVED" }]
+      mockApiService.get.mockResolvedValue(mockStates)
 
       const result = await requestsService.getAllUserRequestsStateInDomain({
         domainId: mockDomainId,
@@ -87,12 +87,12 @@ describe("RequestsService", () => {
         replacePathParams(URLs.requests, { domainId: mockDomainId }),
         undefined,
       )
-      expect(result).toEqual(mockState)
+      expect(result).toEqual(mockStates)
     })
 
     it("should pass query parameters to api.get", async () => {
-      const mockState = { state: "PENDING" }
-      mockApiService.get.mockResolvedValue(mockState)
+      const mockStates = [{ state: "PENDING" }]
+      mockApiService.get.mockResolvedValue(mockStates)
 
       const query = { limit: 5, offset: 10 }
       await requestsService.getAllUserRequestsStateInDomain(

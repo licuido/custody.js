@@ -4,9 +4,14 @@ export type { RippleCustodyClientOptions } from "./ripple-custody.types.js"
 
 // keypairs types
 export { KeypairService } from "./services/keypairs/index.js"
-export type { KeypairAlgorithm } from "./services/keypairs/keypairs.types.js"
+export type {
+  KeyPair,
+  KeypairAlgorithm,
+  KeypairDefinition,
+} from "./services/keypairs/keypairs.types.js"
 
 // intents types
+export { PENDING_STATUSES, TERMINAL_STATUSES } from "./services/intents/index.js"
 export type {
   Core_ApproveIntentBody,
   Core_GetIntentPathParams,
@@ -15,11 +20,15 @@ export type {
   Core_IntentDryRunRequest,
   Core_IntentDryRunResponse,
   Core_IntentResponse,
+  Core_IntentStatus,
   Core_ProposeIntentBody,
   Core_RejectIntentBody,
   Core_RemainingDomainUsers,
   Core_RemainingUsersIntentPathParams,
   Core_RemainingUsersIntentQueryParams,
+  Core_TrustedIntent,
+  WaitForExecutionOptions,
+  WaitForExecutionResult,
 } from "./services/intents/index.js"
 
 // domains types
@@ -95,11 +104,42 @@ export type {
   GetUsersQueryParams,
 } from "./services/users/index.js"
 
+// requests types
+export type {
+  Core_RequestState,
+  GetAllUserRequestsStateInDomainPathParams,
+  GetAllUserRequestsStateInDomainQueryParams,
+  GetAllUserRequestsStateQueryParams,
+  GetRequestStatePathParams,
+  GetRequestStateQueryParams,
+} from "./services/requests/index.js"
+
+// user invitations types
+export type {
+  CancelUserInvitationPathParams,
+  CompleteUserInvitationPathParams,
+  CoreExtensions_InvitationAnswerIn,
+  CoreExtensions_InvitationIn,
+  CoreExtensions_InvitationOut,
+  CoreExtensions_PublicInvitationOut,
+  CreateUserInvitationPathParams,
+  FillUserInvitationPathParams,
+  GetPublicUserInvitationPathParams,
+  GetUserInvitationPathParams,
+  GetUserInvitationsPathParams,
+  GetUserInvitationsQueryParams,
+  RenewUserInvitationPathParams,
+} from "./services/user-invitations/index.js"
+
+// domain resolver types
+export type { DomainResolveOptions, DomainUserReference } from "./services/domain-resolver/index.js"
+
 // tickers types
 export type {
   Core_ApiTicker,
   Core_TickersCollection,
   GetTickerPathParams,
+  GetTickersQueryParams,
 } from "./services/tickers/index.js"
 
 // ledgers types
