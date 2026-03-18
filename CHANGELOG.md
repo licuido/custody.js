@@ -1,5 +1,11 @@
 # custody
 
+## 0.6.0
+
+### Minor Changes
+
+- ceefe79: Fix JWT refresh, update requests return types, more type exports
+
 ## 0.5.1
 
 ### Patch Changes
