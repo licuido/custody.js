@@ -16,6 +16,13 @@ vi.mock("axios", () => ({
 
 import axios from "axios"
 
+/** Build a fake JWT with a given `exp` claim (seconds). */
+const buildJwt = (exp: number): string => {
+  const header = Buffer.from(JSON.stringify({ alg: "HS256" })).toString("base64url")
+  const payload = Buffer.from(JSON.stringify({ exp })).toString("base64url")
+  return `${header}.${payload}.fake-signature`
+}
+
 describe("AuthService", () => {
   const mockAuthUrl = "https://auth.example.com"
   const mockAuthData: AuthFormData = {
@@ -116,6 +123,45 @@ describe("AuthService", () => {
       // Second call - should fetch new token
       await authService.getToken(mockAuthData)
       expect(mockAxiosInstance.post).toHaveBeenCalledTimes(2)
+    })
+
+    it("should use exp claim from JWT for token expiration", async () => {
+      const now = Date.now()
+      // JWT expires in 1 hour from now
+      const expInSeconds = Math.floor(now / 1000) + 3600
+      const jwtToken = buildJwt(expInSeconds)
+
+      mockAxiosInstance.post.mockResolvedValue({
+        data: { access_token: jwtToken },
+      })
+
+      await authService.getToken(mockAuthData)
+      expect(mockAxiosInstance.post).toHaveBeenCalledTimes(1)
+
+      // Advance time to within the 5-minute buffer of the 1-hour expiration (55 min + 1ms)
+      vi.advanceTimersByTime(55 * 60 * 1000 + 1)
+
+      // Token should be considered expired based on JWT's exp claim
+      expect(authService.isTokenExpired()).toBe(true)
+
+      // Should fetch a new token
+      await authService.getToken(mockAuthData)
+      expect(mockAxiosInstance.post).toHaveBeenCalledTimes(2)
+    })
+
+    it("should fall back to default 4-hour validity when JWT has no exp claim", async () => {
+      // mockAccessToken is a plain string, not a valid JWT — extraction will fail
+      mockAxiosInstance.post.mockResolvedValue({
+        data: { access_token: mockAccessToken },
+      })
+
+      await authService.getToken(mockAuthData)
+
+      // Advance to 3 hours 54 minutes (just outside the 5-min buffer of 4 hours)
+      vi.advanceTimersByTime(3 * 60 * 60 * 1000 + 54 * 60 * 1000)
+
+      // Should still be valid (using 4-hour default)
+      expect(authService.isTokenExpired()).toBe(false)
     })
 
     it("should fetch new token when within 5-minute buffer of expiration", async () => {

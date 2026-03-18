@@ -17,7 +17,7 @@ export class ApiService {
   private readonly authFormData: PartialAuthFormData
   private readonly authService: AuthService
   private readonly apiUrl: string
-  private readonly challenge: string
+  private challenge: string
   private readonly keypairService: KeypairService
   private readonly privateKey: string
 
@@ -52,6 +52,32 @@ export class ApiService {
       (error) => Promise.reject(error),
     )
 
+    // Add response interceptor to handle 401 errors by refreshing the token and retrying once
+    this.apiClient.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config
+
+        // Only retry once and only on 401 responses
+        if (
+          axios.isAxiosError(error) &&
+          error.response?.status === 401 &&
+          originalRequest &&
+          !originalRequest._retried
+        ) {
+          originalRequest._retried = true
+
+          // Generate a fresh challenge and force-refresh the token
+          const token = await this.getValidToken(this.privateKey, true)
+          originalRequest.headers.Authorization = `Bearer ${token}`
+
+          return this.apiClient(originalRequest)
+        }
+
+        return Promise.reject(error)
+      },
+    )
+
     // Validate provided private key
     const privateKeyAlgorithm = KeypairService.detectKeyType(this.privateKey)
     if (privateKeyAlgorithm === "unknown") {
@@ -73,6 +99,9 @@ export class ApiService {
    */
   private async getValidToken(privateKey: string, forceRefresh = false): Promise<string> {
     if (forceRefresh || this.authService.isTokenExpired()) {
+      // Generate a fresh challenge for each token refresh to avoid stale challenge rejection
+      this.challenge = this.authFormData.challenge ? this.authFormData.challenge : uuidv4()
+
       const authData = {
         signature: this.keypairService.sign(privateKey, this.challenge),
         challenge: this.challenge,

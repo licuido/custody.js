@@ -233,6 +233,11 @@ export class RippleCustody {
      * @returns The current JWT token.
      */
     getCurrentToken: () => this.authService.getCurrentToken(),
+
+    /**
+     * @returns The current JWT token expiration, if available.
+     */
+    getTokenExpiration: () => this.authService.getTokenExpiration(),
   }
 
   // Domains namespace

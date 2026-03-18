@@ -6,20 +6,20 @@ import { ApiService } from "./api.service.js"
 
 // Mock dependencies
 vi.mock("axios", () => {
-  const mockAxiosInstance = {
-    get: vi.fn(),
-    post: vi.fn(),
-    defaults: { paramsSerializer: null },
-    interceptors: {
-      request: {
-        use: vi.fn(),
-      },
-    },
+  // Make the instance callable (Axios instances are callable for retries)
+  const mockAxiosInstance: any = vi.fn(() => Promise.resolve({ data: {} }))
+  mockAxiosInstance.get = vi.fn()
+  mockAxiosInstance.post = vi.fn()
+  mockAxiosInstance.defaults = { paramsSerializer: null }
+  mockAxiosInstance.interceptors = {
+    request: { use: vi.fn() },
+    response: { use: vi.fn() },
   }
+
   return {
     default: {
       create: vi.fn(() => mockAxiosInstance),
-      isAxiosError: vi.fn((error) => error?.isAxiosError === true),
+      isAxiosError: vi.fn((error: any) => error?.isAxiosError === true),
     },
   }
 })
@@ -66,11 +66,15 @@ MC4CAQAwBQYDK2VwBCIEIOrNTK/ChGQUdwitzdtwnhxfaBgRhR7vQaUxwXWTptnL
     get: ReturnType<typeof vi.fn>
     post: ReturnType<typeof vi.fn>
     defaults: { paramsSerializer: unknown }
-    interceptors: { request: { use: ReturnType<typeof vi.fn> } }
+    interceptors: {
+      request: { use: ReturnType<typeof vi.fn> }
+      response: { use: ReturnType<typeof vi.fn> }
+    }
   }
   let requestInterceptor: (
     config: InternalAxiosRequestConfig,
   ) => Promise<InternalAxiosRequestConfig>
+  let responseErrorInterceptor: (error: any) => Promise<any>
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -92,8 +96,12 @@ MC4CAQAwBQYDK2VwBCIEIOrNTK/ChGQUdwitzdtwnhxfaBgRhR7vQaUxwXWTptnL
     })
 
     // Capture the request interceptor
-    const interceptorCall = mockAxiosInstance.interceptors.request.use.mock.calls[0]
-    requestInterceptor = interceptorCall?.[0]
+    const requestInterceptorCall = mockAxiosInstance.interceptors.request.use.mock.calls[0]
+    requestInterceptor = requestInterceptorCall?.[0]
+
+    // Capture the response error interceptor
+    const responseInterceptorCall = mockAxiosInstance.interceptors.response.use.mock.calls[0]
+    responseErrorInterceptor = responseInterceptorCall?.[1]
   })
 
   describe("constructor", () => {
@@ -131,6 +139,11 @@ MC4CAQAwBQYDK2VwBCIEIOrNTK/ChGQUdwitzdtwnhxfaBgRhR7vQaUxwXWTptnL
     it("should register request interceptor", () => {
       expect(mockAxiosInstance.interceptors.request.use).toHaveBeenCalledTimes(1)
       expect(typeof requestInterceptor).toBe("function")
+    })
+
+    it("should register response interceptor", () => {
+      expect(mockAxiosInstance.interceptors.response.use).toHaveBeenCalledTimes(1)
+      expect(typeof responseErrorInterceptor).toBe("function")
     })
 
     it("should throw error for unsupported private key algorithm", () => {
@@ -417,6 +430,114 @@ MC4CAQAwBQYDK2VwBCIEIOrNTK/ChGQUdwitzdtwnhxfaBgRhR7vQaUxwXWTptnL
         expect(error).toBeInstanceOf(CustodyError)
         expect((error as CustodyError).message).toBe("Serialization failed")
       }
+    })
+  })
+
+  describe("response interceptor (401 retry)", () => {
+    it("should retry request with refreshed token on 401", async () => {
+      mockAuthService.isTokenExpired.mockReturnValue(true)
+      mockAuthService.getToken.mockResolvedValue("refreshed-jwt-token")
+
+      const retryData = { id: "123", retried: true }
+      // Mock the callable axios instance for retry
+      ;(mockAxiosInstance as any as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: retryData,
+      })
+
+      const originalConfig = { headers: { Authorization: "Bearer old-token" }, _retried: false }
+      const error401 = {
+        isAxiosError: true,
+        response: { status: 401, data: { reason: "Unauthorized" } },
+        config: originalConfig,
+      }
+
+      const result = await responseErrorInterceptor(error401)
+
+      // Token should have been refreshed
+      expect(mockAuthService.getToken).toHaveBeenCalled()
+      // Original request should be marked as retried
+      expect(originalConfig._retried).toBe(true)
+      // Authorization header should be updated
+      expect(originalConfig.headers.Authorization).toBe("Bearer refreshed-jwt-token")
+      // Should return the retried response
+      expect(result).toEqual({ data: retryData })
+    })
+
+    it("should not retry on non-401 errors", async () => {
+      const error500 = {
+        isAxiosError: true,
+        response: { status: 500, data: { reason: "Server Error" } },
+        config: { headers: {} },
+      }
+
+      await expect(responseErrorInterceptor(error500)).rejects.toEqual(error500)
+      expect(mockAuthService.getToken).not.toHaveBeenCalled()
+    })
+
+    it("should not retry if already retried (_retried flag)", async () => {
+      const error401 = {
+        isAxiosError: true,
+        response: { status: 401, data: { reason: "Unauthorized" } },
+        config: { headers: {}, _retried: true },
+      }
+
+      await expect(responseErrorInterceptor(error401)).rejects.toEqual(error401)
+      expect(mockAuthService.getToken).not.toHaveBeenCalled()
+    })
+
+    it("should not retry when config is missing", async () => {
+      const error401 = {
+        isAxiosError: true,
+        response: { status: 401, data: { reason: "Unauthorized" } },
+        config: undefined,
+      }
+
+      await expect(responseErrorInterceptor(error401)).rejects.toEqual(error401)
+    })
+  })
+
+  describe("challenge refresh", () => {
+    it("should generate a fresh challenge on token refresh", async () => {
+      const { v4 } = await import("uuid")
+      vi.mocked(v4).mockClear()
+
+      mockAuthService.isTokenExpired.mockReturnValue(true)
+      mockAuthService.getToken.mockResolvedValue("new-token")
+
+      const mockConfig = { headers: {} } as InternalAxiosRequestConfig
+      await requestInterceptor(mockConfig)
+
+      // v4 should have been called to generate a fresh challenge
+      expect(vi.mocked(v4)).toHaveBeenCalled()
+    })
+
+    it("should not regenerate challenge when user provided one", async () => {
+      const { v4 } = await import("uuid")
+      vi.mocked(v4).mockClear()
+      vi.clearAllMocks()
+
+      const customChallenge = "user-provided-challenge"
+      const serviceWithChallenge = new ApiService({
+        apiUrl: mockApiUrl,
+        authFormData: { publicKey: mockPublicKey, challenge: customChallenge },
+        authService: mockAuthService as any,
+        privateKey: mockPrivateKey,
+      })
+
+      mockAuthService.isTokenExpired.mockReturnValue(true)
+      mockAuthService.getToken.mockResolvedValue("new-token")
+
+      // Capture the new request interceptor
+      const newInterceptorCall = mockAxiosInstance.interceptors.request.use.mock.calls.at(-1)
+      const newRequestInterceptor = newInterceptorCall?.[0]
+
+      const mockConfig = { headers: {} } as InternalAxiosRequestConfig
+      await newRequestInterceptor(mockConfig)
+
+      // getToken should have been called with the user-provided challenge
+      expect(mockAuthService.getToken).toHaveBeenCalledWith(
+        expect.objectContaining({ challenge: customChallenge }),
+      )
     })
   })
 })

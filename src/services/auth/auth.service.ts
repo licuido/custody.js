@@ -17,7 +17,7 @@ export class AuthService {
   private authClient: AxiosInstance
   private accessToken: string = ""
   private tokenExpiration: number | null = null // timestamp in milliseconds
-  private readonly TOKEN_VALIDITY = 4 * 60 * 60 * 1000 // 4 hours in milliseconds
+  private readonly DEFAULT_TOKEN_VALIDITY = 4 * 60 * 60 * 1000 // 4 hours in milliseconds
 
   /**
    * Stores the in-flight token refresh promise to prevent concurrent refresh requests.
@@ -59,8 +59,9 @@ export class AuthService {
       const response = await this.authClient.post<AuthResponse>("", formData)
       this.accessToken = response.data.access_token
 
-      // Set token expiration to 4 hours from now
-      this.tokenExpiration = Date.now() + this.TOKEN_VALIDITY
+      // Extract expiration from the JWT's exp claim, fall back to default validity
+      const exp = this.extractExpFromJwt(this.accessToken)
+      this.tokenExpiration = exp ? exp * 1000 : Date.now() + this.DEFAULT_TOKEN_VALIDITY
       return this.accessToken
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -103,6 +104,22 @@ export class AuthService {
   }
 
   /**
+   * Extract the `exp` (expiration) claim from a JWT token's payload.
+   * @returns The `exp` value in seconds (Unix timestamp), or null if extraction fails.
+   */
+  private extractExpFromJwt(token: string): number | null {
+    try {
+      const payload = token.split(".")[1]
+      if (!payload) return null
+
+      const decoded = JSON.parse(Buffer.from(payload, "base64url").toString())
+      return typeof decoded.exp === "number" ? decoded.exp : null
+    } catch {
+      return null
+    }
+  }
+
+  /**
    * Check if the current token is expired or about to expire.
    */
   isTokenExpired(): boolean {
@@ -119,5 +136,12 @@ export class AuthService {
    */
   getCurrentToken(): string | null {
     return this.accessToken
+  }
+
+  /**
+   * Get the current JWT token expiration, if available.
+   */
+  getTokenExpiration(): number | null {
+    return this.tokenExpiration
   }
 }
