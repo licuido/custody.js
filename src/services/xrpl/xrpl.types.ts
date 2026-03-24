@@ -114,11 +114,19 @@ export type XrplIntentOptions = {
   /**
    * Custom properties to include in the intent request.
    */
-  customProperties?: Record<string, string>
+  requestCustomProperties?: Record<string, string>
   /**
-   * Intent ID to use for the intent. If not provided, a new UUID will be generated.
+   * Custom properties to include in the intent payload.
    */
-  intentId?: string
+  payloadCustomProperties?: Record<string, string>
+  /**
+   * Request ID to use for the intent. If not provided, a new UUID will be generated.
+   */
+  requestId?: string
+  /**
+   * Payload ID to use for the intent. If not provided, a new UUID will be generated.
+   */
+  payloadId?: string
 }
 
 export type Core_XrplOperation = components["schemas"]["Core_XrplOperation"]
