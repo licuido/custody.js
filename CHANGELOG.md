@@ -1,5 +1,11 @@
 # custody
 
+## 0.7.0
+
+### Minor Changes
+
+- e912ce9: Fix request and payload id in xrpl service
+
 ## 0.6.0
 
 ### Minor Changes
