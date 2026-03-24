@@ -10,7 +10,7 @@ import {
   type Core_ProposeIntentBody,
 } from "../intents/index.js"
 import type {
-  BuildIntentProps,
+  BuildTransactionIntentProps,
   Core_XrplOperation,
   CustodyAccountSet,
   CustodyClawback,
@@ -261,7 +261,7 @@ export class XrplService {
     // Remove Account from operation data (it's only used to find the sender)
     const { Account, ...operation } = data
 
-    const intent = this.buildIntent({
+    const intent = this.buildTransactionIntent({
       operation,
       context,
       options,
@@ -274,7 +274,7 @@ export class XrplService {
    * Builds an XRPL intent body.
    * @private
    */
-  private buildIntent({ operation, context, options }: BuildIntentProps): Core_ProposeIntentBody {
+  private buildTransactionIntent({ operation, context, options }: BuildTransactionIntentProps): Core_ProposeIntentBody {
     const feePriority = options.feePriority ?? "Low"
     const expiryDays = options.expiryDays ?? 1
     const requestId = options.requestId ?? uuidv7()

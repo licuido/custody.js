@@ -131,7 +131,7 @@ export type XrplIntentOptions = {
 
 export type Core_XrplOperation = components["schemas"]["Core_XrplOperation"]
 
-export type BuildIntentProps = {
+export type BuildTransactionIntentProps = {
   operation: Core_XrplOperation
   context: IntentContext
   options: XrplIntentOptions
