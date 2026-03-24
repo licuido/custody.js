@@ -274,7 +274,11 @@ export class XrplService {
    * Builds an XRPL intent body.
    * @private
    */
-  private buildTransactionIntent({ operation, context, options }: BuildTransactionIntentProps): Core_ProposeIntentBody {
+  private buildTransactionIntent({
+    operation,
+    context,
+    options,
+  }: BuildTransactionIntentProps): Core_ProposeIntentBody {
     const feePriority = options.feePriority ?? "Low"
     const expiryDays = options.expiryDays ?? 1
     const requestId = options.requestId ?? uuidv7()
