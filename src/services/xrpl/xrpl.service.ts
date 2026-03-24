@@ -10,7 +10,7 @@ import {
   type Core_ProposeIntentBody,
 } from "../intents/index.js"
 import type {
-  BuildIntentProps,
+  BuildTransactionIntentProps,
   Core_XrplOperation,
   CustodyAccountSet,
   CustodyClawback,
@@ -199,7 +199,8 @@ export class XrplService {
 
     const base64Encoded = Buffer.from(encoded).toString("base64")
 
-    const intentId = options.intentId ?? uuidv7()
+    const requestId = options.requestId ?? uuidv7()
+    const payloadId = options.payloadId ?? uuidv7()
 
     const intent: Core_ProposeIntentBody = {
       request: {
@@ -211,13 +212,13 @@ export class XrplService {
           .add(options.expiryDays ?? 1, "day")
           .toISOString(),
         targetDomainId: context.domainId,
-        id: intentId,
-        customProperties: options.customProperties ?? {},
+        id: requestId,
+        customProperties: options.requestCustomProperties ?? {},
         payload: {
-          id: uuidv7(),
+          id: payloadId,
           accountId: context.accountId,
           ledgerId: context.ledgerId,
-          customProperties: {},
+          customProperties: options.payloadCustomProperties ?? {},
           content: {
             value: base64Encoded,
             type: "Unsafe",
@@ -260,7 +261,7 @@ export class XrplService {
     // Remove Account from operation data (it's only used to find the sender)
     const { Account, ...operation } = data
 
-    const intent = this.buildIntent({
+    const intent = this.buildTransactionIntent({
       operation,
       context,
       options,
@@ -273,10 +274,15 @@ export class XrplService {
    * Builds an XRPL intent body.
    * @private
    */
-  private buildIntent({ operation, context, options }: BuildIntentProps): Core_ProposeIntentBody {
+  private buildTransactionIntent({
+    operation,
+    context,
+    options,
+  }: BuildTransactionIntentProps): Core_ProposeIntentBody {
     const feePriority = options.feePriority ?? "Low"
     const expiryDays = options.expiryDays ?? 1
-    const intentId = options.intentId ?? uuidv7()
+    const requestId = options.requestId ?? uuidv7()
+    const payloadId = options.payloadId ?? uuidv7()
 
     return {
       request: {
@@ -284,13 +290,13 @@ export class XrplService {
           domainId: context.domainId,
           id: context.userId,
         },
-        customProperties: options.customProperties ?? {},
+        customProperties: options.requestCustomProperties ?? {},
         expiryAt: dayjs().add(expiryDays, "day").toISOString(),
-        id: intentId,
+        id: requestId,
         payload: {
           accountId: context.accountId,
-          customProperties: {},
-          id: uuidv7(),
+          customProperties: options.payloadCustomProperties ?? {},
+          id: payloadId,
           ledgerId: context.ledgerId,
           parameters: {
             feeStrategy: {

@@ -139,7 +139,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "High",
         expiryDays: 7,
-        customProperties: { orderId: "order-123" },
+        requestCustomProperties: { orderId: "order-123" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -355,8 +355,9 @@ describe("XrplService", () => {
       }
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-payment-intent-id-123"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-payment-request-id-123"
+      const customPayloadId = "custom-payment-payload-id-123"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
@@ -364,10 +365,14 @@ describe("XrplService", () => {
         requestId: "request-123",
       } as any)
 
-      await xrplService.sendPayment(mockPayment, { intentId: customIntentId })
+      await xrplService.sendPayment(mockPayment, {
+        requestId: customRequestId,
+        payloadId: customPayloadId,
+      })
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
   })
 
@@ -430,7 +435,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "Medium",
         expiryDays: 3,
-        customProperties: { reference: "trustline-setup" },
+        requestCustomProperties: { reference: "trustline-setup" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -523,8 +528,9 @@ describe("XrplService", () => {
       )
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-trustline-intent-id-456"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-trustline-request-id-456"
+      const customPayloadId = "custom-trustline-payload-id-456"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
@@ -532,10 +538,14 @@ describe("XrplService", () => {
         requestId: "request-123",
       } as any)
 
-      await xrplService.createTrustline(mockTrustline, { intentId: customIntentId })
+      await xrplService.createTrustline(mockTrustline, {
+        requestId: customRequestId,
+        payloadId: customPayloadId,
+      })
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
 
     it("should create trustline with multiple flags", async () => {
@@ -666,7 +676,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "High",
         expiryDays: 5,
-        customProperties: { reference: "deposit-preauth-setup" },
+        requestCustomProperties: { reference: "deposit-preauth-setup" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -802,7 +812,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "High",
         expiryDays: 2,
-        customProperties: { reference: "clawback-enforcement" },
+        requestCustomProperties: { reference: "clawback-enforcement" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -904,8 +914,9 @@ describe("XrplService", () => {
       )
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-clawback-intent-id-789"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-clawback-request-id-789"
+      const customPayloadId = "custom-clawback-payload-id-789"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
@@ -913,10 +924,14 @@ describe("XrplService", () => {
         requestId: "request-123",
       } as any)
 
-      await xrplService.clawback(mockClawback, { intentId: customIntentId })
+      await xrplService.clawback(mockClawback, {
+        requestId: customRequestId,
+        payloadId: customPayloadId,
+      })
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
   })
 
@@ -1006,7 +1021,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "Medium",
         expiryDays: 3,
-        customProperties: { reference: "mpt-authorize" },
+        requestCustomProperties: { reference: "mpt-authorize" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -1074,8 +1089,9 @@ describe("XrplService", () => {
       )
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-mptauthorize-intent-id-7890"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-mptauthorize-request-id-7890"
+      const customPayloadId = "custom-mptauthorize-payload-id-7890"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
@@ -1083,10 +1099,14 @@ describe("XrplService", () => {
         requestId: "request-123",
       } as any)
 
-      await xrplService.mpTokenAuthorize(mockMpTokenAuthorize, { intentId: customIntentId })
+      await xrplService.mpTokenAuthorize(mockMpTokenAuthorize, {
+        requestId: customRequestId,
+        payloadId: customPayloadId,
+      })
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
   })
 
@@ -1278,7 +1298,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "High",
         expiryDays: 7,
-        customProperties: { reference: "dex-trade" },
+        requestCustomProperties: { reference: "dex-trade" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -1344,8 +1364,9 @@ describe("XrplService", () => {
       )
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-offercreate-intent-id-789"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-offercreate-request-id-789"
+      const customPayloadId = "custom-offercreate-payload-id-789"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
@@ -1353,10 +1374,14 @@ describe("XrplService", () => {
         requestId: "request-123",
       } as any)
 
-      await xrplService.offerCreate(mockOfferCreate, { intentId: customIntentId })
+      await xrplService.offerCreate(mockOfferCreate, {
+        requestId: customRequestId,
+        payloadId: customPayloadId,
+      })
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
   })
 
@@ -1560,7 +1585,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "Medium",
         expiryDays: 2,
-        customProperties: { reference: "account-config" },
+        requestCustomProperties: { reference: "account-config" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -1626,8 +1651,9 @@ describe("XrplService", () => {
       )
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-accountset-intent-id-7890"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-accountset-request-id-7890"
+      const customPayloadId = "custom-accountset-payload-id-7890"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
@@ -1635,10 +1661,14 @@ describe("XrplService", () => {
         requestId: "request-123",
       } as any)
 
-      await xrplService.accountSet(mockAccountSet, { intentId: customIntentId })
+      await xrplService.accountSet(mockAccountSet, {
+        requestId: customRequestId,
+        payloadId: customPayloadId,
+      })
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
   })
 
@@ -1760,7 +1790,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "High",
         expiryDays: 5,
-        customProperties: { reference: "mpt-issuance-create" },
+        requestCustomProperties: { reference: "mpt-issuance-create" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -1834,8 +1864,9 @@ describe("XrplService", () => {
       )
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-mptissuancecreate-intent-id-123"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-mptissuancecreate-request-id-123"
+      const customPayloadId = "custom-mptissuancecreate-payload-id-123"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
@@ -1844,11 +1875,13 @@ describe("XrplService", () => {
       } as any)
 
       await xrplService.mpTokenIssuanceCreate(mockMpTokenIssuanceCreate, {
-        intentId: customIntentId,
+        requestId: customRequestId,
+        payloadId: customPayloadId,
       })
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
   })
 
@@ -2004,7 +2037,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "Medium",
         expiryDays: 3,
-        customProperties: { reference: "mpt-issuance-set" },
+        requestCustomProperties: { reference: "mpt-issuance-set" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -2076,8 +2109,9 @@ describe("XrplService", () => {
       )
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-mptissuanceset-intent-id-456"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-mptissuanceset-request-id-456"
+      const customPayloadId = "custom-mptissuanceset-payload-id-456"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
@@ -2085,10 +2119,14 @@ describe("XrplService", () => {
         requestId: "request-123",
       } as any)
 
-      await xrplService.mpTokenIssuanceSet(mockMpTokenIssuanceSet, { intentId: customIntentId })
+      await xrplService.mpTokenIssuanceSet(mockMpTokenIssuanceSet, {
+        requestId: customRequestId,
+        payloadId: customPayloadId,
+      })
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
   })
 
@@ -2149,7 +2187,7 @@ describe("XrplService", () => {
       const options: XrplIntentOptions = {
         feePriority: "High",
         expiryDays: 1,
-        customProperties: { reference: "mpt-issuance-destroy" },
+        requestCustomProperties: { reference: "mpt-issuance-destroy" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -2223,8 +2261,9 @@ describe("XrplService", () => {
       )
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-mptissuancedestroy-intent-id-789"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-mptissuancedestroy-request-id-789"
+      const customPayloadId = "custom-mptissuancedestroy-payload-id-789"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
@@ -2233,11 +2272,13 @@ describe("XrplService", () => {
       } as any)
 
       await xrplService.mpTokenIssuanceDestroy(mockMpTokenIssuanceDestroy, {
-        intentId: customIntentId,
+        requestId: customRequestId,
+        payloadId: customPayloadId,
       })
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
 
     it("should destroy MPToken with different issuance IDs", async () => {
@@ -2322,7 +2363,7 @@ describe("XrplService", () => {
     it("should create raw sign intent with custom options", async () => {
       const options: XrplIntentOptions = {
         expiryDays: 7,
-        customProperties: { reference: "raw-sign-test" },
+        requestCustomProperties: { reference: "raw-sign-test" },
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -2338,10 +2379,12 @@ describe("XrplService", () => {
       expect(intentCall.request.expiryAt).toBeDefined()
     })
 
-    it("should use provided intentId when specified", async () => {
-      const customIntentId = "custom-intent-id-123"
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-request-id-123"
+      const customPayloadId = "custom-payload-id-123"
       const options: XrplIntentOptions = {
-        intentId: customIntentId,
+        requestId: customRequestId,
+        payloadId: customPayloadId,
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
@@ -2353,7 +2396,8 @@ describe("XrplService", () => {
       await xrplService.rawSign(mockXrplTransaction, options)
 
       const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
-      expect(intentCall.request.id).toBe(customIntentId)
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
 
     it("should pass domainId to resolveContext when specified", async () => {
