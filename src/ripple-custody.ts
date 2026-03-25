@@ -922,5 +922,13 @@ export class RippleCustody {
       xrplTransaction: SubmittableTransaction,
       options?: XrplIntentOptions,
     ): Promise<Core_IntentResponse> => this.xrplService.rawSign(xrplTransaction, options),
+
+    /**
+     * Get the compressed secp256k1 public key for an XRPL account.
+     * @param params - The domain ID and account ID
+     * @returns The compressed public key in uppercase hex format
+     */
+    getPublicKey: async (params: { domainId: string; accountId: string }): Promise<string> =>
+      this.xrplService.getPublicKey(params),
   }
 }

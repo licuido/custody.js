@@ -76,6 +76,7 @@ describe("XrplService", () => {
 
     mockAccountsService = {
       findByAddress: vi.fn(),
+      getAccount: vi.fn(),
     } as unknown as AccountsService
 
     mockIntentsService = {
@@ -2522,6 +2523,168 @@ describe("XrplService", () => {
         const decodedHex = Buffer.from(content, "base64").toString("hex")
         expect(decodedHex).toBe("deadbeef01020304")
       }
+    })
+  })
+
+  describe("getPublicKey", () => {
+    // Real secp256k1 SPKI/DER public key encoded as base64 (uncompressed)
+    const mockBase64PublicKey =
+      "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEbGnS71yQ3IPhmUXe6HDWZzMkTibxMd69oH1WZAPWLDFcw4uSV5FktyG4s2TRpLDnBf71dpho3Z8kST3ZmhRBAA=="
+
+    // The expected compressed form of the above key
+    const expectedCompressedKey =
+      "026C69D2EF5C90DC83E19945DEE870D66733244E26F131DEBDA07D566403D62C31"
+
+    const mockVaultAccountResponse = {
+      data: {
+        id: mockAccountId,
+        domainId: mockDomainId,
+        alias: "test-account",
+        providerDetails: {
+          type: "Vault" as const,
+          vaultId: "vault-123",
+          keyStrategy: "VaultHard" as const,
+          keyInformation: { type: "Vault" as const },
+          keys: [
+            {
+              id: "SECP256K1_CUSTODY_1" as const,
+              derivationPath: "8'/2'",
+              publicKey: {
+                value: mockBase64PublicKey,
+                chainCode: "JR8fpOSrGhilD5Ss1ePfbNq8FgNdos+YwJ/GVuwQU1Q=",
+                type: "ExtendedPublicKey" as const,
+              },
+              type: "VaultDerived" as const,
+            },
+          ],
+        },
+        lock: { status: "Unlocked" as const },
+        metadata: { created: "2024-01-01T00:00:00Z", lastModified: "2024-01-01T00:00:00Z" },
+      },
+      signature: "sig",
+      signingKey: "key-123",
+    }
+
+    it("should return the compressed public key for a Vault account", async () => {
+      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(
+        mockVaultAccountResponse as any,
+      )
+
+      const result = await xrplService.getPublicKey({
+        domainId: mockDomainId,
+        accountId: mockAccountId,
+      })
+
+      expect(mockAccountsService.getAccount).toHaveBeenCalledWith({
+        domainId: mockDomainId,
+        accountId: mockAccountId,
+      })
+      expect(result).toBe(expectedCompressedKey)
+    })
+
+    it("should throw when the account is not a Vault account", async () => {
+      const externalAccountResponse = {
+        data: {
+          id: mockAccountId,
+          domainId: mockDomainId,
+          alias: "external-account",
+          providerDetails: {
+            type: "External" as const,
+            providerId: "provider-123",
+            locationId: "location-123",
+          },
+          lock: { status: "Unlocked" as const },
+          metadata: { created: "2024-01-01T00:00:00Z", lastModified: "2024-01-01T00:00:00Z" },
+        },
+        signature: "sig",
+        signingKey: "key-123",
+      }
+
+      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(
+        externalAccountResponse as any,
+      )
+
+      await expect(
+        xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
+      ).rejects.toThrow("Account is not a Vault account")
+    })
+
+    it("should throw when SECP256K1_CUSTODY_1 key is not found", async () => {
+      const accountWithoutKey = {
+        ...mockVaultAccountResponse,
+        data: {
+          ...mockVaultAccountResponse.data,
+          providerDetails: {
+            ...mockVaultAccountResponse.data.providerDetails,
+            keys: [
+              {
+                id: "ED25519_CUSTODY_1" as const,
+                derivationPath: "8'/1'",
+                publicKey: {
+                  value: "somekey",
+                  chainCode: "somechaincode",
+                  type: "ExtendedPublicKey" as const,
+                },
+                type: "VaultDerived" as const,
+              },
+            ],
+          },
+        },
+      }
+
+      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(accountWithoutKey as any)
+
+      await expect(
+        xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
+      ).rejects.toThrow("Public key not found for key ID SECP256K1_CUSTODY_1")
+    })
+
+    it("should throw when keys array is undefined", async () => {
+      const accountWithoutKeys = {
+        ...mockVaultAccountResponse,
+        data: {
+          ...mockVaultAccountResponse.data,
+          providerDetails: {
+            type: "Vault" as const,
+            vaultId: "vault-123",
+            keyStrategy: "VaultHard" as const,
+            keyInformation: { type: "Vault" as const },
+          },
+        },
+      }
+
+      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(accountWithoutKeys as any)
+
+      await expect(
+        xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
+      ).rejects.toThrow("Public key not found for key ID SECP256K1_CUSTODY_1")
+    })
+
+    it("should throw when the key exists but publicKey is undefined", async () => {
+      const accountWithKeyNoPublicKey = {
+        ...mockVaultAccountResponse,
+        data: {
+          ...mockVaultAccountResponse.data,
+          providerDetails: {
+            ...mockVaultAccountResponse.data.providerDetails,
+            keys: [
+              {
+                id: "SECP256K1_CUSTODY_1" as const,
+                derivationPath: "8'/2'",
+                type: "VaultDerived" as const,
+              },
+            ],
+          },
+        },
+      }
+
+      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(
+        accountWithKeyNoPublicKey as any,
+      )
+
+      await expect(
+        xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
+      ).rejects.toThrow("Public key not found for key ID SECP256K1_CUSTODY_1")
     })
   })
 })
