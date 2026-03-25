@@ -1,5 +1,11 @@
 # custody
 
+## 0.7.1
+
+### Patch Changes
+
+- 0712e4c: Fix raw signing and added getPublicKey for the XRPL
+
 ## 0.7.0
 
 ### Minor Changes
