@@ -1,6 +1,8 @@
+import { createPublicKey } from "crypto"
 import dayjs from "dayjs"
 import { v7 as uuidv7 } from "uuid"
 import { encodeForSigning, type SubmittableTransaction } from "xrpl"
+import { CustodyError } from "../../models/index.js"
 import { AccountsService } from "../accounts/index.js"
 import type { ApiService } from "../apis/index.js"
 import { DomainResolverService } from "../domain-resolver/index.js"
@@ -181,6 +183,39 @@ export class XrplService {
   }
 
   /**
+   * Retrieves the compressed secp256k1 public key for an XRPL account.
+   * @param domainId - The domain ID of the account
+   * @param accountId - The account ID
+   * @returns The compressed public key in uppercase hex format
+   * @throws {CustodyError} If the account is not a Vault account or the key is not found
+   */
+  public async getPublicKey({
+    domainId,
+    accountId,
+  }: {
+    domainId: string
+    accountId: string
+  }): Promise<string> {
+    const account = await this.accountsService.getAccount({ domainId, accountId })
+
+    const { providerDetails } = account.data
+
+    if (providerDetails.type !== "Vault") {
+      throw new CustodyError({ reason: "Account is not a Vault account" })
+    }
+
+    const key = providerDetails.keys?.find((k) => k.id === "SECP256K1_CUSTODY_1")
+
+    if (!key?.publicKey) {
+      throw new CustodyError({
+        reason: "Public key not found for key ID SECP256K1_CUSTODY_1",
+      })
+    }
+
+    return compressPublicKey(key.publicKey.value)
+  }
+
+  /**
    * Creates and proposes a raw sign intent for an XRPL transaction.
    * @param xrplTransaction - The XRPL transaction details
    * @param options - Optional configuration for the raw sign intent
@@ -197,7 +232,7 @@ export class XrplService {
 
     const encoded = encodeForSigning(xrplTransaction)
 
-    const base64Encoded = Buffer.from(encoded).toString("base64")
+    const base64Encoded = Buffer.from(encoded, "hex").toString("base64")
 
     const requestId = options.requestId ?? uuidv7()
     const payloadId = options.payloadId ?? uuidv7()
@@ -314,4 +349,23 @@ export class XrplService {
       },
     }
   }
+}
+
+/**
+ * Compresses a base64-encoded SPKI/DER secp256k1 public key to its compressed hex form.
+ * Uses Node.js built-in crypto via JWK export to extract the raw EC point coordinates.
+ */
+function compressPublicKey(base64PublicKey: string): string {
+  const publicKey = createPublicKey({
+    key: Buffer.from(base64PublicKey, "base64"),
+    format: "der",
+    type: "spki",
+  })
+
+  const jwk = publicKey.export({ format: "jwk" })
+  const x = Buffer.from(jwk.x!, "base64url")
+  const y = Buffer.from(jwk.y!, "base64url")
+  const lastByte = y[y.length - 1]!
+  const prefix = lastByte % 2 === 0 ? "02" : "03"
+  return (prefix + x.toString("hex")).toUpperCase()
 }
