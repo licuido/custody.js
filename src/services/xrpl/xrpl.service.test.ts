@@ -2566,9 +2566,7 @@ describe("XrplService", () => {
     }
 
     it("should return the compressed public key for a Vault account", async () => {
-      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(
-        mockVaultAccountResponse as any,
-      )
+      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(mockVaultAccountResponse as any)
 
       const result = await xrplService.getPublicKey({
         domainId: mockDomainId,
@@ -2600,9 +2598,7 @@ describe("XrplService", () => {
         signingKey: "key-123",
       }
 
-      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(
-        externalAccountResponse as any,
-      )
+      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(externalAccountResponse as any)
 
       await expect(
         xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
@@ -2678,9 +2674,7 @@ describe("XrplService", () => {
         },
       }
 
-      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(
-        accountWithKeyNoPublicKey as any,
-      )
+      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(accountWithKeyNoPublicKey as any)
 
       await expect(
         xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
