@@ -197,7 +197,7 @@ export class XrplService {
 
     const encoded = encodeForSigning(xrplTransaction)
 
-    const base64Encoded = Buffer.from(encoded).toString("base64")
+    const base64Encoded = Buffer.from(encoded, "hex").toString("base64")
 
     const requestId = options.requestId ?? uuidv7()
     const payloadId = options.payloadId ?? uuidv7()

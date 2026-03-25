@@ -23,7 +23,7 @@ import type {
 
 // Mock the xrpl encodeForSigning function
 vi.mock("xrpl", () => ({
-  encodeForSigning: vi.fn().mockReturnValue("mockedEncodedTransaction"),
+  encodeForSigning: vi.fn().mockReturnValue("deadbeef01020304"),
 }))
 
 describe("XrplService", () => {
@@ -2517,11 +2517,10 @@ describe("XrplService", () => {
         intentCall.request.payload.content.type === "Unsafe"
       ) {
         const content = intentCall.request.payload.content.value
-        // Verify it's valid base64
+        // Verify it's valid base64 that decodes back to the original hex
         expect(() => Buffer.from(content, "base64")).not.toThrow()
-        // Verify it decodes to the mocked encoded transaction
-        const decoded = Buffer.from(content, "base64").toString()
-        expect(decoded).toBe("mockedEncodedTransaction")
+        const decodedHex = Buffer.from(content, "base64").toString("hex")
+        expect(decodedHex).toBe("deadbeef01020304")
       }
     })
   })
