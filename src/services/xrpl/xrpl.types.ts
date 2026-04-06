@@ -136,3 +136,47 @@ export type BuildTransactionIntentProps = {
   context: IntentContext
   options: XrplIntentOptions
 }
+
+// Raw sign & wait
+
+/**
+ * Options for polling the manifest signature after a raw sign intent.
+ */
+export type WaitForSignatureOptions = {
+  /** Maximum number of polling attempts (default: 10) */
+  maxRetries?: number
+  /** Interval between polling attempts in milliseconds (default: 3000) */
+  intervalMs?: number
+  /** Maximum retries when manifest returns 404 (default: 3) */
+  notFoundRetries?: number
+  /** Interval between 404 retries in milliseconds (default: 1000) */
+  notFoundIntervalMs?: number
+  /** Callback on each polling attempt */
+  onAttempt?: (attempt: number) => void
+}
+
+/**
+ * Options for rawSignAndWait: intent options + polling configuration.
+ */
+export type RawSignAndWaitOptions = XrplIntentOptions & {
+  /** Polling options for waiting for the manifest signature */
+  polling?: WaitForSignatureOptions
+}
+
+/**
+ * Result of rawSignAndWait / rawSignBatchAndWait.
+ */
+export type RawSignAndWaitResult = {
+  /** The signature in uppercase hex */
+  signature: string
+  /** The compressed secp256k1 public key in uppercase hex */
+  signingPubKey: string
+}
+
+/**
+ * Options for rawSignBatch / rawSignBatchAndWait: intent options + polling configuration.
+ */
+export type RawSignBatchOptions = XrplIntentOptions & {
+  /** Polling options for waiting for the manifest signature */
+  polling?: WaitForSignatureOptions
+}

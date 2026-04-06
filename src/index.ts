@@ -180,6 +180,10 @@ export type {
   CustodyOfferCreate,
   CustodyPayment,
   CustodyTrustline,
+  RawSignAndWaitOptions,
+  RawSignAndWaitResult,
+  RawSignBatchOptions,
+  WaitForSignatureOptions,
   XrplIntentOptions,
 } from "./services/xrpl/index.js"
 

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { SubmittableTransaction } from "xrpl"
+import type { Batch, SubmittableTransaction } from "xrpl"
+import { encodeForSigningBatch, hashes } from "xrpl"
 import { CustodyError } from "../../models/index.js"
 import { AccountsService } from "../accounts/index.js"
 import type { ApiService } from "../apis/index.js"
@@ -21,9 +22,13 @@ import type {
   XrplIntentOptions,
 } from "./xrpl.types.js"
 
-// Mock the xrpl encodeForSigning function
+// Mock the xrpl encoding and hashing functions
 vi.mock("xrpl", () => ({
   encodeForSigning: vi.fn().mockReturnValue("deadbeef01020304"),
+  encodeForSigningBatch: vi.fn().mockReturnValue("batchencoded0102"),
+  hashes: {
+    hashSignedTx: vi.fn().mockReturnValue("TXHASH0123456789"),
+  },
 }))
 
 describe("XrplService", () => {
@@ -77,6 +82,7 @@ describe("XrplService", () => {
     mockAccountsService = {
       findByAddress: vi.fn(),
       getAccount: vi.fn(),
+      getManifest: vi.fn(),
     } as unknown as AccountsService
 
     mockIntentsService = {
@@ -2679,6 +2685,244 @@ describe("XrplService", () => {
       await expect(
         xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
       ).rejects.toThrow("Public key not found for key ID SECP256K1_CUSTODY_1")
+    })
+  })
+
+  describe("rawSignAndWait", () => {
+    const mockXrplTransaction: SubmittableTransaction = {
+      TransactionType: "Payment",
+      Account: mockAddress,
+      Destination: "rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH",
+      Amount: "1000000",
+      Fee: "12",
+      Sequence: 1,
+    }
+
+    const mockSigningPubKey = "02AABBCCDD"
+
+    // base64 signature from manifest
+    const mockBase64Signature = Buffer.from("aabbccdd", "hex").toString("base64")
+
+    const mockManifestWithSignature = {
+      data: {
+        value: {
+          type: "Unsafe" as const,
+          signature: mockBase64Signature,
+        },
+      },
+    }
+
+    it("should auto-set SigningPubKey and return signature", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.spyOn(xrplService, "getPublicKey").mockResolvedValue(mockSigningPubKey)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockAccountsService.getManifest).mockResolvedValue(mockManifestWithSignature as any)
+
+      const tx = { ...mockXrplTransaction }
+      const result = await xrplService.rawSignAndWait(tx, {
+        polling: { maxRetries: 1, intervalMs: 0 },
+      })
+
+      expect(result.signature).toBe("AABBCCDD")
+      expect(result.signingPubKey).toBe(mockSigningPubKey)
+      expect(tx.SigningPubKey).toBe(mockSigningPubKey)
+    })
+
+    it("should not override SigningPubKey if already set", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockAccountsService.getManifest).mockResolvedValue(mockManifestWithSignature as any)
+
+      const tx = { ...mockXrplTransaction, SigningPubKey: "EXISTING_PUB_KEY" }
+      const result = await xrplService.rawSignAndWait(tx, {
+        polling: { maxRetries: 1, intervalMs: 0 },
+      })
+
+      expect(result.signingPubKey).toBe("EXISTING_PUB_KEY")
+      // getAccount should NOT have been called since SigningPubKey was already set
+      expect(mockAccountsService.getAccount).not.toHaveBeenCalled()
+    })
+
+    it("should throw CustodyError on timeout", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      // Manifest has no value yet (not signed)
+      vi.mocked(mockAccountsService.getManifest).mockResolvedValue({
+        data: { value: undefined },
+      } as any)
+
+      const tx = { ...mockXrplTransaction, SigningPubKey: "EXISTING_PUB_KEY" }
+      await expect(
+        xrplService.rawSignAndWait(tx, {
+          polling: { maxRetries: 2, intervalMs: 0 },
+        }),
+      ).rejects.toThrow("Manifest signature not available after maximum retries")
+    })
+
+    it("should call onAttempt callback", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockAccountsService.getManifest)
+        .mockResolvedValueOnce({ data: {} } as any)
+        .mockResolvedValueOnce(mockManifestWithSignature as any)
+
+      const onAttempt = vi.fn()
+      const tx = { ...mockXrplTransaction, SigningPubKey: "PK" }
+      await xrplService.rawSignAndWait(tx, {
+        polling: { maxRetries: 3, intervalMs: 0, onAttempt },
+      })
+
+      expect(onAttempt).toHaveBeenCalledWith(1)
+      expect(onAttempt).toHaveBeenCalledWith(2)
+      expect(onAttempt).toHaveBeenCalledTimes(2)
+    })
+
+    it("should retry on 404 manifest", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockAccountsService.getManifest)
+        .mockRejectedValueOnce(new CustodyError({ reason: "Not found" }, 404))
+        .mockResolvedValueOnce(mockManifestWithSignature as any)
+
+      const tx = { ...mockXrplTransaction, SigningPubKey: "PK" }
+      const result = await xrplService.rawSignAndWait(tx, {
+        polling: { maxRetries: 1, intervalMs: 0, notFoundRetries: 2, notFoundIntervalMs: 0 },
+      })
+
+      expect(result.signature).toBe("AABBCCDD")
+    })
+  })
+
+  describe("rawSignBatch", () => {
+    const mockBatch: Batch = {
+      TransactionType: "Batch",
+      Account: "rSubmitterAddress",
+      Flags: 65536, // tfAllOrNothing
+      RawTransactions: [
+        {
+          RawTransaction: {
+            TransactionType: "Payment",
+            Account: mockAddress,
+            Destination: "rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH",
+            Amount: "1000000",
+            Fee: "0",
+            Sequence: 0,
+            SigningPubKey: "",
+          },
+        },
+      ],
+    }
+
+    it("should propose a raw sign intent with batch-encoded bytes", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+
+      await xrplService.rawSignBatch(mockBatch, mockAddress)
+
+      expect(hashes.hashSignedTx).toHaveBeenCalledWith(mockBatch.RawTransactions[0].RawTransaction)
+      expect(encodeForSigningBatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flags: mockBatch.Flags,
+          txIDs: ["TXHASH0123456789"],
+        }),
+      )
+
+      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      expect(intentCall.request.type).toBe("Propose")
+      if (intentCall.request.payload.type === "v0_SignManifest") {
+        expect(intentCall.request.payload.content.type).toBe("Unsafe")
+        if (intentCall.request.payload.content.type === "Unsafe") {
+          // "batchencoded0102" hex → base64
+          const expectedBase64 = Buffer.from("batchencoded0102", "hex").toString("base64")
+          expect(intentCall.request.payload.content.value).toBe(expectedBase64)
+        }
+      }
+    })
+
+    it("should resolve context using signerAddress, not batch Account", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+
+      await xrplService.rawSignBatch(mockBatch, mockAddress)
+
+      // Should resolve with the inner account address, not the batch submitter
+      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+    })
+
+    it("should throw if signerAddress is not in any inner transaction", async () => {
+      await expect(xrplService.rawSignBatch(mockBatch, "rNotInBatchAddress")).rejects.toThrow(
+        "Address rNotInBatchAddress is not involved in any inner transaction",
+      )
+    })
+  })
+
+  describe("rawSignBatchAndWait", () => {
+    const mockBatch: Batch = {
+      TransactionType: "Batch",
+      Account: "rSubmitterAddress",
+      Flags: 65536,
+      RawTransactions: [
+        {
+          RawTransaction: {
+            TransactionType: "Payment",
+            Account: mockAddress,
+            Destination: "rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH",
+            Amount: "1000000",
+            Fee: "0",
+            Sequence: 0,
+            SigningPubKey: "",
+          },
+        },
+      ],
+    }
+
+    const mockSigningPubKey = "02AABBCCDD"
+    const mockBase64Signature = Buffer.from("aabbccdd", "hex").toString("base64")
+    const mockManifestWithSignature = {
+      data: {
+        value: {
+          type: "Unsafe" as const,
+          signature: mockBase64Signature,
+        },
+      },
+    }
+
+    it("should sign batch envelope and return signature with signingPubKey", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.spyOn(xrplService, "getPublicKey").mockResolvedValue(mockSigningPubKey)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockAccountsService.getManifest).mockResolvedValue(mockManifestWithSignature as any)
+
+      const result = await xrplService.rawSignBatchAndWait(mockBatch, mockAddress, {
+        polling: { maxRetries: 1, intervalMs: 0 },
+      })
+
+      expect(result.signature).toBe("AABBCCDD")
+      expect(result.signingPubKey).toBe(mockSigningPubKey)
+    })
+
+    it("should throw CustodyError on timeout", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.spyOn(xrplService, "getPublicKey").mockResolvedValue(mockSigningPubKey)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockAccountsService.getManifest).mockResolvedValue({
+        data: { value: undefined },
+      } as any)
+
+      await expect(
+        xrplService.rawSignBatchAndWait(mockBatch, mockAddress, {
+          polling: { maxRetries: 2, intervalMs: 0 },
+        }),
+      ).rejects.toThrow("Manifest signature not available after maximum retries")
     })
   })
 })
