@@ -100,9 +100,7 @@ export type CustodyAccountSet = Prettify<
 // Batch
 
 export type Core_XrplOperation_Batch = components["schemas"]["Core_XrplOperation_Batch"]
-export type CustodyBatch = Prettify<
-  Pick<Batch, "Account"> & Omit<Core_XrplOperation_Batch, "type">
->
+export type CustodyBatch = Prettify<Pick<Batch, "Account"> & Omit<Core_XrplOperation_Batch, "type">>
 
 // General
 

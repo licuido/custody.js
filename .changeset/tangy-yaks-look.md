@@ -2,5 +2,4 @@
 "custody": patch
 ---
 
-Add batch transaction support to XRPL service  
-
+Add batch transaction support to XRPL service
