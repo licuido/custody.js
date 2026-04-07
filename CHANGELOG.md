@@ -1,5 +1,11 @@
 # custody
 
+## 0.8.1
+
+### Patch Changes
+
+- bc028c7: Add batch transaction support to XRPL service
+
 ## 0.8.0
 
 ### Minor Changes
