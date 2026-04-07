@@ -8,8 +8,6 @@ import {
   type Batch,
   type SubmittableTransaction,
 } from "xrpl"
-
-type NonBatchTransaction = Exclude<SubmittableTransaction, Batch>
 import { sleep } from "../../helpers/async/async.js"
 import { CustodyError } from "../../models/index.js"
 import { AccountsService } from "../accounts/index.js"
@@ -236,7 +234,7 @@ export class XrplService {
    * @throws {CustodyError} If validation fails or the sender account is not found
    */
   public async rawSign(
-    xrplTransaction: NonBatchTransaction,
+    xrplTransaction: SubmittableTransaction,
     options: XrplIntentOptions = {},
   ): Promise<Core_IntentResponse> {
     const context = await this.resolveIntentContext(xrplTransaction.Account, {
@@ -263,7 +261,7 @@ export class XrplService {
    *   or the manifest signature is not available after maximum retries
    */
   public async rawSignAndWait(
-    xrplTransaction: NonBatchTransaction,
+    xrplTransaction: SubmittableTransaction,
     options: RawSignAndWaitOptions = {},
   ): Promise<RawSignAndWaitResult> {
     const context = await this.resolveIntentContext(xrplTransaction.Account, {

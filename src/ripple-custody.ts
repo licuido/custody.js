@@ -1,6 +1,4 @@
 import type { Batch, SubmittableTransaction } from "xrpl"
-
-type NonBatchTransaction = Exclude<SubmittableTransaction, Batch>
 import type { RippleCustodyClientOptions } from "./ripple-custody.types.js"
 import {
   AccountsService,
@@ -924,7 +922,7 @@ export class RippleCustody {
      * @returns The proposed intent response
      */
     rawSign: async (
-      xrplTransaction: NonBatchTransaction,
+      xrplTransaction: SubmittableTransaction,
       options?: XrplIntentOptions,
     ): Promise<Core_IntentResponse> => this.xrplService.rawSign(xrplTransaction, options),
 
@@ -936,7 +934,7 @@ export class RippleCustody {
      * @returns The signature and signing public key in uppercase hex
      */
     rawSignAndWait: async (
-      xrplTransaction: NonBatchTransaction,
+      xrplTransaction: SubmittableTransaction,
       options?: RawSignAndWaitOptions,
     ): Promise<RawSignAndWaitResult> => this.xrplService.rawSignAndWait(xrplTransaction, options),
 
