@@ -949,7 +949,8 @@ export class RippleCustody {
       batch: Batch,
       signerAddress: string,
       options?: RawSignInnerBatchOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.rawSignInnerBatch(batch, signerAddress, options),
+    ): Promise<Core_IntentResponse> =>
+      this.xrplService.rawSignInnerBatch(batch, signerAddress, options),
 
     /**
      * Signs a Batch transaction envelope for a single inner account and waits
