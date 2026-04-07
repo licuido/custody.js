@@ -316,9 +316,7 @@ export class XrplService {
   ): Promise<Core_IntentResponse> {
     this.validateBatchSigner(batch, signerAddress)
 
-    const context = await this.resolveIntentContext(signerAddress, {
-      domainId: options.domainId,
-    })
+    const context = await this.resolveInnerBatchContext(signerAddress, options)
 
     const base64Encoded = this.encodeBatchForSigning(batch)
 
@@ -348,9 +346,7 @@ export class XrplService {
   ): Promise<RawSignAndWaitResult> {
     this.validateBatchSigner(batch, signerAddress)
 
-    const context = await this.resolveIntentContext(signerAddress, {
-      domainId: options.domainId,
-    })
+    const context = await this.resolveInnerBatchContext(signerAddress, options)
 
     const signingPubKey = await this.getPublicKey({
       domainId: context.domainId,
@@ -382,6 +378,30 @@ export class XrplService {
     const { domainId, userId } = await this.domainResolver.resolve(options)
     const account = await this.accountsService.findByAddress(address)
     return { domainId, userId, ...account }
+  }
+
+  /**
+   * Resolves the intent context for an inner batch signer.
+   * When `accountId` and `ledgerId` are provided in options, skips the address lookup.
+   * @private
+   */
+  private async resolveInnerBatchContext(
+    signerAddress: string,
+    options: RawSignInnerBatchOptions,
+  ): Promise<IntentContext> {
+    if (options.accountId && options.ledgerId) {
+      const { domainId, userId } = await this.domainResolver.resolve({
+        domainId: options.domainId,
+      })
+      return {
+        domainId,
+        userId,
+        accountId: options.accountId,
+        ledgerId: options.ledgerId,
+        address: signerAddress,
+      }
+    }
+    return this.resolveIntentContext(signerAddress, { domainId: options.domainId })
   }
 
   /**

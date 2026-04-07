@@ -173,10 +173,21 @@ export type RawSignAndWaitResult = {
   signingPubKey: string
 }
 
+type BatchSignerLookup = { accountId?: never; ledgerId?: never }
+type BatchSignerDirect = {
+  /** Custody account ID — skips the address lookup when provided with ledgerId */
+  accountId: string
+  /** Ledger ID for the account */
+  ledgerId: string
+}
+
 /**
  * Options for rawSignInnerBatch / rawSignInnerBatchAndWait: intent options + polling configuration.
+ *
+ * When `accountId` and `ledgerId` are provided, the address-to-account lookup is
+ * skipped, saving an API call.
  */
 export type RawSignInnerBatchOptions = XrplIntentOptions & {
   /** Polling options for waiting for the manifest signature */
   polling?: WaitForSignatureOptions
-}
+} & (BatchSignerLookup | BatchSignerDirect)
