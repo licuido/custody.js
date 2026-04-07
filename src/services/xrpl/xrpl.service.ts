@@ -22,6 +22,7 @@ import type {
   BuildTransactionIntentProps,
   Core_XrplOperation,
   CustodyAccountSet,
+  CustodyBatch,
   CustodyClawback,
   CustodyDepositPreauth,
   CustodyMpTokenAuthorize,
@@ -146,6 +147,20 @@ export class XrplService {
     options: XrplIntentOptions = {},
   ): Promise<Core_IntentResponse> {
     return this.proposeXrplIntent({ ...accountSet, type: "AccountSet" }, options)
+  }
+
+  /**
+   * Creates and proposes a batch intent for an XRPL Batch transaction.
+   * @param batch - The batch transaction details
+   * @param options - Optional configuration for the batch intent
+   * @returns The proposed intent response
+   * @throws {CustodyError} If validation fails or the sender account is not found
+   */
+  public async batch(
+    batch: CustodyBatch,
+    options: XrplIntentOptions = {},
+  ): Promise<Core_IntentResponse> {
+    return this.proposeXrplIntent({ ...batch, type: "Batch" }, options)
   }
 
   /**

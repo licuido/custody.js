@@ -1,5 +1,6 @@
 import type {
   AccountSet,
+  Batch,
   Clawback,
   DepositPreauth,
   MPTokenAuthorize,
@@ -94,6 +95,13 @@ export type CustodyOfferCreate = Prettify<
 export type Core_XrplOperation_AccountSet = components["schemas"]["Core_XrplOperation_AccountSet"]
 export type CustodyAccountSet = Prettify<
   Pick<AccountSet, "Account"> & Omit<Core_XrplOperation_AccountSet, "type">
+>
+
+// Batch
+
+export type Core_XrplOperation_Batch = components["schemas"]["Core_XrplOperation_Batch"]
+export type CustodyBatch = Prettify<
+  Pick<Batch, "Account"> & Omit<Core_XrplOperation_Batch, "type">
 >
 
 // General
