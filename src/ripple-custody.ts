@@ -1,4 +1,6 @@
 import type { Batch, SubmittableTransaction } from "xrpl"
+
+type NonBatchTransaction = Exclude<SubmittableTransaction, Batch>
 import type { RippleCustodyClientOptions } from "./ripple-custody.types.js"
 import {
   AccountsService,
@@ -157,7 +159,7 @@ import {
   type CustodyTrustline,
   type RawSignAndWaitOptions,
   type RawSignAndWaitResult,
-  type RawSignBatchOptions,
+  type RawSignInnerBatchOptions,
   type XrplIntentOptions,
 } from "./services/xrpl/index.js"
 
@@ -922,7 +924,7 @@ export class RippleCustody {
      * @returns The proposed intent response
      */
     rawSign: async (
-      xrplTransaction: SubmittableTransaction,
+      xrplTransaction: NonBatchTransaction,
       options?: XrplIntentOptions,
     ): Promise<Core_IntentResponse> => this.xrplService.rawSign(xrplTransaction, options),
 
@@ -934,7 +936,7 @@ export class RippleCustody {
      * @returns The signature and signing public key in uppercase hex
      */
     rawSignAndWait: async (
-      xrplTransaction: SubmittableTransaction,
+      xrplTransaction: NonBatchTransaction,
       options?: RawSignAndWaitOptions,
     ): Promise<RawSignAndWaitResult> => this.xrplService.rawSignAndWait(xrplTransaction, options),
 
@@ -945,11 +947,11 @@ export class RippleCustody {
      * @param options - Optional configuration for the raw sign intent
      * @returns The proposed intent response
      */
-    rawSignBatch: async (
+    rawSignInnerBatch: async (
       batch: Batch,
       signerAddress: string,
-      options?: RawSignBatchOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.rawSignBatch(batch, signerAddress, options),
+      options?: RawSignInnerBatchOptions,
+    ): Promise<Core_IntentResponse> => this.xrplService.rawSignInnerBatch(batch, signerAddress, options),
 
     /**
      * Signs a Batch transaction envelope for a single inner account and waits
@@ -959,12 +961,12 @@ export class RippleCustody {
      * @param options - Optional configuration for the raw sign intent and polling
      * @returns The signature and signing public key in uppercase hex
      */
-    rawSignBatchAndWait: async (
+    rawSignInnerBatchAndWait: async (
       batch: Batch,
       signerAddress: string,
-      options?: RawSignBatchOptions,
+      options?: RawSignInnerBatchOptions,
     ): Promise<RawSignAndWaitResult> =>
-      this.xrplService.rawSignBatchAndWait(batch, signerAddress, options),
+      this.xrplService.rawSignInnerBatchAndWait(batch, signerAddress, options),
 
     /**
      * Get the compressed secp256k1 public key for an XRPL account.

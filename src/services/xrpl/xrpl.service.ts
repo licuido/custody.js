@@ -8,6 +8,8 @@ import {
   type Batch,
   type SubmittableTransaction,
 } from "xrpl"
+
+type NonBatchTransaction = Exclude<SubmittableTransaction, Batch>
 import { sleep } from "../../helpers/async/async.js"
 import { CustodyError } from "../../models/index.js"
 import { AccountsService } from "../accounts/index.js"
@@ -34,7 +36,7 @@ import type {
   IntentContext,
   RawSignAndWaitOptions,
   RawSignAndWaitResult,
-  RawSignBatchOptions,
+  RawSignInnerBatchOptions,
   WaitForSignatureOptions,
   XrplIntentOptions,
 } from "./xrpl.types.js"
@@ -234,7 +236,7 @@ export class XrplService {
    * @throws {CustodyError} If validation fails or the sender account is not found
    */
   public async rawSign(
-    xrplTransaction: SubmittableTransaction,
+    xrplTransaction: NonBatchTransaction,
     options: XrplIntentOptions = {},
   ): Promise<Core_IntentResponse> {
     const context = await this.resolveIntentContext(xrplTransaction.Account, {
@@ -261,7 +263,7 @@ export class XrplService {
    *   or the manifest signature is not available after maximum retries
    */
   public async rawSignAndWait(
-    xrplTransaction: SubmittableTransaction,
+    xrplTransaction: NonBatchTransaction,
     options: RawSignAndWaitOptions = {},
   ): Promise<RawSignAndWaitResult> {
     const context = await this.resolveIntentContext(xrplTransaction.Account, {
@@ -309,10 +311,10 @@ export class XrplService {
    * @returns The proposed intent response
    * @throws {CustodyError} If signerAddress is not in the batch, or the account is not found
    */
-  public async rawSignBatch(
+  public async rawSignInnerBatch(
     batch: Batch,
     signerAddress: string,
-    options: RawSignBatchOptions = {},
+    options: RawSignInnerBatchOptions = {},
   ): Promise<Core_IntentResponse> {
     this.validateBatchSigner(batch, signerAddress)
 
@@ -341,10 +343,10 @@ export class XrplService {
    * @throws {CustodyError} If signerAddress is not in the batch, the account is not found,
    *   or the manifest signature is not available after maximum retries
    */
-  public async rawSignBatchAndWait(
+  public async rawSignInnerBatchAndWait(
     batch: Batch,
     signerAddress: string,
-    options: RawSignBatchOptions = {},
+    options: RawSignInnerBatchOptions = {},
   ): Promise<RawSignAndWaitResult> {
     this.validateBatchSigner(batch, signerAddress)
 

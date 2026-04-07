@@ -2798,7 +2798,7 @@ describe("XrplService", () => {
     })
   })
 
-  describe("rawSignBatch", () => {
+  describe("rawSignInnerBatch", () => {
     const mockBatch: Batch = {
       TransactionType: "Batch",
       Account: "rSubmitterAddress",
@@ -2823,7 +2823,7 @@ describe("XrplService", () => {
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
       vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
 
-      await xrplService.rawSignBatch(mockBatch, mockAddress)
+      await xrplService.rawSignInnerBatch(mockBatch, mockAddress)
 
       expect(hashes.hashSignedTx).toHaveBeenCalledWith(mockBatch.RawTransactions[0].RawTransaction)
       expect(encodeForSigningBatch).toHaveBeenCalledWith(
@@ -2850,20 +2850,20 @@ describe("XrplService", () => {
       vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
       vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
 
-      await xrplService.rawSignBatch(mockBatch, mockAddress)
+      await xrplService.rawSignInnerBatch(mockBatch, mockAddress)
 
       // Should resolve with the inner account address, not the batch submitter
       expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
     })
 
     it("should throw if signerAddress is not in any inner transaction", async () => {
-      await expect(xrplService.rawSignBatch(mockBatch, "rNotInBatchAddress")).rejects.toThrow(
+      await expect(xrplService.rawSignInnerBatch(mockBatch, "rNotInBatchAddress")).rejects.toThrow(
         "Address rNotInBatchAddress is not involved in any inner transaction",
       )
     })
   })
 
-  describe("rawSignBatchAndWait", () => {
+  describe("rawSignInnerBatchAndWait", () => {
     const mockBatch: Batch = {
       TransactionType: "Batch",
       Account: "rSubmitterAddress",
@@ -2901,7 +2901,7 @@ describe("XrplService", () => {
       vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
       vi.mocked(mockAccountsService.getManifest).mockResolvedValue(mockManifestWithSignature as any)
 
-      const result = await xrplService.rawSignBatchAndWait(mockBatch, mockAddress, {
+      const result = await xrplService.rawSignInnerBatchAndWait(mockBatch, mockAddress, {
         polling: { maxRetries: 1, intervalMs: 0 },
       })
 
@@ -2919,7 +2919,7 @@ describe("XrplService", () => {
       } as any)
 
       await expect(
-        xrplService.rawSignBatchAndWait(mockBatch, mockAddress, {
+        xrplService.rawSignInnerBatchAndWait(mockBatch, mockAddress, {
           polling: { maxRetries: 2, intervalMs: 0 },
         }),
       ).rejects.toThrow("Manifest signature not available after maximum retries")

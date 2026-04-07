@@ -164,7 +164,7 @@ export type RawSignAndWaitOptions = XrplIntentOptions & {
 }
 
 /**
- * Result of rawSignAndWait / rawSignBatchAndWait.
+ * Result of rawSignAndWait / rawSignInnerBatchAndWait.
  */
 export type RawSignAndWaitResult = {
   /** The signature in uppercase hex */
@@ -174,9 +174,9 @@ export type RawSignAndWaitResult = {
 }
 
 /**
- * Options for rawSignBatch / rawSignBatchAndWait: intent options + polling configuration.
+ * Options for rawSignInnerBatch / rawSignInnerBatchAndWait: intent options + polling configuration.
  */
-export type RawSignBatchOptions = XrplIntentOptions & {
+export type RawSignInnerBatchOptions = XrplIntentOptions & {
   /** Polling options for waiting for the manifest signature */
   polling?: WaitForSignatureOptions
 }

@@ -182,7 +182,7 @@ export type {
   CustodyTrustline,
   RawSignAndWaitOptions,
   RawSignAndWaitResult,
-  RawSignBatchOptions,
+  RawSignInnerBatchOptions,
   WaitForSignatureOptions,
   XrplIntentOptions,
 } from "./services/xrpl/index.js"
