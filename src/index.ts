@@ -171,6 +171,7 @@ export type {
 // xrpl types
 export type {
   CustodyAccountSet,
+  CustodyBatch,
   CustodyClawback,
   CustodyDepositPreauth,
   CustodyMpTokenAuthorize,

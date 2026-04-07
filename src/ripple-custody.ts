@@ -146,6 +146,7 @@ import type {
 import {
   XrplService,
   type CustodyAccountSet,
+  type CustodyBatch,
   type CustodyClawback,
   type CustodyDepositPreauth,
   type CustodyMpTokenAuthorize,
@@ -914,6 +915,17 @@ export class RippleCustody {
       params: CustodyAccountSet,
       options?: XrplIntentOptions,
     ): Promise<Core_IntentResponse> => this.xrplService.accountSet(params, options),
+
+    /**
+     * Create an XRPL Batch transaction.
+     * @param params - The Batch transaction details
+     * @param options - Optional configuration for the Batch intent
+     * @returns The proposed intent response
+     */
+    batch: async (
+      params: CustodyBatch,
+      options?: XrplIntentOptions,
+    ): Promise<Core_IntentResponse> => this.xrplService.batch(params, options),
 
     /**
      * Create an XRPL raw sign.
