@@ -7,346 +7,9 @@
       "url": "images/ripple-custody.png",
       "altText": "Ripple Custody logo"
     },
-    "x-app-version": "1.32.0"
+    "x-app-version": "1.32.4"
   },
   "paths": {
-    "/v1/domains/{domainId}/accounts/transferability": {
-      "get": {
-        "tags": ["Accounts"],
-        "summary": "Get transfer ticker info",
-        "operationId": "transferability",
-        "parameters": [
-          {
-            "name": "domainId",
-            "in": "path",
-            "description": "Unique identifier for the domain.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sourceAccountId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "destinationAccountId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "tickerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_TransferabilityResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid value for: path parameter domainId, Invalid value for: query parameter sourceAccountId, Invalid value for: query parameter destinationAccountId, Invalid value for: query parameter tickerId",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Entity or Domain not found (EntityNotFoundError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "httpAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/domains/{domainId}/accounts/{accountId}/deposit-instructions/{instructions-id}": {
-      "get": {
-        "tags": ["Accounts"],
-        "summary": "Get deposit instructions by id",
-        "operationId": "deposit-instructions-by-id",
-        "parameters": [
-          {
-            "name": "domainId",
-            "in": "path",
-            "description": "Unique identifier for the domain.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "instructions-id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_TrustedDepositInstructions"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Requester locked (RequesterLockedError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Entity or Domain not found (EntityNotFoundError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "httpAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/domains/{domainId}/accounts/{accountId}/deposit-instructions": {
-      "get": {
-        "tags": ["Accounts"],
-        "summary": "Get deposit instructions",
-        "operationId": "deposit-instructions",
-        "parameters": [
-          {
-            "name": "domainId",
-            "in": "path",
-            "description": "Unique identifier for the domain.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The number of entities to return.",
-            "schema": {
-              "maximum": 100,
-              "minimum": 1,
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "startingAfter",
-            "in": "query",
-            "description": "DepositInstructions id used to the determine beginning of query results.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sortBy",
-            "in": "query",
-            "description": "Property name used to sort the query results.",
-            "schema": {
-              "enum": ["id", "tickerId", "instructions.address", "metadata.createdAt"],
-              "type": "string"
-            }
-          },
-          {
-            "name": "sortOrder",
-            "in": "query",
-            "description": "Sort order applied to the query results.",
-            "schema": {
-              "$ref": "#/components/schemas/Core_SortOrder"
-            }
-          },
-          {
-            "name": "tickerId",
-            "in": "query",
-            "description": "Return entities matching given tickerId.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "example": "fdeeeb4b-f987-4ec4-9880-1eb280581d49"
-          },
-          {
-            "name": "lastOnly",
-            "in": "query",
-            "description": "Return only last created instructions.",
-            "schema": {
-              "type": "boolean"
-            },
-            "example": "true"
-          },
-          {
-            "name": "metadata.createdBy",
-            "in": "query",
-            "description": "Return entities that were created by matching user.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "example": "fdeeeb4b-f987-4ec4-9880-1eb280581d49"
-          },
-          {
-            "name": "metadata.lastModifiedBy",
-            "in": "query",
-            "description": "Return entities that were last modified by matching user.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "example": "90c4cf2f-ebe0-4bf7-91cd-4c45cd02277b"
-          },
-          {
-            "name": "metadata.description",
-            "in": "query",
-            "description": "Return entities with descriptions that contains or equals to provided description.",
-            "schema": {
-              "minLength": 0,
-              "type": "string"
-            },
-            "example": "description1"
-          },
-          {
-            "name": "metadata.customProperties",
-            "in": "query",
-            "description": "Return entities that contains provided custom properties.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "example": ["key1:value1", "key2:value2"]
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_TrustedDepositInstructionsCollection"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Requester locked (RequesterLockedError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "httpAuth": []
-          }
-        ]
-      }
-    },
     "/v1/backups/{backupId}": {
       "get": {
         "tags": ["Backups"],
@@ -2009,7 +1672,7 @@
     "/v1/addresses": {
       "get": {
         "tags": ["Accounts"],
-        "summary": "Get an address from all addresses including deposit instructions across domains",
+        "summary": "Get address from all generated addresses across domains",
         "operationId": "getAllDomainsAddresses",
         "parameters": [
           {
@@ -6792,347 +6455,6 @@
         ]
       }
     },
-    "/v1/providers/{providerId}": {
-      "get": {
-        "tags": ["Providers"],
-        "summary": "Get Provider details",
-        "operationId": "getProvider",
-        "parameters": [
-          {
-            "name": "providerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ApiProvider"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid value for: path parameter providerId",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Entity or Domain not found (EntityNotFoundError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "httpAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/providers": {
-      "get": {
-        "tags": ["Providers"],
-        "summary": "List providers",
-        "operationId": "getProviders",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The number of entities to return.",
-            "schema": {
-              "maximum": 100,
-              "minimum": 1,
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "startingAfter",
-            "in": "query",
-            "description": "Entity id used to the determine beginning of query results.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sortBy",
-            "in": "query",
-            "description": "Property name used to sort the query results.",
-            "schema": {
-              "enum": ["id", "alias", "lock", "metadata.createdAt", "metadata.lastModifiedAt"],
-              "type": "string"
-            }
-          },
-          {
-            "name": "sortOrder",
-            "in": "query",
-            "description": "Sort order applied to the query results.",
-            "schema": {
-              "$ref": "#/components/schemas/Core_SortOrder"
-            }
-          },
-          {
-            "name": "alias",
-            "in": "query",
-            "description": "Return entities with aliases that contains or equals to provided alias.",
-            "schema": {
-              "minLength": 1,
-              "type": "string"
-            },
-            "example": "alias1"
-          },
-          {
-            "name": "lock",
-            "in": "query",
-            "description": "Return entities matching given lock status.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/Core_LockStatus"
-              }
-            },
-            "example": ["Locked", "Unlocked"]
-          },
-          {
-            "name": "metadata.createdBy",
-            "in": "query",
-            "description": "Return entities that were created by matching user.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "example": "fdeeeb4b-f987-4ec4-9880-1eb280581d49"
-          },
-          {
-            "name": "metadata.lastModifiedBy",
-            "in": "query",
-            "description": "Return entities that were last modified by matching user.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "example": "90c4cf2f-ebe0-4bf7-91cd-4c45cd02277b"
-          },
-          {
-            "name": "metadata.description",
-            "in": "query",
-            "description": "Return entities with descriptions that contains or equals to provided description.",
-            "schema": {
-              "minLength": 0,
-              "type": "string"
-            },
-            "example": "description1"
-          },
-          {
-            "name": "metadata.customProperties",
-            "in": "query",
-            "description": "Return entities that contains provided custom properties.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "example": ["key1:value1", "key2:value2"]
-          },
-          {
-            "name": "additionalDetails.processingStatus",
-            "in": "query",
-            "description": "Return entities matching given processing status.",
-            "schema": {
-              "$ref": "#/components/schemas/Core_AccountProviderProcessingStatus"
-            },
-            "example": "Pending"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ProvidersCollection"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid value for: query parameter limit, Invalid value for: query parameter startingAfter, Invalid value for: query parameter sortBy, Invalid value for: query parameter sortOrder, Invalid value for: query parameter alias, Invalid value for: query parameter lock, Invalid value for: query parameter metadata.createdBy, Invalid value for: query parameter metadata.lastModifiedBy, Invalid value for: query parameter metadata.description, Invalid value for: query parameter metadata.customProperties, Invalid value for: query parameter additionalDetails.processingStatus",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "httpAuth": []
-          }
-        ]
-      }
-    },
-    "/v1/providers/{providerId}/locations": {
-      "get": {
-        "tags": ["Providers"],
-        "summary": "Get Provider locations",
-        "operationId": "getProviderLocations",
-        "parameters": [
-          {
-            "name": "providerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The number of entities to return.",
-            "schema": {
-              "maximum": 100,
-              "minimum": 1,
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "startingAfter",
-            "in": "query",
-            "description": "Entity id used to the determine beginning of query results.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sortBy",
-            "in": "query",
-            "description": "Property name used to sort the query results.",
-            "schema": {
-              "enum": [
-                "data.id",
-                "data.alias",
-                "data.metadata.createdAt",
-                "data.metadata.lastModifiedAt"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "name": "sortOrder",
-            "in": "query",
-            "description": "Sort order applied to the query results.",
-            "schema": {
-              "$ref": "#/components/schemas/Core_SortOrder"
-            }
-          },
-          {
-            "name": "providerLocationId",
-            "in": "query",
-            "description": "Return entities matching given ProviderLocationId",
-            "schema": {
-              "type": "array",
-              "items": {
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "example": ["portfolio-1", "portfolio-2"]
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_LocationsCollection"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid value for: path parameter providerId, Invalid value for: query parameter limit, Invalid value for: query parameter startingAfter, Invalid value for: query parameter sortBy, Invalid value for: query parameter sortOrder, Invalid value for: query parameter providerLocationId",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "One of: Invalid JWT (InvalidJwtError); User not authorized (PermissionDeniedError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Entity or Domain not found (EntityNotFoundError)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Core_ErrorMessage"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "httpAuth": []
-          }
-        ]
-      }
-    },
     "/v1/domains/{domainId}/users/invitations": {
       "get": {
         "tags": ["User invitations"],
@@ -11083,84 +10405,8 @@
         "enum": ["Pending", "Preparing", "Tracked", "Recovering", "Completed", "Interrupted"],
         "type": "string"
       },
-      "Core_AccountProvider": {
-        "required": ["id", "provider", "alias", "lock", "metadata"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "provider": {
-            "$ref": "#/components/schemas/Core_AccountProviderType"
-          },
-          "alias": {
-            "maxLength": 75,
-            "minLength": 1,
-            "type": "string"
-          },
-          "lock": {
-            "$ref": "#/components/schemas/Core_LockStatus"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/Core_EntityMetadata"
-          }
-        }
-      },
-      "Core_AccountProviderAction": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_AccountProviderAction_External"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "External": "#/components/schemas/Core_AccountProviderAction_External"
-          }
-        }
-      },
-      "Core_AccountProviderAction_External": {
-        "required": ["publicKey", "type"],
-        "type": "object",
-        "properties": {
-          "publicKey": {
-            "$ref": "#/components/schemas/Core_ApiAccountProviderKey"
-          },
-          "type": {
-            "enum": ["External"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_AccountProviderAdditionalDetails": {
-        "required": ["processing"],
-        "type": "object",
-        "properties": {
-          "processing": {
-            "$ref": "#/components/schemas/Core_AccountProviderProcessingDetails"
-          }
-        }
-      },
-      "Core_AccountProviderCreated": {
-        "required": ["id", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["AccountProviderCreated"],
-            "type": "string"
-          }
-        }
-      },
       "Core_AccountProviderInformation": {
         "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_AccountProviderInformation_External"
-          },
           {
             "$ref": "#/components/schemas/Core_AccountProviderInformation_Vault"
           }
@@ -11168,30 +10414,7 @@
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "External": "#/components/schemas/Core_AccountProviderInformation_External",
             "Vault": "#/components/schemas/Core_AccountProviderInformation_Vault"
-          }
-        }
-      },
-      "Core_AccountProviderInformation_External": {
-        "required": ["providerId", "locationId", "type"],
-        "type": "object",
-        "properties": {
-          "providerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "providerAccountId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["External"],
-            "type": "string"
           }
         }
       },
@@ -11217,137 +10440,6 @@
           },
           "type": {
             "enum": ["Vault"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_AccountProviderKey": {
-        "required": ["publicKey"],
-        "type": "object",
-        "properties": {
-          "publicKey": {
-            "type": "string",
-            "format": "base64"
-          },
-          "status": {
-            "$ref": "#/components/schemas/Core_AccountProviderKeyStatus"
-          },
-          "predecessor": {
-            "type": "string",
-            "format": "base64"
-          },
-          "keySignature": {
-            "type": "string",
-            "format": "base64"
-          },
-          "validAfterSequenceId": {
-            "type": "string",
-            "description": "This field is a large integer and represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
-          },
-          "details": {
-            "type": "string"
-          }
-        }
-      },
-      "Core_AccountProviderKeyStatus": {
-        "enum": ["AwaitingActivation", "ActivationFailed", "Active", "Replaced"],
-        "type": "string"
-      },
-      "Core_AccountProviderProcessingDetails": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_AccountProviderProcessingDetails_Completed"
-          },
-          {
-            "$ref": "#/components/schemas/Core_AccountProviderProcessingDetails_Pending"
-          },
-          {
-            "$ref": "#/components/schemas/Core_AccountProviderProcessingDetails_Preparing"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Completed": "#/components/schemas/Core_AccountProviderProcessingDetails_Completed",
-            "Pending": "#/components/schemas/Core_AccountProviderProcessingDetails_Pending",
-            "Preparing": "#/components/schemas/Core_AccountProviderProcessingDetails_Preparing"
-          }
-        }
-      },
-      "Core_AccountProviderProcessingDetails_Completed": {
-        "required": ["type"],
-        "type": "object",
-        "properties": {
-          "type": {
-            "enum": ["Completed"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_AccountProviderProcessingDetails_Pending": {
-        "required": ["type"],
-        "type": "object",
-        "properties": {
-          "type": {
-            "enum": ["Pending"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_AccountProviderProcessingDetails_Preparing": {
-        "required": ["type"],
-        "type": "object",
-        "properties": {
-          "type": {
-            "enum": ["Preparing"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_AccountProviderProcessingStatus": {
-        "enum": ["Pending", "Preparing", "Completed"],
-        "type": "string"
-      },
-      "Core_AccountProviderType": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_AccountProviderType_ExternalProvider"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "ExternalProvider": "#/components/schemas/Core_AccountProviderType_ExternalProvider"
-          }
-        }
-      },
-      "Core_AccountProviderType_ExternalProvider": {
-        "required": ["publicKeys", "type"],
-        "type": "object",
-        "properties": {
-          "publicKeys": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Core_AccountProviderKey"
-            }
-          },
-          "type": {
-            "enum": ["ExternalProvider"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_AccountProviderUpdated": {
-        "required": ["id", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["AccountProviderUpdated"],
             "type": "string"
           }
         }
@@ -11596,16 +10688,12 @@
         "oneOf": [
           {
             "$ref": "#/components/schemas/Core_AccountAddressReference"
-          },
-          {
-            "$ref": "#/components/schemas/Core_DepositInstructionsReference"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "AccountAddressReference": "#/components/schemas/Core_AccountAddressReference",
-            "DepositInstructionsReference": "#/components/schemas/Core_DepositInstructionsReference"
+            "AccountAddressReference": "#/components/schemas/Core_AccountAddressReference"
           }
         }
       },
@@ -11824,16 +10912,6 @@
           }
         }
       },
-      "Core_ApiAccountProviderKey": {
-        "required": ["publicKey"],
-        "type": "object",
-        "properties": {
-          "publicKey": {
-            "type": "string",
-            "format": "base64"
-          }
-        }
-      },
       "Core_ApiBackup": {
         "required": ["id", "data", "metadata"],
         "type": "object",
@@ -11904,6 +10982,43 @@
           }
         }
       },
+      "Core_ApiBatchInnerTransactionMeta": {
+        "required": ["index", "account", "operationType", "role"],
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "account": {
+            "type": "string"
+          },
+          "operationType": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "Core_ApiBatchSigningData": {
+        "required": ["signingPayloadHex", "signingPayloadHashHex", "innerTransactions"],
+        "type": "object",
+        "properties": {
+          "signingPayloadHex": {
+            "type": "string"
+          },
+          "signingPayloadHashHex": {
+            "type": "string"
+          },
+          "innerTransactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_ApiBatchInnerTransactionMeta"
+            }
+          }
+        }
+      },
       "Core_ApiBroadcastingTransactionProcessingHint": {
         "enum": [
           "CurrentlyFeesTooSmall",
@@ -11962,23 +11077,6 @@
         "enum": ["Cancellation", "Internal", "Replacement"],
         "type": "string"
       },
-      "Core_ApiLocation": {
-        "required": ["data", "signature", "signingKey"],
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/Core_Location"
-          },
-          "signature": {
-            "type": "string",
-            "format": "base64"
-          },
-          "signingKey": {
-            "type": "string",
-            "format": "base64"
-          }
-        }
-      },
       "Core_ApiManifest": {
         "required": ["data", "signature", "signingKey"],
         "type": "object",
@@ -12030,39 +11128,9 @@
         ],
         "type": "string"
       },
-      "Core_ApiProvider": {
-        "required": ["data", "signature", "signingKey"],
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/Core_AccountProvider"
-          },
-          "signature": {
-            "type": "string",
-            "format": "base64"
-          },
-          "signingKey": {
-            "type": "string",
-            "format": "base64"
-          },
-          "additionalDetails": {
-            "$ref": "#/components/schemas/Core_AccountProviderAdditionalDetails"
-          }
-        }
-      },
       "Core_ApiRecoveringAccountProcessingHint": {
         "enum": ["TransientIssue", "InternalError"],
         "type": "string"
-      },
-      "Core_ApiRelatedTransaction": {
-        "required": ["id"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
       },
       "Core_ApiRoles": {
         "required": ["roles"],
@@ -12168,7 +11236,7 @@
         }
       },
       "Core_ApiTransaction": {
-        "required": ["id", "ledgerId", "relatedAccounts", "relatedTransactions", "registeredAt"],
+        "required": ["id", "ledgerId", "relatedAccounts", "registeredAt"],
         "type": "object",
         "properties": {
           "id": {
@@ -12187,12 +11255,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Core_TransactionRelatedAccountReference"
-            }
-          },
-          "relatedTransactions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Core_ApiRelatedTransaction"
             }
           },
           "processing": {
@@ -12815,6 +11877,45 @@
           "type": {
             "enum": ["BalancesUpdated"],
             "type": "string"
+          }
+        }
+      },
+      "Core_BatchInnerTransaction": {
+        "required": ["operation", "account"],
+        "type": "object",
+        "properties": {
+          "operation": {
+            "$ref": "#/components/schemas/Core_XrplOperation"
+          },
+          "account": {
+            "type": "string"
+          },
+          "sequence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ticketSequence": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Core_BatchSigner": {
+        "required": ["account", "signingPubKey", "txnSignature"],
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "signingPubKey": {
+            "pattern": "^[A-Fa-f0-9]*$",
+            "type": "string",
+            "description": "Hex encoded string."
+          },
+          "txnSignature": {
+            "pattern": "^[A-Fa-f0-9]*$",
+            "type": "string",
+            "description": "Hex encoded string."
           }
         }
       },
@@ -13649,189 +12750,6 @@
           }
         }
       },
-      "Core_DepositInstructions": {
-        "required": ["id", "tickerId", "account", "metadata"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "tickerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "account": {
-            "$ref": "#/components/schemas/Core_AccountReference"
-          },
-          "providerDetails": {
-            "$ref": "#/components/schemas/Core_DepositInstructionsProviderDetails"
-          },
-          "expiryAt": {
-            "type": "string",
-            "format": "date-time",
-            "deprecated": true
-          },
-          "instructions": {
-            "$ref": "#/components/schemas/Core_DepositInstructionsDetails"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/Core_EntityMetadata"
-          }
-        }
-      },
-      "Core_DepositInstructionsCreated": {
-        "required": ["id", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["DepositInstructionsCreated"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_DepositInstructionsDetails": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_DepositInstructionsDetails_Address"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Address": "#/components/schemas/Core_DepositInstructionsDetails_Address"
-          }
-        }
-      },
-      "Core_DepositInstructionsDetails_Address": {
-        "required": ["address", "type"],
-        "type": "object",
-        "properties": {
-          "address": {
-            "maxLength": 512,
-            "minLength": 1,
-            "type": "string"
-          },
-          "memo": {
-            "maxLength": 20,
-            "minLength": 1,
-            "type": "string"
-          },
-          "tag": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string"
-          },
-          "type": {
-            "enum": ["Address"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_DepositInstructionsProviderDetails": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_DepositInstructionsProviderDetails_Completed"
-          },
-          {
-            "$ref": "#/components/schemas/Core_DepositInstructionsProviderDetails_Failed"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "status",
-          "mapping": {
-            "Completed": "#/components/schemas/Core_DepositInstructionsProviderDetails_Completed",
-            "Failed": "#/components/schemas/Core_DepositInstructionsProviderDetails_Failed"
-          }
-        }
-      },
-      "Core_DepositInstructionsProviderDetails_Completed": {
-        "required": ["expiryAt", "instructions", "status"],
-        "type": "object",
-        "properties": {
-          "expiryAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "instructions": {
-            "$ref": "#/components/schemas/Core_DepositInstructionsDetails"
-          },
-          "status": {
-            "enum": ["Completed"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_DepositInstructionsProviderDetails_Failed": {
-        "required": ["failureReason", "status"],
-        "type": "object",
-        "properties": {
-          "failureReason": {
-            "type": "string"
-          },
-          "status": {
-            "enum": ["Failed"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_DepositInstructionsReference": {
-        "required": ["id", "address", "domainId", "accountId", "createdAt", "custodyType", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "address": {
-            "maxLength": 512,
-            "minLength": 1,
-            "type": "string"
-          },
-          "ledgerId": {
-            "maxLength": 100,
-            "minLength": 1,
-            "type": "string"
-          },
-          "domainId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "accountId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "custodyType": {
-            "$ref": "#/components/schemas/Core_CustodyType"
-          },
-          "type": {
-            "enum": ["DepositInstructionsReference"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_DepositInstructionsUpdated": {
-        "required": ["id", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["DepositInstructionsUpdated"],
-            "type": "string"
-          }
-        }
-      },
       "Core_Domain": {
         "required": ["id", "alias", "lock", "permissions", "metadata"],
         "type": "object",
@@ -14441,88 +13359,6 @@
           }
         }
       },
-      "Core_ExternalOperation": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_ExternalOperation_Transfer"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Transfer": "#/components/schemas/Core_ExternalOperation_Transfer"
-          }
-        }
-      },
-      "Core_ExternalOperation_Transfer": {
-        "required": ["outputs", "tickerId", "type"],
-        "type": "object",
-        "properties": {
-          "outputs": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Core_Output"
-            }
-          },
-          "tickerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "memo": {
-            "maxLength": 2000,
-            "minLength": 1,
-            "type": "string"
-          },
-          "type": {
-            "enum": ["Transfer"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_ExternalProviderTransactionReference": {
-        "required": ["id", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "maxLength": 20,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "Core_ExternalTickerProperties": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_ExternalTickerProperties_Asset"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Asset": "#/components/schemas/Core_ExternalTickerProperties_Asset"
-          }
-        }
-      },
-      "Core_ExternalTickerProperties_Asset": {
-        "required": ["providerAssetId", "type"],
-        "type": "object",
-        "properties": {
-          "providerAssetId": {
-            "maxLength": 75,
-            "minLength": 1,
-            "type": "string"
-          },
-          "type": {
-            "enum": ["Asset"],
-            "type": "string"
-          }
-        }
-      },
       "Core_FeePriority": {
         "enum": ["High", "Medium", "Low"],
         "type": "string"
@@ -14688,12 +13524,6 @@
             "$ref": "#/components/schemas/Core_AccountCreated"
           },
           {
-            "$ref": "#/components/schemas/Core_AccountProviderCreated"
-          },
-          {
-            "$ref": "#/components/schemas/Core_AccountProviderUpdated"
-          },
-          {
             "$ref": "#/components/schemas/Core_AccountUpdated"
           },
           {
@@ -14707,12 +13537,6 @@
           },
           {
             "$ref": "#/components/schemas/Core_BalancesUpdated"
-          },
-          {
-            "$ref": "#/components/schemas/Core_DepositInstructionsCreated"
-          },
-          {
-            "$ref": "#/components/schemas/Core_DepositInstructionsUpdated"
           },
           {
             "$ref": "#/components/schemas/Core_DomainCreated"
@@ -14746,12 +13570,6 @@
           },
           {
             "$ref": "#/components/schemas/Core_LedgerUpdated"
-          },
-          {
-            "$ref": "#/components/schemas/Core_LocationCreated"
-          },
-          {
-            "$ref": "#/components/schemas/Core_LocationUpdated"
           },
           {
             "$ref": "#/components/schemas/Core_ManifestCreated"
@@ -14809,15 +13627,11 @@
           "propertyName": "type",
           "mapping": {
             "AccountCreated": "#/components/schemas/Core_AccountCreated",
-            "AccountProviderCreated": "#/components/schemas/Core_AccountProviderCreated",
-            "AccountProviderUpdated": "#/components/schemas/Core_AccountProviderUpdated",
             "AccountUpdated": "#/components/schemas/Core_AccountUpdated",
             "AddressCreated": "#/components/schemas/Core_AddressCreated",
             "BackupCreated": "#/components/schemas/Core_BackupCreated",
             "BackupUpdated": "#/components/schemas/Core_BackupUpdated",
             "BalancesUpdated": "#/components/schemas/Core_BalancesUpdated",
-            "DepositInstructionsCreated": "#/components/schemas/Core_DepositInstructionsCreated",
-            "DepositInstructionsUpdated": "#/components/schemas/Core_DepositInstructionsUpdated",
             "DomainCreated": "#/components/schemas/Core_DomainCreated",
             "DomainUpdated": "#/components/schemas/Core_DomainUpdated",
             "EndpointCreated": "#/components/schemas/Core_EndpointCreated",
@@ -14829,8 +13643,6 @@
             "IntentUpdated": "#/components/schemas/Core_IntentUpdated",
             "LedgerCreated": "#/components/schemas/Core_LedgerCreated",
             "LedgerUpdated": "#/components/schemas/Core_LedgerUpdated",
-            "LocationCreated": "#/components/schemas/Core_LocationCreated",
-            "LocationUpdated": "#/components/schemas/Core_LocationUpdated",
             "ManifestCreated": "#/components/schemas/Core_ManifestCreated",
             "ManifestUpdated": "#/components/schemas/Core_ManifestUpdated",
             "PolicyCreated": "#/components/schemas/Core_PolicyCreated",
@@ -15158,16 +13970,10 @@
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_AddAccountLedgers"
           },
           {
-            "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_AddProviderKey"
-          },
-          {
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_AddTrustedPublicKeysForMigration"
           },
           {
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_AttemptTransactionOrderCancellation"
-          },
-          {
-            "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_ConnectProvider"
           },
           {
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_CreateAccount"
@@ -15236,9 +14042,6 @@
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_ReleaseQuarantinedTransfers"
           },
           {
-            "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_RequestDepositInstructions"
-          },
-          {
             "$ref": "#/components/schemas/Core_IntentDryRunResponse_v0_SetSystemProperty"
           },
           {
@@ -15301,10 +14104,8 @@
           "mapping": {
             "v0_AcknowledgeBackup": "#/components/schemas/Core_IntentDryRunResponse_v0_AcknowledgeBackup",
             "v0_AddAccountLedgers": "#/components/schemas/Core_IntentDryRunResponse_v0_AddAccountLedgers",
-            "v0_AddProviderKey": "#/components/schemas/Core_IntentDryRunResponse_v0_AddProviderKey",
             "v0_AddTrustedPublicKeysForMigration": "#/components/schemas/Core_IntentDryRunResponse_v0_AddTrustedPublicKeysForMigration",
             "v0_AttemptTransactionOrderCancellation": "#/components/schemas/Core_IntentDryRunResponse_v0_AttemptTransactionOrderCancellation",
-            "v0_ConnectProvider": "#/components/schemas/Core_IntentDryRunResponse_v0_ConnectProvider",
             "v0_CreateAccount": "#/components/schemas/Core_IntentDryRunResponse_v0_CreateAccount",
             "v0_CreateBackup": "#/components/schemas/Core_IntentDryRunResponse_v0_CreateBackup",
             "v0_CreateDomain": "#/components/schemas/Core_IntentDryRunResponse_v0_CreateDomain",
@@ -15327,7 +14128,6 @@
             "v0_MigrateSilo3AccountBatch": "#/components/schemas/Core_IntentDryRunResponse_v0_MigrateSilo3AccountBatch",
             "v0_NotarizeData": "#/components/schemas/Core_IntentDryRunResponse_v0_NotarizeData",
             "v0_ReleaseQuarantinedTransfers": "#/components/schemas/Core_IntentDryRunResponse_v0_ReleaseQuarantinedTransfers",
-            "v0_RequestDepositInstructions": "#/components/schemas/Core_IntentDryRunResponse_v0_RequestDepositInstructions",
             "v0_SetSystemProperty": "#/components/schemas/Core_IntentDryRunResponse_v0_SetSystemProperty",
             "v0_SignManifest": "#/components/schemas/Core_IntentDryRunResponse_v0_SignManifest",
             "v0_UnlockAccount": "#/components/schemas/Core_IntentDryRunResponse_v0_UnlockAccount",
@@ -15390,26 +14190,6 @@
           }
         }
       },
-      "Core_IntentDryRunResponse_v0_AddProviderKey": {
-        "required": ["success", "type"],
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "errors": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "type": {
-            "enum": ["v0_AddProviderKey"],
-            "type": "string"
-          }
-        }
-      },
       "Core_IntentDryRunResponse_v0_AddTrustedPublicKeysForMigration": {
         "required": ["success", "type"],
         "type": "object",
@@ -15449,26 +14229,6 @@
           },
           "type": {
             "enum": ["v0_AttemptTransactionOrderCancellation"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_IntentDryRunResponse_v0_ConnectProvider": {
-        "required": ["success", "type"],
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "errors": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "type": {
-            "enum": ["v0_ConnectProvider"],
             "type": "string"
           }
         }
@@ -15924,26 +14684,6 @@
           },
           "type": {
             "enum": ["v0_ReleaseQuarantinedTransfers"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_IntentDryRunResponse_v0_RequestDepositInstructions": {
-        "required": ["success", "type"],
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "errors": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "type": {
-            "enum": ["v0_RequestDepositInstructions"],
             "type": "string"
           }
         }
@@ -16487,12 +15227,9 @@
           "v0_CreateTransferOrder",
           "v0_SignManifest",
           "v0_SetSystemProperty",
-          "v0_ConnectProvider",
-          "v0_RequestDepositInstructions",
           "v0_CreateLedger",
           "v0_UpdateLedger",
           "v0_AddTrustedPublicKeysForMigration",
-          "v0_AddProviderKey",
           "v0_CreateBackup",
           "v0_AcknowledgeBackup"
         ],
@@ -16568,9 +15305,6 @@
             "$ref": "#/components/schemas/Core_LedgerParameters_Ethereum"
           },
           {
-            "$ref": "#/components/schemas/Core_LedgerParameters_External"
-          },
-          {
             "$ref": "#/components/schemas/Core_LedgerParameters_Hedera"
           },
           {
@@ -16599,7 +15333,6 @@
             "Bitcoin": "#/components/schemas/Core_LedgerParameters_Bitcoin",
             "Cardano": "#/components/schemas/Core_LedgerParameters_Cardano",
             "Ethereum": "#/components/schemas/Core_LedgerParameters_Ethereum",
-            "External": "#/components/schemas/Core_LedgerParameters_External",
             "Hedera": "#/components/schemas/Core_LedgerParameters_Hedera",
             "Solana": "#/components/schemas/Core_LedgerParameters_Solana",
             "Stellar": "#/components/schemas/Core_LedgerParameters_Stellar",
@@ -16752,16 +15485,6 @@
           },
           "type": {
             "enum": ["Ethereum"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_LedgerParameters_External": {
-        "required": ["type"],
-        "type": "object",
-        "properties": {
-          "type": {
-            "enum": ["External"],
             "type": "string"
           }
         }
@@ -17007,84 +15730,6 @@
           },
           "type": {
             "enum": ["LedgerUpdated"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_Location": {
-        "required": ["id", "providerId", "providerLocationId", "alias", "metadata"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "providerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "providerLocationId": {
-            "maxLength": 28,
-            "minLength": 1,
-            "type": "string",
-            "description": "ID of the location as reported by the provider"
-          },
-          "alias": {
-            "maxLength": 75,
-            "minLength": 1,
-            "type": "string"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/Core_EntityMetadata"
-          }
-        }
-      },
-      "Core_LocationCreated": {
-        "required": ["id", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["LocationCreated"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_LocationUpdated": {
-        "required": ["id", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["LocationUpdated"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_LocationsCollection": {
-        "required": ["items", "count"],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Core_ApiLocation"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "currentStartingAfter": {
-            "type": "string"
-          },
-          "nextStartingAfter": {
             "type": "string"
           }
         }
@@ -17654,9 +16299,6 @@
             "$ref": "#/components/schemas/Core_OnLedgerData_Ethereum"
           },
           {
-            "$ref": "#/components/schemas/Core_OnLedgerData_External"
-          },
-          {
             "$ref": "#/components/schemas/Core_OnLedgerData_Xrpl"
           }
         ],
@@ -17665,7 +16307,6 @@
           "mapping": {
             "Bitcoin": "#/components/schemas/Core_OnLedgerData_Bitcoin",
             "Ethereum": "#/components/schemas/Core_OnLedgerData_Ethereum",
-            "External": "#/components/schemas/Core_OnLedgerData_External",
             "Xrpl": "#/components/schemas/Core_OnLedgerData_Xrpl"
           }
         }
@@ -17724,30 +16365,6 @@
           }
         }
       },
-      "Core_OnLedgerData_External": {
-        "required": ["underlyingLedgerTransactionIds", "providerTransactions", "type"],
-        "type": "object",
-        "properties": {
-          "underlyingLedgerTransactionIds": {
-            "type": "array",
-            "items": {
-              "maxLength": 500,
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          "providerTransactions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Core_ExternalProviderTransactionReference"
-            }
-          },
-          "type": {
-            "enum": ["External"],
-            "type": "string"
-          }
-        }
-      },
       "Core_OnLedgerData_Xrpl": {
         "required": ["type"],
         "type": "object",
@@ -17758,25 +16375,6 @@
           "type": {
             "enum": ["Xrpl"],
             "type": "string"
-          }
-        }
-      },
-      "Core_Output": {
-        "required": ["destination", "amount"],
-        "type": "object",
-        "properties": {
-          "destination": {
-            "$ref": "#/components/schemas/Core_TransactionDestination"
-          },
-          "destinationTag": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string"
-          },
-          "amount": {
-            "minimum": 0,
-            "type": "string",
-            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
           }
         }
       },
@@ -18070,9 +16668,6 @@
             "$ref": "#/components/schemas/Core_TransactionOrderParameters_Ethereum"
           },
           {
-            "$ref": "#/components/schemas/Core_TransactionOrderParameters_External"
-          },
-          {
             "$ref": "#/components/schemas/Core_TransactionOrderParameters_Hedera"
           },
           {
@@ -18101,7 +16696,6 @@
             "Bitcoin": "#/components/schemas/Core_TransactionOrderParameters_Bitcoin",
             "Cardano": "#/components/schemas/Core_TransactionOrderParameters_Cardano",
             "Ethereum": "#/components/schemas/Core_TransactionOrderParameters_Ethereum",
-            "External": "#/components/schemas/Core_TransactionOrderParameters_External",
             "Hedera": "#/components/schemas/Core_TransactionOrderParameters_Hedera",
             "Solana": "#/components/schemas/Core_TransactionOrderParameters_Solana",
             "Stellar": "#/components/schemas/Core_TransactionOrderParameters_Stellar",
@@ -18124,16 +16718,10 @@
             "$ref": "#/components/schemas/Core_v0_AddAccountLedgers"
           },
           {
-            "$ref": "#/components/schemas/Core_v0_AddProviderKey"
-          },
-          {
             "$ref": "#/components/schemas/Core_v0_AddTrustedPublicKeysForMigration"
           },
           {
             "$ref": "#/components/schemas/Core_v0_AttemptTransactionOrderCancellation"
-          },
-          {
-            "$ref": "#/components/schemas/Core_v0_ConnectProvider"
           },
           {
             "$ref": "#/components/schemas/Core_v0_CreateAccount"
@@ -18199,9 +16787,6 @@
             "$ref": "#/components/schemas/Core_v0_ReleaseQuarantinedTransfers"
           },
           {
-            "$ref": "#/components/schemas/Core_v0_RequestDepositInstructions"
-          },
-          {
             "$ref": "#/components/schemas/Core_v0_SetSystemProperty"
           },
           {
@@ -18264,10 +16849,8 @@
           "mapping": {
             "v0_AcknowledgeBackup": "#/components/schemas/Core_v0_AcknowledgeBackup",
             "v0_AddAccountLedgers": "#/components/schemas/Core_v0_AddAccountLedgers",
-            "v0_AddProviderKey": "#/components/schemas/Core_v0_AddProviderKey",
             "v0_AddTrustedPublicKeysForMigration": "#/components/schemas/Core_v0_AddTrustedPublicKeysForMigration",
             "v0_AttemptTransactionOrderCancellation": "#/components/schemas/Core_v0_AttemptTransactionOrderCancellation",
-            "v0_ConnectProvider": "#/components/schemas/Core_v0_ConnectProvider",
             "v0_CreateAccount": "#/components/schemas/Core_v0_CreateAccount",
             "v0_CreateBackup": "#/components/schemas/Core_v0_CreateBackup",
             "v0_CreateDomain": "#/components/schemas/Core_v0_CreateDomain",
@@ -18290,7 +16873,6 @@
             "v0_MigrateSilo3AccountBatch": "#/components/schemas/Core_v0_MigrateSilo3AccountBatch",
             "v0_NotarizeData": "#/components/schemas/Core_v0_NotarizeData",
             "v0_ReleaseQuarantinedTransfers": "#/components/schemas/Core_v0_ReleaseQuarantinedTransfers",
-            "v0_RequestDepositInstructions": "#/components/schemas/Core_v0_RequestDepositInstructions",
             "v0_SetSystemProperty": "#/components/schemas/Core_v0_SetSystemProperty",
             "v0_SignManifest": "#/components/schemas/Core_v0_SignManifest",
             "v0_UnlockAccount": "#/components/schemas/Core_v0_UnlockAccount",
@@ -18343,28 +16925,6 @@
           },
           "type": {
             "enum": ["v0_CreateTransactionOrder"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_ProvidersCollection": {
-        "required": ["items", "count"],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Core_ApiProvider"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "currentStartingAfter": {
-            "type": "string"
-          },
-          "nextStartingAfter": {
             "type": "string"
           }
         }
@@ -20254,27 +18814,6 @@
           }
         }
       },
-      "Core_TickerBalances": {
-        "required": ["totalAmount", "reservedAmount", "quarantinedAmount"],
-        "type": "object",
-        "properties": {
-          "totalAmount": {
-            "minimum": 0,
-            "type": "string",
-            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
-          },
-          "reservedAmount": {
-            "minimum": 0,
-            "type": "string",
-            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
-          },
-          "quarantinedAmount": {
-            "minimum": 0,
-            "type": "string",
-            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
-          }
-        }
-      },
       "Core_TickerCreated": {
         "required": ["id", "type"],
         "type": "object",
@@ -20308,9 +18847,6 @@
             "$ref": "#/components/schemas/Core_TickerLedgerDetails_Ethereum"
           },
           {
-            "$ref": "#/components/schemas/Core_TickerLedgerDetails_External"
-          },
-          {
             "$ref": "#/components/schemas/Core_TickerLedgerDetails_Hedera"
           },
           {
@@ -20339,7 +18875,6 @@
             "Bitcoin": "#/components/schemas/Core_TickerLedgerDetails_Bitcoin",
             "Cardano": "#/components/schemas/Core_TickerLedgerDetails_Cardano",
             "Ethereum": "#/components/schemas/Core_TickerLedgerDetails_Ethereum",
-            "External": "#/components/schemas/Core_TickerLedgerDetails_External",
             "Hedera": "#/components/schemas/Core_TickerLedgerDetails_Hedera",
             "Solana": "#/components/schemas/Core_TickerLedgerDetails_Solana",
             "Stellar": "#/components/schemas/Core_TickerLedgerDetails_Stellar",
@@ -20398,19 +18933,6 @@
           },
           "type": {
             "enum": ["Ethereum"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_TickerLedgerDetails_External": {
-        "required": ["properties", "type"],
-        "type": "object",
-        "properties": {
-          "properties": {
-            "$ref": "#/components/schemas/Core_ExternalTickerProperties"
-          },
-          "type": {
-            "enum": ["External"],
             "type": "string"
           }
         }
@@ -20927,9 +19449,6 @@
             "$ref": "#/components/schemas/Core_TransactionEstimate_Ethereum"
           },
           {
-            "$ref": "#/components/schemas/Core_TransactionEstimate_External"
-          },
-          {
             "$ref": "#/components/schemas/Core_TransactionEstimate_Failure"
           },
           {
@@ -20961,7 +19480,6 @@
             "Bitcoin": "#/components/schemas/Core_TransactionEstimate_Bitcoin",
             "Cardano": "#/components/schemas/Core_TransactionEstimate_Cardano",
             "Ethereum": "#/components/schemas/Core_TransactionEstimate_Ethereum",
-            "External": "#/components/schemas/Core_TransactionEstimate_External",
             "Failure": "#/components/schemas/Core_TransactionEstimate_Failure",
             "Hedera": "#/components/schemas/Core_TransactionEstimate_Hedera",
             "Solana": "#/components/schemas/Core_TransactionEstimate_Solana",
@@ -21042,25 +19560,6 @@
           },
           "type": {
             "enum": ["Ethereum"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_TransactionEstimate_External": {
-        "required": ["fee", "tickerId", "type"],
-        "type": "object",
-        "properties": {
-          "fee": {
-            "minimum": 0,
-            "type": "string",
-            "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
-          },
-          "tickerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["External"],
             "type": "string"
           }
         }
@@ -21196,6 +19695,9 @@
             "type": "string",
             "description": "This field is a large integer that can be positive or zero. It is represented as a string because it may contain value that cannot be expressed with JSON number without a loss of precision."
           },
+          "batchSigningData": {
+            "$ref": "#/components/schemas/Core_ApiBatchSigningData"
+          },
           "type": {
             "enum": ["XRPL"],
             "type": "string"
@@ -21238,7 +19740,6 @@
           "BitcoinRedirect",
           "Cardano",
           "Ethereum",
-          "External",
           "Hedera",
           "Solana",
           "Substrate",
@@ -21265,9 +19766,6 @@
           },
           {
             "$ref": "#/components/schemas/Core_TransactionOrderParameters_Ethereum"
-          },
-          {
-            "$ref": "#/components/schemas/Core_TransactionOrderParameters_External"
           },
           {
             "$ref": "#/components/schemas/Core_TransactionOrderParameters_Hedera"
@@ -21299,7 +19797,6 @@
             "BitcoinRedirect": "#/components/schemas/Core_TransactionOrderParameters_BitcoinRedirect",
             "Cardano": "#/components/schemas/Core_TransactionOrderParameters_Cardano",
             "Ethereum": "#/components/schemas/Core_TransactionOrderParameters_Ethereum",
-            "External": "#/components/schemas/Core_TransactionOrderParameters_External",
             "Hedera": "#/components/schemas/Core_TransactionOrderParameters_Hedera",
             "Solana": "#/components/schemas/Core_TransactionOrderParameters_Solana",
             "Stellar": "#/components/schemas/Core_TransactionOrderParameters_Stellar",
@@ -21447,19 +19944,6 @@
           },
           "type": {
             "enum": ["Ethereum"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_TransactionOrderParameters_External": {
-        "required": ["operation", "type"],
-        "type": "object",
-        "properties": {
-          "operation": {
-            "$ref": "#/components/schemas/Core_ExternalOperation"
-          },
-          "type": {
-            "enum": ["External"],
             "type": "string"
           }
         }
@@ -21822,9 +20306,6 @@
             "$ref": "#/components/schemas/Core_TransferMetadata_Ethereum"
           },
           {
-            "$ref": "#/components/schemas/Core_TransferMetadata_External"
-          },
-          {
             "$ref": "#/components/schemas/Core_TransferMetadata_Hedera"
           },
           {
@@ -21853,7 +20334,6 @@
             "Bitcoin": "#/components/schemas/Core_TransferMetadata_Bitcoin",
             "Cardano": "#/components/schemas/Core_TransferMetadata_Cardano",
             "Ethereum": "#/components/schemas/Core_TransferMetadata_Ethereum",
-            "External": "#/components/schemas/Core_TransferMetadata_External",
             "Hedera": "#/components/schemas/Core_TransferMetadata_Hedera",
             "Solana": "#/components/schemas/Core_TransferMetadata_Solana",
             "Stellar": "#/components/schemas/Core_TransferMetadata_Stellar",
@@ -21904,16 +20384,6 @@
         "properties": {
           "type": {
             "enum": ["Ethereum"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_TransferMetadata_External": {
-        "required": ["type"],
-        "type": "object",
-        "properties": {
-          "type": {
-            "enum": ["External"],
             "type": "string"
           }
         }
@@ -22010,116 +20480,6 @@
           },
           "type": {
             "enum": ["TransferUpdated"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_Transferability": {
-        "type": "object",
-        "properties": {
-          "source": {
-            "$ref": "#/components/schemas/Core_TransferabilitySource"
-          },
-          "underlying": {
-            "$ref": "#/components/schemas/Core_TransferabilityUnderlying"
-          },
-          "destination": {
-            "$ref": "#/components/schemas/Core_TransferabilityDestination"
-          }
-        }
-      },
-      "Core_TransferabilityDestination": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_TransferabilityDestination_Ticker"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Ticker": "#/components/schemas/Core_TransferabilityDestination_Ticker"
-          }
-        }
-      },
-      "Core_TransferabilityDestination_Ticker": {
-        "required": ["tickerId", "type"],
-        "type": "object",
-        "properties": {
-          "tickerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["Ticker"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_TransferabilityResponse": {
-        "required": ["items"],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Core_Transferability"
-            }
-          }
-        }
-      },
-      "Core_TransferabilitySource": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_TransferabilitySource_Ticker"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Ticker": "#/components/schemas/Core_TransferabilitySource_Ticker"
-          }
-        }
-      },
-      "Core_TransferabilitySource_Ticker": {
-        "required": ["tickerId", "balances", "type"],
-        "type": "object",
-        "properties": {
-          "tickerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "balances": {
-            "$ref": "#/components/schemas/Core_TickerBalances"
-          },
-          "type": {
-            "enum": ["Ticker"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_TransferabilityUnderlying": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/Core_TransferabilityUnderlying_Ticker"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Ticker": "#/components/schemas/Core_TransferabilityUnderlying_Ticker"
-          }
-        }
-      },
-      "Core_TransferabilityUnderlying_Ticker": {
-        "required": ["tickerId", "type"],
-        "type": "object",
-        "properties": {
-          "tickerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["Ticker"],
             "type": "string"
           }
         }
@@ -22268,45 +20628,6 @@
           },
           "type": {
             "enum": ["TRC20"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_TrustedDepositInstructions": {
-        "required": ["data", "signature", "signingKey"],
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/Core_DepositInstructions"
-          },
-          "signature": {
-            "type": "string",
-            "format": "base64"
-          },
-          "signingKey": {
-            "type": "string",
-            "format": "base64"
-          }
-        }
-      },
-      "Core_TrustedDepositInstructionsCollection": {
-        "required": ["items", "count"],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Core_TrustedDepositInstructions"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "currentStartingAfter": {
-            "type": "string"
-          },
-          "nextStartingAfter": {
             "type": "string"
           }
         }
@@ -22793,16 +21114,10 @@
             "$ref": "#/components/schemas/Core_v0_AddAccountLedgers"
           },
           {
-            "$ref": "#/components/schemas/Core_v0_AddProviderKey"
-          },
-          {
             "$ref": "#/components/schemas/Core_v0_AddTrustedPublicKeysForMigration"
           },
           {
             "$ref": "#/components/schemas/Core_v0_AttemptTransactionOrderCancellation"
-          },
-          {
-            "$ref": "#/components/schemas/Core_v0_ConnectProvider"
           },
           {
             "$ref": "#/components/schemas/Core_v0_CreateAccount"
@@ -22871,9 +21186,6 @@
             "$ref": "#/components/schemas/Core_v0_ReleaseQuarantinedTransfers"
           },
           {
-            "$ref": "#/components/schemas/Core_v0_RequestDepositInstructions"
-          },
-          {
             "$ref": "#/components/schemas/Core_v0_SetSystemProperty"
           },
           {
@@ -22936,10 +21248,8 @@
           "mapping": {
             "v0_AcknowledgeBackup": "#/components/schemas/Core_v0_AcknowledgeBackup",
             "v0_AddAccountLedgers": "#/components/schemas/Core_v0_AddAccountLedgers",
-            "v0_AddProviderKey": "#/components/schemas/Core_v0_AddProviderKey",
             "v0_AddTrustedPublicKeysForMigration": "#/components/schemas/Core_v0_AddTrustedPublicKeysForMigration",
             "v0_AttemptTransactionOrderCancellation": "#/components/schemas/Core_v0_AttemptTransactionOrderCancellation",
-            "v0_ConnectProvider": "#/components/schemas/Core_v0_ConnectProvider",
             "v0_CreateAccount": "#/components/schemas/Core_v0_CreateAccount",
             "v0_CreateBackup": "#/components/schemas/Core_v0_CreateBackup",
             "v0_CreateDomain": "#/components/schemas/Core_v0_CreateDomain",
@@ -22962,7 +21272,6 @@
             "v0_MigrateSilo3AccountBatch": "#/components/schemas/Core_v0_MigrateSilo3AccountBatch",
             "v0_NotarizeData": "#/components/schemas/Core_v0_NotarizeData",
             "v0_ReleaseQuarantinedTransfers": "#/components/schemas/Core_v0_ReleaseQuarantinedTransfers",
-            "v0_RequestDepositInstructions": "#/components/schemas/Core_v0_RequestDepositInstructions",
             "v0_SetSystemProperty": "#/components/schemas/Core_v0_SetSystemProperty",
             "v0_SignManifest": "#/components/schemas/Core_v0_SignManifest",
             "v0_UnlockAccount": "#/components/schemas/Core_v0_UnlockAccount",
@@ -23031,10 +21340,6 @@
           "UnsupportedAccountKeyStrategy",
           "VaultNotFound",
           "VaultLocked",
-          "ExternalProviderNotFound",
-          "ExternalProviderLocked",
-          "ExternalProviderUnexpectedState",
-          "LocationNotFound",
           "VaultNotReady",
           "InvalidDestination",
           "InvalidTransactionOrderState",
@@ -23051,7 +21356,6 @@
           "DuplicateTickerIdsToValidate",
           "DuplicateTickerLedgerDatasToValidate",
           "InvalidEntityId",
-          "TickerUnderlyingAssetIsNotInMetacoAssets",
           "MissingLoginIds",
           "DuplicatedLoginIds",
           "FeatureFlagDisabled",
@@ -23065,8 +21369,7 @@
           "InvalidVaultParameters",
           "BackupNotReady",
           "BackupAcknowledgeDenied",
-          "ValidateTickersPostProcessingFailure",
-          "DepositInstructionPostProcessingFailure"
+          "ValidateTickersPostProcessingFailure"
         ],
         "type": "string"
       },
@@ -23897,6 +22200,9 @@
             "$ref": "#/components/schemas/Core_XrplOperation_AccountSet"
           },
           {
+            "$ref": "#/components/schemas/Core_XrplOperation_Batch"
+          },
+          {
             "$ref": "#/components/schemas/Core_XrplOperation_Clawback"
           },
           {
@@ -23924,6 +22230,9 @@
             "$ref": "#/components/schemas/Core_XrplOperation_Payment"
           },
           {
+            "$ref": "#/components/schemas/Core_XrplOperation_TicketCreate"
+          },
+          {
             "$ref": "#/components/schemas/Core_XrplOperation_TrustSet"
           }
         ],
@@ -23931,6 +22240,7 @@
           "propertyName": "type",
           "mapping": {
             "AccountSet": "#/components/schemas/Core_XrplOperation_AccountSet",
+            "Batch": "#/components/schemas/Core_XrplOperation_Batch",
             "Clawback": "#/components/schemas/Core_XrplOperation_Clawback",
             "DepositPreauth": "#/components/schemas/Core_XrplOperation_DepositPreauth",
             "EscrowFinish": "#/components/schemas/Core_XrplOperation_EscrowFinish",
@@ -23940,6 +22250,7 @@
             "MPTokenIssuanceSet": "#/components/schemas/Core_XrplOperation_MPTokenIssuanceSet",
             "OfferCreate": "#/components/schemas/Core_XrplOperation_OfferCreate",
             "Payment": "#/components/schemas/Core_XrplOperation_Payment",
+            "TicketCreate": "#/components/schemas/Core_XrplOperation_TicketCreate",
             "TrustSet": "#/components/schemas/Core_XrplOperation_TrustSet"
           }
         }
@@ -23960,6 +22271,39 @@
           },
           "type": {
             "enum": ["AccountSet"],
+            "type": "string"
+          }
+        }
+      },
+      "Core_XrplOperation_Batch": {
+        "required": ["executionMode", "innerTransactions", "batchSigners", "type"],
+        "type": "object",
+        "properties": {
+          "executionMode": {
+            "$ref": "#/components/schemas/Core_Xrpl_BatchExecutionMode"
+          },
+          "innerTransactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_BatchInnerTransaction"
+            }
+          },
+          "ticketSequence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastLedgerSequence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "batchSigners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Core_BatchSigner"
+            }
+          },
+          "type": {
+            "enum": ["Batch"],
             "type": "string"
           }
         }
@@ -24183,6 +22527,20 @@
           }
         }
       },
+      "Core_XrplOperation_TicketCreate": {
+        "required": ["ticketCount", "type"],
+        "type": "object",
+        "properties": {
+          "ticketCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "enum": ["TicketCreate"],
+            "type": "string"
+          }
+        }
+      },
       "Core_XrplOperation_TrustSet": {
         "required": ["flags", "limitAmount", "type"],
         "type": "object",
@@ -24368,6 +22726,10 @@
           }
         }
       },
+      "Core_Xrpl_BatchExecutionMode": {
+        "enum": ["AllOrNothing", "OnlyOne", "UntilFailure", "Independent"],
+        "type": "string"
+      },
       "Core_Xrpl_LimitAmount": {
         "required": ["currency", "value"],
         "type": "object",
@@ -24490,24 +22852,6 @@
           }
         }
       },
-      "Core_v0_AddProviderKey": {
-        "required": ["providerId", "publicKey", "type"],
-        "type": "object",
-        "properties": {
-          "providerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "publicKey": {
-            "type": "string",
-            "format": "base64"
-          },
-          "type": {
-            "enum": ["v0_AddProviderKey"],
-            "type": "string"
-          }
-        }
-      },
       "Core_v0_AddTrustedPublicKeysForMigration": {
         "required": [
           "newCollectionSigningPublicKey",
@@ -24579,39 +22923,6 @@
           }
         }
       },
-      "Core_v0_ConnectProvider": {
-        "required": ["id", "alias", "provider", "lock", "customProperties", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "alias": {
-            "maxLength": 75,
-            "minLength": 1,
-            "type": "string"
-          },
-          "provider": {
-            "$ref": "#/components/schemas/Core_AccountProviderAction"
-          },
-          "lock": {
-            "$ref": "#/components/schemas/Core_LockStatus"
-          },
-          "description": {
-            "maxLength": 250,
-            "minLength": 0,
-            "type": "string"
-          },
-          "customProperties": {
-            "$ref": "#/components/schemas/Core_StringsMap"
-          },
-          "type": {
-            "enum": ["v0_ConnectProvider"],
-            "type": "string"
-          }
-        }
-      },
       "Core_v0_CreateAccount": {
         "required": ["id", "alias", "providerDetails", "lock", "customProperties", "type"],
         "type": "object",
@@ -24662,35 +22973,13 @@
       "Core_v0_CreateAccountProviderDetailsPayload": {
         "oneOf": [
           {
-            "$ref": "#/components/schemas/Core_v0_CreateAccountProviderDetailsPayload_External"
-          },
-          {
             "$ref": "#/components/schemas/Core_v0_CreateAccountProviderDetailsPayload_Vault"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "External": "#/components/schemas/Core_v0_CreateAccountProviderDetailsPayload_External",
             "Vault": "#/components/schemas/Core_v0_CreateAccountProviderDetailsPayload_Vault"
-          }
-        }
-      },
-      "Core_v0_CreateAccountProviderDetailsPayload_External": {
-        "required": ["providerId", "locationId", "type"],
-        "type": "object",
-        "properties": {
-          "providerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "enum": ["External"],
-            "type": "string"
           }
         }
       },
@@ -25065,11 +23354,6 @@
           "preferredAddressForChange": {
             "$ref": "#/components/schemas/Core_PreferredAddressForChange"
           },
-          "memo": {
-            "maxLength": 2000,
-            "minLength": 1,
-            "type": "string"
-          },
           "description": {
             "maxLength": 250,
             "minLength": 0,
@@ -25337,36 +23621,6 @@
           },
           "type": {
             "enum": ["v0_ReleaseQuarantinedTransfers"],
-            "type": "string"
-          }
-        }
-      },
-      "Core_v0_RequestDepositInstructions": {
-        "required": ["id", "accountId", "tickerId", "customProperties", "type"],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "accountId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "tickerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "description": {
-            "maxLength": 250,
-            "minLength": 0,
-            "type": "string"
-          },
-          "customProperties": {
-            "$ref": "#/components/schemas/Core_StringsMap"
-          },
-          "type": {
-            "enum": ["v0_RequestDepositInstructions"],
             "type": "string"
           }
         }

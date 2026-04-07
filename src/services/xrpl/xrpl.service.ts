@@ -1,7 +1,14 @@
 import { createPublicKey } from "crypto"
 import dayjs from "dayjs"
 import { v7 as uuidv7 } from "uuid"
-import { encodeForSigning, type SubmittableTransaction } from "xrpl"
+import {
+  encodeForSigning,
+  encodeForSigningBatch,
+  hashes,
+  type Batch,
+  type SubmittableTransaction,
+} from "xrpl"
+import { sleep } from "../../helpers/async/async.js"
 import { CustodyError } from "../../models/index.js"
 import { AccountsService } from "../accounts/index.js"
 import type { ApiService } from "../apis/index.js"
@@ -25,6 +32,10 @@ import type {
   CustodyPayment,
   CustodyTrustline,
   IntentContext,
+  RawSignAndWaitOptions,
+  RawSignAndWaitResult,
+  RawSignInnerBatchOptions,
+  WaitForSignatureOptions,
   XrplIntentOptions,
 } from "./xrpl.types.js"
 
@@ -231,40 +242,129 @@ export class XrplService {
     })
 
     const encoded = encodeForSigning(xrplTransaction)
-
     const base64Encoded = Buffer.from(encoded, "hex").toString("base64")
 
-    const requestId = options.requestId ?? uuidv7()
-    const payloadId = options.payloadId ?? uuidv7()
+    const { intentResponse } = await this.proposeRawSignIntent(base64Encoded, context, options)
+    return intentResponse
+  }
 
-    const intent: Core_ProposeIntentBody = {
-      request: {
-        author: {
-          id: context.userId,
-          domainId: context.domainId,
-        },
-        expiryAt: dayjs()
-          .add(options.expiryDays ?? 1, "day")
-          .toISOString(),
-        targetDomainId: context.domainId,
-        id: requestId,
-        customProperties: options.requestCustomProperties ?? {},
-        payload: {
-          id: payloadId,
-          accountId: context.accountId,
-          ledgerId: context.ledgerId,
-          customProperties: options.payloadCustomProperties ?? {},
-          content: {
-            value: base64Encoded,
-            type: "Unsafe",
-          },
-          type: "v0_SignManifest",
-        },
-        type: "Propose",
-      },
+  /**
+   * Raw-signs an XRPL transaction and waits for the manifest signature.
+   *
+   * If `SigningPubKey` is not already set on the transaction, it will be
+   * fetched from the custody account and set automatically.
+   *
+   * @param xrplTransaction - The XRPL transaction details
+   * @param options - Optional configuration for the raw sign intent and polling
+   * @returns The signature and signing public key in uppercase hex
+   * @throws {CustodyError} If validation fails, the sender account is not found,
+   *   or the manifest signature is not available after maximum retries
+   */
+  public async rawSignAndWait(
+    xrplTransaction: SubmittableTransaction,
+    options: RawSignAndWaitOptions = {},
+  ): Promise<RawSignAndWaitResult> {
+    const context = await this.resolveIntentContext(xrplTransaction.Account, {
+      domainId: options.domainId,
+    })
+
+    if (!xrplTransaction.SigningPubKey) {
+      const pubKey = await this.getPublicKey({
+        domainId: context.domainId,
+        accountId: context.accountId,
+      })
+      xrplTransaction.SigningPubKey = pubKey
     }
 
-    return this.intentService.proposeIntent(intent)
+    const encoded = encodeForSigning(xrplTransaction)
+    const base64Encoded = Buffer.from(encoded, "hex").toString("base64")
+
+    const { payloadId } = await this.proposeRawSignIntent(base64Encoded, context, options)
+
+    const signature = await this.waitForManifestSignature(
+      context.domainId,
+      context.accountId,
+      payloadId,
+      options.polling,
+    )
+
+    return {
+      signature,
+      signingPubKey: xrplTransaction.SigningPubKey,
+    }
+  }
+
+  /**
+   * Proposes a raw sign intent for a Batch transaction envelope for a single
+   * inner account. The batch envelope (`flags` + all inner transaction hashes)
+   * is encoded using `encodeForSigningBatch` and signed with the key of the
+   * specified `signerAddress`.
+   *
+   * All signers sign the same envelope data. Call this once per inner account
+   * that is managed by this custody instance.
+   *
+   * @param batch - The autofilled Batch transaction (with all inner transactions)
+   * @param signerAddress - The XRPL address of the inner account to sign for
+   * @param options - Optional configuration for the raw sign intent
+   * @returns The proposed intent response
+   * @throws {CustodyError} If signerAddress is not in the batch, or the account is not found
+   */
+  public async rawSignInnerBatch(
+    batch: Batch,
+    signerAddress: string,
+    options: RawSignInnerBatchOptions = {},
+  ): Promise<Core_IntentResponse> {
+    this.validateBatchSigner(batch, signerAddress)
+
+    const context = await this.resolveInnerBatchContext(signerAddress, options)
+
+    const base64Encoded = this.encodeBatchForSigning(batch)
+
+    const { intentResponse } = await this.proposeRawSignIntent(base64Encoded, context, options)
+    return intentResponse
+  }
+
+  /**
+   * Signs a Batch transaction envelope for a single inner account and waits
+   * for the manifest signature.
+   *
+   * All signers sign the same envelope (`flags` + all inner transaction hashes).
+   * Call this method once per inner account managed by this custody instance.
+   * Inner accounts on other custody instances sign independently with their own SDK.
+   *
+   * @param batch - The autofilled Batch transaction (with all inner transactions)
+   * @param signerAddress - The XRPL address of the inner account to sign for
+   * @param options - Optional configuration for the raw sign intent and polling
+   * @returns The signature and signing public key in uppercase hex
+   * @throws {CustodyError} If signerAddress is not in the batch, the account is not found,
+   *   or the manifest signature is not available after maximum retries
+   */
+  public async rawSignInnerBatchAndWait(
+    batch: Batch,
+    signerAddress: string,
+    options: RawSignInnerBatchOptions = {},
+  ): Promise<RawSignAndWaitResult> {
+    this.validateBatchSigner(batch, signerAddress)
+
+    const context = await this.resolveInnerBatchContext(signerAddress, options)
+
+    const signingPubKey = await this.getPublicKey({
+      domainId: context.domainId,
+      accountId: context.accountId,
+    })
+
+    const base64Encoded = this.encodeBatchForSigning(batch)
+
+    const { payloadId } = await this.proposeRawSignIntent(base64Encoded, context, options)
+
+    const signature = await this.waitForManifestSignature(
+      context.domainId,
+      context.accountId,
+      payloadId,
+      options.polling,
+    )
+
+    return { signature, signingPubKey }
   }
 
   /**
@@ -278,6 +378,61 @@ export class XrplService {
     const { domainId, userId } = await this.domainResolver.resolve(options)
     const account = await this.accountsService.findByAddress(address)
     return { domainId, userId, ...account }
+  }
+
+  /**
+   * Resolves the intent context for an inner batch signer.
+   * When `accountId` and `ledgerId` are provided in options, skips the address lookup.
+   * @private
+   */
+  private async resolveInnerBatchContext(
+    signerAddress: string,
+    options: RawSignInnerBatchOptions,
+  ): Promise<IntentContext> {
+    if (options.accountId && options.ledgerId) {
+      const { domainId, userId } = await this.domainResolver.resolve({
+        domainId: options.domainId,
+      })
+      return {
+        domainId,
+        userId,
+        accountId: options.accountId,
+        ledgerId: options.ledgerId,
+        address: signerAddress,
+      }
+    }
+    return this.resolveIntentContext(signerAddress, { domainId: options.domainId })
+  }
+
+  /**
+   * Validates that the signer address is involved in at least one inner transaction.
+   * @private
+   */
+  private validateBatchSigner(batch: Batch, signerAddress: string): void {
+    const involvedAccounts = new Set(
+      batch.RawTransactions.map((rawTx) => rawTx.RawTransaction.Account),
+    )
+    if (!involvedAccounts.has(signerAddress)) {
+      throw new CustodyError({
+        reason: `Address ${signerAddress} is not involved in any inner transaction of the Batch`,
+      })
+    }
+  }
+
+  /**
+   * Encodes a Batch transaction envelope for signing.
+   * Computes txIDs from inner transactions and encodes with `encodeForSigningBatch`.
+   * @private
+   */
+  private encodeBatchForSigning(batch: Batch): string {
+    const txIDs = batch.RawTransactions.map((rawTx) => hashes.hashSignedTx(rawTx.RawTransaction))
+
+    const batchEncodedHex = encodeForSigningBatch({
+      flags: batch.Flags,
+      txIDs,
+    } as unknown as Batch)
+
+    return Buffer.from(batchEncodedHex, "hex").toString("base64")
   }
 
   /**
@@ -303,6 +458,121 @@ export class XrplService {
     })
 
     return this.intentService.proposeIntent(intent)
+  }
+
+  /**
+   * Proposes a raw sign intent with base64-encoded bytes.
+   * Shared by rawSign, rawSignAndWait, and signBytesAndWait.
+   * @private
+   */
+  private async proposeRawSignIntent(
+    base64Bytes: string,
+    context: IntentContext,
+    options: XrplIntentOptions,
+  ): Promise<{ intentResponse: Core_IntentResponse; payloadId: string }> {
+    const requestId = options.requestId ?? uuidv7()
+    const payloadId = options.payloadId ?? uuidv7()
+
+    const intent: Core_ProposeIntentBody = {
+      request: {
+        author: {
+          id: context.userId,
+          domainId: context.domainId,
+        },
+        expiryAt: dayjs()
+          .add(options.expiryDays ?? 1, "day")
+          .toISOString(),
+        targetDomainId: context.domainId,
+        id: requestId,
+        customProperties: options.requestCustomProperties ?? {},
+        payload: {
+          id: payloadId,
+          accountId: context.accountId,
+          ledgerId: context.ledgerId,
+          customProperties: options.payloadCustomProperties ?? {},
+          content: {
+            value: base64Bytes,
+            type: "Unsafe",
+          },
+          type: "v0_SignManifest",
+        },
+        type: "Propose",
+      },
+    }
+
+    const intentResponse = await this.intentService.proposeIntent(intent)
+    return { intentResponse, payloadId }
+  }
+
+  /**
+   * Polls the manifest until a signature is available, then returns it as uppercase hex.
+   * @private
+   */
+  private async waitForManifestSignature(
+    domainId: string,
+    accountId: string,
+    manifestId: string,
+    options: WaitForSignatureOptions = {},
+  ): Promise<string> {
+    const {
+      maxRetries = 10,
+      intervalMs = 3000,
+      notFoundRetries = 3,
+      notFoundIntervalMs = 1000,
+      onAttempt,
+    } = options
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      onAttempt?.(attempt)
+
+      const manifest = await this.getManifestWithRetry(
+        { domainId, accountId, manifestId },
+        notFoundRetries,
+        notFoundIntervalMs,
+      )
+
+      const { value } = manifest.data
+      if (value && value.type === "Unsafe") {
+        return Buffer.from(value.signature, "base64").toString("hex").toUpperCase()
+      }
+
+      if (attempt < maxRetries) {
+        await sleep(intervalMs)
+      }
+    }
+
+    throw new CustodyError({
+      reason: "Manifest signature not available after maximum retries",
+    })
+  }
+
+  /**
+   * Fetches a manifest with retry logic for 404 errors.
+   * @private
+   */
+  private async getManifestWithRetry(
+    params: { domainId: string; accountId: string; manifestId: string },
+    maxRetries: number,
+    intervalMs: number,
+  ) {
+    let lastError: Error | undefined
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await this.accountsService.getManifest(params)
+      } catch (error) {
+        if (error instanceof CustodyError && error.statusCode === 404) {
+          lastError = error
+          if (attempt < maxRetries) {
+            await sleep(intervalMs)
+          }
+          continue
+        }
+        throw error
+      }
+    }
+
+    throw lastError
   }
 
   /**

@@ -1,4 +1,4 @@
-import type { SubmittableTransaction } from "xrpl"
+import type { Batch, SubmittableTransaction } from "xrpl"
 import type { RippleCustodyClientOptions } from "./ripple-custody.types.js"
 import {
   AccountsService,
@@ -155,6 +155,9 @@ import {
   type CustodyOfferCreate,
   type CustodyPayment,
   type CustodyTrustline,
+  type RawSignAndWaitOptions,
+  type RawSignAndWaitResult,
+  type RawSignInnerBatchOptions,
   type XrplIntentOptions,
 } from "./services/xrpl/index.js"
 
@@ -922,6 +925,47 @@ export class RippleCustody {
       xrplTransaction: SubmittableTransaction,
       options?: XrplIntentOptions,
     ): Promise<Core_IntentResponse> => this.xrplService.rawSign(xrplTransaction, options),
+
+    /**
+     * Raw-signs an XRPL transaction and waits for the manifest signature.
+     * If SigningPubKey is not set on the transaction, it will be fetched automatically.
+     * @param xrplTransaction - The XRPL transaction details
+     * @param options - Optional configuration for the raw sign intent and polling
+     * @returns The signature and signing public key in uppercase hex
+     */
+    rawSignAndWait: async (
+      xrplTransaction: SubmittableTransaction,
+      options?: RawSignAndWaitOptions,
+    ): Promise<RawSignAndWaitResult> => this.xrplService.rawSignAndWait(xrplTransaction, options),
+
+    /**
+     * Proposes a raw sign intent for a Batch transaction envelope for a single inner account.
+     * @param batch - The autofilled Batch transaction
+     * @param signerAddress - The XRPL address of the inner account to sign for
+     * @param options - Optional configuration for the raw sign intent
+     * @returns The proposed intent response
+     */
+    rawSignInnerBatch: async (
+      batch: Batch,
+      signerAddress: string,
+      options?: RawSignInnerBatchOptions,
+    ): Promise<Core_IntentResponse> =>
+      this.xrplService.rawSignInnerBatch(batch, signerAddress, options),
+
+    /**
+     * Signs a Batch transaction envelope for a single inner account and waits
+     * for the manifest signature. Call once per inner account.
+     * @param batch - The autofilled Batch transaction
+     * @param signerAddress - The XRPL address of the inner account to sign for
+     * @param options - Optional configuration for the raw sign intent and polling
+     * @returns The signature and signing public key in uppercase hex
+     */
+    rawSignInnerBatchAndWait: async (
+      batch: Batch,
+      signerAddress: string,
+      options?: RawSignInnerBatchOptions,
+    ): Promise<RawSignAndWaitResult> =>
+      this.xrplService.rawSignInnerBatchAndWait(batch, signerAddress, options),
 
     /**
      * Get the compressed secp256k1 public key for an XRPL account.

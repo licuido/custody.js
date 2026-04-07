@@ -136,3 +136,58 @@ export type BuildTransactionIntentProps = {
   context: IntentContext
   options: XrplIntentOptions
 }
+
+// Raw sign & wait
+
+/**
+ * Options for polling the manifest signature after a raw sign intent.
+ */
+export type WaitForSignatureOptions = {
+  /** Maximum number of polling attempts (default: 10) */
+  maxRetries?: number
+  /** Interval between polling attempts in milliseconds (default: 3000) */
+  intervalMs?: number
+  /** Maximum retries when manifest returns 404 (default: 3) */
+  notFoundRetries?: number
+  /** Interval between 404 retries in milliseconds (default: 1000) */
+  notFoundIntervalMs?: number
+  /** Callback on each polling attempt */
+  onAttempt?: (attempt: number) => void
+}
+
+/**
+ * Options for rawSignAndWait: intent options + polling configuration.
+ */
+export type RawSignAndWaitOptions = XrplIntentOptions & {
+  /** Polling options for waiting for the manifest signature */
+  polling?: WaitForSignatureOptions
+}
+
+/**
+ * Result of rawSignAndWait / rawSignInnerBatchAndWait.
+ */
+export type RawSignAndWaitResult = {
+  /** The signature in uppercase hex */
+  signature: string
+  /** The compressed secp256k1 public key in uppercase hex */
+  signingPubKey: string
+}
+
+type BatchSignerLookup = { accountId?: never; ledgerId?: never }
+type BatchSignerDirect = {
+  /** Custody account ID — skips the address lookup when provided with ledgerId */
+  accountId: string
+  /** Ledger ID for the account */
+  ledgerId: string
+}
+
+/**
+ * Options for rawSignInnerBatch / rawSignInnerBatchAndWait: intent options + polling configuration.
+ *
+ * When `accountId` and `ledgerId` are provided, the address-to-account lookup is
+ * skipped, saving an API call.
+ */
+export type RawSignInnerBatchOptions = XrplIntentOptions & {
+  /** Polling options for waiting for the manifest signature */
+  polling?: WaitForSignatureOptions
+} & (BatchSignerLookup | BatchSignerDirect)
