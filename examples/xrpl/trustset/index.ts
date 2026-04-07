@@ -45,7 +45,7 @@ const createTrustline = async () => {
       {
         // Optional: Provide an intentId to track this transaction
         // If not provided, one will be generated automatically
-        intentId,
+        payloadId: intentId,
       },
     )
 
