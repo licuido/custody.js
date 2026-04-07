@@ -1,5 +1,11 @@
 # custody
 
+## 0.8.0
+
+### Minor Changes
+
+- df285d6: Add methods to sign XRPL transactions via custody and poll for the manifest
+
 ## 0.7.1
 
 ### Patch Changes
