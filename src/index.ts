@@ -168,7 +168,11 @@ export type {
   ImportPreparedOperationsRequestBody,
 } from "./services/vaults/index.js"
 
-// xrpl types
+// xrpl types and functions
+export {
+  batchSignersToCustodyBatchSigners,
+  rawTransactionsToInnerTransactions,
+} from "./services/xrpl/index.js"
 export type {
   CustodyAccountSet,
   CustodyBatch,

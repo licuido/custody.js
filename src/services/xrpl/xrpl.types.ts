@@ -102,6 +102,14 @@ export type CustodyAccountSet = Prettify<
 export type Core_XrplOperation_Batch = components["schemas"]["Core_XrplOperation_Batch"]
 export type CustodyBatch = Prettify<Pick<Batch, "Account"> & Omit<Core_XrplOperation_Batch, "type">>
 
+// Batch Adapters
+
+export type CustodyBatchSigner = CustodyBatch["batchSigners"][number]
+export type CustodyInnerTransaction = CustodyBatch["innerTransactions"][number]
+export type CustodyOperation = CustodyInnerTransaction["operation"]
+
+export type CustodyAccountSetFlag = CustodyAccountSet["setFlag"]
+
 // General
 
 export type XrplIntentOptions = {
