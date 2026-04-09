@@ -125,7 +125,9 @@ const mpTokenIssuanceCreateFlagsToStrings = (
   return result
 }
 
-const mpTokenIssuanceSetFlagsToStrings = (flags?: number | object): ("tfMPTLock" | "tfMPTUnlock")[] => {
+const mpTokenIssuanceSetFlagsToStrings = (
+  flags?: number | object,
+): ("tfMPTLock" | "tfMPTUnlock")[] => {
   if (!flags) return []
   if (typeof flags === "object") {
     const f = flags as Record<string, boolean>
