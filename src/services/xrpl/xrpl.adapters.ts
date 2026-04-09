@@ -19,6 +19,7 @@ import type {
 
 type RawTx = Batch["RawTransactions"][number]["RawTransaction"]
 
+// XRP drops are represented as plain strings; IOU amounts carry currency/issuer metadata.
 const amountToAssetQuantity = (amount: IssuedCurrencyAmount | string) => {
   if (typeof amount === "string") {
     return { amount }
@@ -33,6 +34,8 @@ const amountToAssetQuantity = (amount: IssuedCurrencyAmount | string) => {
   }
 }
 
+// XRPL flags can arrive either as a bitmask integer or as a pre-decoded object
+// (e.g. { tfSell: true }). Both forms are handled throughout the flag helpers below.
 const offerCreateFlagsToStrings = (
   flags?: number | object,
 ): ("tfImmediateOrCancel" | "tfFillOrKill" | "tfSell")[] => {
@@ -188,6 +191,8 @@ const txToOperation = (tx: RawTx): CustodyOperation => {
       }
     case "Clawback": {
       const amount = tx.Amount
+      // Clawback Amount can be either an IOU (IssuedCurrencyAmount) or an MPT amount,
+      // distinguished by the presence of `mpt_issuance_id`.
       const isMPT = "mpt_issuance_id" in amount
       return {
         type: "Clawback",
