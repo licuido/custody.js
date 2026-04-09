@@ -1,5 +1,11 @@
 # custody
 
+## 0.8.2
+
+### Patch Changes
+
+- 54844a1: Add batch adapters functions
+
 ## 0.8.1
 
 ### Patch Changes
