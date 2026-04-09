@@ -13,6 +13,7 @@ import type {
   CustodyAccountSetFlag,
   CustodyBatchSigner,
   CustodyInnerTransaction,
+  CustodyMpTokenIssuanceCreate,
   CustodyOperation,
 } from "./xrpl.types.js"
 
@@ -90,13 +91,7 @@ const mpTokenAuthorizeFlagsToStrings = (flags?: number | object): "tfMPTUnauthor
   return result
 }
 
-type MPTokenIssuanceCreateFlag =
-  | "tfMPTCanLock"
-  | "tfMPTRequireAuth"
-  | "tfMPTCanEscrow"
-  | "tfMPTCanTrade"
-  | "tfMPTCanTransfer"
-  | "tfMPTCanClawback"
+type MPTokenIssuanceCreateFlag = CustodyMpTokenIssuanceCreate["flags"][number]
 
 const mpTokenIssuanceCreateFlagsToStrings = (
   flags?: number | object,
