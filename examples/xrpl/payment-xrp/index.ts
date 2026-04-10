@@ -42,7 +42,7 @@ const sendXrpPayment = async () => {
       {
         // Optional: Provide an intentId to track this transaction
         // If not provided, one will be generated automatically
-        payloadId: intentId,
+        requestId: intentId,
       },
     )
 
