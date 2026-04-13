@@ -155,6 +155,7 @@ import {
   type CustodyMpTokenIssuanceSet,
   type CustodyOfferCreate,
   type CustodyPayment,
+  type CustodyTicketCreate,
   type CustodyTrustline,
   type RawSignAndWaitOptions,
   type RawSignAndWaitResult,
@@ -915,6 +916,17 @@ export class RippleCustody {
       params: CustodyAccountSet,
       options?: XrplIntentOptions,
     ): Promise<Core_IntentResponse> => this.xrplService.accountSet(params, options),
+
+    /**
+     * Create an XRPL TicketCreate transaction.
+     * @param params - The TicketCreate transaction details
+     * @param options - Optional configuration for the TicketCreate intent
+     * @returns The proposed intent response
+     */
+    ticketCreate: async (
+      params: CustodyTicketCreate,
+      options?: XrplIntentOptions,
+    ): Promise<Core_IntentResponse> => this.xrplService.ticketCreate(params, options),
 
     /**
      * Create an XRPL Batch transaction.
