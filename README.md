@@ -27,8 +27,6 @@ Install directly from the GitHub repository:
 npm install github:florent-uzio/custody.js
 ```
 
-Test 4
-
 ## Quick Start
 
 ### 1. Generate Keypairs
