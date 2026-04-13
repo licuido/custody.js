@@ -42,11 +42,7 @@ describe("TypedTransport", () => {
     it("should resolve path params and pass query separately", async () => {
       mockApiService.get.mockResolvedValue({ data: [] })
 
-      await transport.get(
-        "/v1/domains/{domainId}/accounts",
-        { domainId: "d-123" },
-        { limit: 5 },
-      )
+      await transport.get("/v1/domains/{domainId}/accounts", { domainId: "d-123" }, { limit: 5 })
 
       expect(mockApiService.get).toHaveBeenCalledWith("/v1/domains/d-123/accounts", { limit: 5 })
     })
@@ -59,10 +55,7 @@ describe("TypedTransport", () => {
         intentId: "i-456",
       })
 
-      expect(mockApiService.get).toHaveBeenCalledWith(
-        "/v1/domains/d-123/intents/i-456",
-        undefined,
-      )
+      expect(mockApiService.get).toHaveBeenCalledWith("/v1/domains/d-123/intents/i-456", undefined)
     })
 
     it("should separate mixed path and non-path params in pathParams", async () => {

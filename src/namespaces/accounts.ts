@@ -59,36 +59,28 @@ export function createAccounts(t: TypedTransport) {
     list: (
       params: GetAccountsPathParams,
       query?: GetAccountsQueryParams,
-    ): Promise<Core_AccountsCollection> =>
-      t.get(URLs.accounts, params, query),
+    ): Promise<Core_AccountsCollection> => t.get(URLs.accounts, params, query),
 
     allDomainsAddresses: (
       query: GetAllDomainsAddressesQueryParams,
-    ): Promise<Core_AddressReferenceCollection> =>
-      t.get(URLs.addresses, undefined, query),
+    ): Promise<Core_AddressReferenceCollection> => t.get(URLs.addresses, undefined, query),
 
-    get: (
-      params: GetAccountPathParams,
-      query?: GetAccountQueryParams,
-    ): Promise<Core_ApiAccount> =>
+    get: (params: GetAccountPathParams, query?: GetAccountQueryParams): Promise<Core_ApiAccount> =>
       t.get(URLs.account, params, query),
 
     addresses: (
       params: GetAddressesPathParams,
       query?: GetAddressesQueryParams,
-    ): Promise<Core_AddressesCollection> =>
-      t.get(URLs.accountAddresses, params, query),
+    ): Promise<Core_AddressesCollection> => t.get(URLs.accountAddresses, params, query),
 
     generateNewExternalAddressDeprecated: (
       params: GenerateNewAccountExternalAddressDeprecatedPathParams,
       query: GenerateNewAccountExternalAddressDeprecatedQueryParams,
-    ): Promise<Core_AccountAddress> =>
-      t.post(URLs.accountAddresses, query, params),
+    ): Promise<Core_AccountAddress> => t.post(URLs.accountAddresses, query, params),
 
     generateNewExternalAddress: (
       params: GenerateNewExternalAddressPathParams,
-    ): Promise<Core_AccountAddress> =>
-      t.post(URLs.accountAddressesByLedger, null, params),
+    ): Promise<Core_AccountAddress> => t.post(URLs.accountAddressesByLedger, null, params),
 
     getAccountAddress: (params: GetAccountAddressPathParams): Promise<Core_AccountAddress> =>
       t.get(URLs.accountAddress, params),
@@ -96,25 +88,21 @@ export function createAccounts(t: TypedTransport) {
     getAccountBalances: (
       params: GetAccountBalancesPathParams,
       query?: GetAccountBalancesQueryParams,
-    ): Promise<Core_BalancesCollection> =>
-      t.get(URLs.accountBalances, params, query),
+    ): Promise<Core_BalancesCollection> => t.get(URLs.accountBalances, params, query),
 
     forceUpdateAccountBalances: (
       params: ForceUpdateAccountBalancesPathParams,
       query?: ForceUpdateAccountBalancesQueryParams,
-    ): Promise<void> =>
-      t.post(URLs.accountBalances, query, params),
+    ): Promise<void> => t.post(URLs.accountBalances, query, params),
 
     getManifests: (
       params: GetManifestsPathParams,
       query?: GetManifestsQueryParams,
-    ): Promise<Core_ManifestsCollection> =>
-      t.get(URLs.accountManifests, params, query),
+    ): Promise<Core_ManifestsCollection> => t.get(URLs.accountManifests, params, query),
 
     getManifest: (params: GetManifestPathParams): Promise<Core_ApiManifest> =>
       t.get(URLs.accountManifest, params),
 
-    findByAddress: (address: string): Promise<AccountReference> =>
-      findByAddress(t, address),
+    findByAddress: (address: string): Promise<AccountReference> => findByAddress(t, address),
   } as const
 }

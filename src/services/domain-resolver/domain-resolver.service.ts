@@ -1,7 +1,7 @@
 import { URLs } from "../../constants/urls.js"
 import { CustodyError } from "../../models/index.js"
-import type { Core_MeReference } from "../users/users.types.js"
 import type { TypedTransport } from "../../transport/index.js"
+import type { Core_MeReference } from "../users/users.types.js"
 import type { DomainResolveOptions, DomainUserReference } from "./domain-resolver.types.js"
 
 /**

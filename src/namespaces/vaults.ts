@@ -15,10 +15,11 @@ export function createVaults(t: TypedTransport) {
     list: (queryParams?: GetVaultsQueryParams): Promise<Core_VaultsCollection> =>
       t.get(URLs.vaults, undefined, queryParams ?? {}),
 
-    get: (params: GetVaultPathParams): Promise<Core_ApiVault> =>
-      t.get(URLs.vault, params),
+    get: (params: GetVaultPathParams): Promise<Core_ApiVault> => t.get(URLs.vault, params),
 
-    exportPreparedOperations: (params: ExportPreparedOperationsPathParams): Promise<Core_ExportPreparedOperationsResponse> =>
+    exportPreparedOperations: (
+      params: ExportPreparedOperationsPathParams,
+    ): Promise<Core_ExportPreparedOperationsResponse> =>
       t.get(URLs.vaultOperationsPrepared, params),
 
     importPreparedOperations: (body: ImportPreparedOperationsRequestBody): Promise<void> =>

@@ -30,11 +30,9 @@ describe("findByAddress", () => {
       ledgerId: "xrpl-mainnet",
       address: "rAddress123",
     })
-    expect(mockTransport.get).toHaveBeenCalledWith(
-      "/v1/addresses",
-      undefined,
-      { address: "rAddress123" },
-    )
+    expect(mockTransport.get).toHaveBeenCalledWith("/v1/addresses", undefined, {
+      address: "rAddress123",
+    })
   })
 
   it("should return empty string for ledgerId when ledgerId is null", async () => {

@@ -16,14 +16,19 @@ export class TypedTransport {
    * Makes a typed GET request.
    * Splits flat params into path and query params based on the URL template.
    */
-  async get<T>(url: string, pathParams?: Record<string, unknown>, query?: unknown, _config?: RequestConfig): Promise<T> {
+  async get<T>(
+    url: string,
+    pathParams?: Record<string, unknown>,
+    query?: unknown,
+    _config?: RequestConfig,
+  ): Promise<T> {
     let resolvedUrl = url
     if (pathParams && Object.keys(pathParams).length > 0) {
       const result = splitParams(url, pathParams)
       resolvedUrl = result.url
       // Merge any non-path params from pathParams into query
       if (result.query) {
-        query = { ...(query as Record<string, unknown> ?? {}), ...result.query }
+        query = { ...((query as Record<string, unknown>) ?? {}), ...result.query }
       }
     }
     return this.api.get<T>(resolvedUrl, query as AxiosRequestConfig["params"])
@@ -33,7 +38,12 @@ export class TypedTransport {
    * Makes a typed POST request.
    * Resolves path params from the URL template before posting.
    */
-  async post<T>(url: string, body: unknown, pathParams?: Record<string, unknown>, config?: RequestConfig): Promise<T> {
+  async post<T>(
+    url: string,
+    body: unknown,
+    pathParams?: Record<string, unknown>,
+    config?: RequestConfig,
+  ): Promise<T> {
     let resolvedUrl = url
     if (pathParams && Object.keys(pathParams).length > 0) {
       const result = splitParams(url, pathParams)

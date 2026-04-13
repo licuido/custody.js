@@ -12,7 +12,6 @@ export function createDomains(t: TypedTransport) {
     list: (query?: GetDomainsQueryParams): Promise<Core_TrustedDomainsCollection> =>
       t.get(URLs.domains, undefined, query),
 
-    get: (params: GetDomainPathParams): Promise<Core_TrustedDomain> =>
-      t.get(URLs.domain, params),
+    get: (params: GetDomainPathParams): Promise<Core_TrustedDomain> => t.get(URLs.domain, params),
   } as const
 }

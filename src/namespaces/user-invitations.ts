@@ -21,8 +21,7 @@ export function createUserInvitations(t: TypedTransport) {
     list: (
       pathParams: GetUserInvitationsPathParams,
       query?: GetUserInvitationsQueryParams,
-    ): Promise<CoreExtensions_InvitationOut> =>
-      t.get(URLs.userInvitations, pathParams, query),
+    ): Promise<CoreExtensions_InvitationOut> => t.get(URLs.userInvitations, pathParams, query),
 
     get: (params: GetUserInvitationPathParams): Promise<CoreExtensions_InvitationOut> =>
       t.get(URLs.userInvitation, params),
@@ -30,14 +29,12 @@ export function createUserInvitations(t: TypedTransport) {
     create: (
       pathParams: CreateUserInvitationPathParams,
       body: CoreExtensions_InvitationIn,
-    ): Promise<CoreExtensions_InvitationOut> =>
-      t.post(URLs.userInvitations, body, pathParams),
+    ): Promise<CoreExtensions_InvitationOut> => t.post(URLs.userInvitations, body, pathParams),
 
     fill: (
       pathParams: FillUserInvitationPathParams,
       body: CoreExtensions_InvitationAnswerIn,
-    ): Promise<void> =>
-      t.post(URLs.publicUserInvitation, body, pathParams),
+    ): Promise<void> => t.post(URLs.publicUserInvitation, body, pathParams),
 
     cancel: (pathParams: CancelUserInvitationPathParams): Promise<CoreExtensions_InvitationOut> =>
       t.post(URLs.userInvitationCancel, undefined, pathParams),
@@ -45,10 +42,13 @@ export function createUserInvitations(t: TypedTransport) {
     renew: (pathParams: RenewUserInvitationPathParams): Promise<CoreExtensions_InvitationOut> =>
       t.post(URLs.userInvitationRenew, undefined, pathParams),
 
-    complete: (pathParams: CompleteUserInvitationPathParams): Promise<CoreExtensions_InvitationOut> =>
+    complete: (
+      pathParams: CompleteUserInvitationPathParams,
+    ): Promise<CoreExtensions_InvitationOut> =>
       t.post(URLs.userInvitationComplete, undefined, pathParams),
 
-    getPublic: (pathParams: GetPublicUserInvitationPathParams): Promise<CoreExtensions_PublicInvitationOut> =>
-      t.get(URLs.publicUserInvitation, pathParams),
+    getPublic: (
+      pathParams: GetPublicUserInvitationPathParams,
+    ): Promise<CoreExtensions_PublicInvitationOut> => t.get(URLs.publicUserInvitation, pathParams),
   } as const
 }

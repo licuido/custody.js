@@ -11,8 +11,10 @@ import type { TypedTransport } from "../transport/index.js"
 
 export function createRequests(t: TypedTransport) {
   return {
-    state: (params: GetRequestStatePathParams, query?: GetRequestStateQueryParams): Promise<Core_RequestState> =>
-      t.get(URLs.request, params, query),
+    state: (
+      params: GetRequestStatePathParams,
+      query?: GetRequestStateQueryParams,
+    ): Promise<Core_RequestState> => t.get(URLs.request, params, query),
 
     userStates: (query?: GetAllUserRequestsStateQueryParams): Promise<Core_RequestState[]> =>
       t.get(URLs.meRequests, undefined, query),
@@ -20,7 +22,6 @@ export function createRequests(t: TypedTransport) {
     userStatesInDomain: (
       params: GetAllUserRequestsStateInDomainPathParams,
       query?: GetAllUserRequestsStateInDomainQueryParams,
-    ): Promise<Core_RequestState[]> =>
-      t.get(URLs.requests, params, query),
+    ): Promise<Core_RequestState[]> => t.get(URLs.requests, params, query),
   } as const
 }

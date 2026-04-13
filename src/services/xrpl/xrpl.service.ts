@@ -12,10 +12,10 @@ import { URLs } from "../../constants/urls.js"
 import { sleep } from "../../helpers/async/async.js"
 import { CustodyError } from "../../models/index.js"
 import { findByAddress } from "../../namespaces/accounts.js"
+import { TypedTransport } from "../../transport/index.js"
 import type { Core_ApiAccount, Core_ApiManifest } from "../accounts/accounts.types.js"
 import { DomainResolverService } from "../domain-resolver/index.js"
 import type { Core_IntentResponse, Core_ProposeIntentBody } from "../intents/intents.types.js"
-import { TypedTransport } from "../../transport/index.js"
 import type {
   BuildTransactionIntentProps,
   Core_XrplOperation,

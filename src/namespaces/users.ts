@@ -13,16 +13,16 @@ import type { TypedTransport } from "../transport/index.js"
 
 export function createUsers(t: TypedTransport) {
   return {
-    list: (params: GetUsersPathParams, query?: GetUsersQueryParams): Promise<Core_TrustedUsersCollection> =>
-      t.get(URLs.users, params, query),
+    list: (
+      params: GetUsersPathParams,
+      query?: GetUsersQueryParams,
+    ): Promise<Core_TrustedUsersCollection> => t.get(URLs.users, params, query),
 
     knownRoles: (params: GetKnownUserRolesPathParams): Promise<Core_ApiRoles> =>
       t.get(URLs.userRoles, params),
 
-    get: (params: GetUserPathParams): Promise<Core_TrustedUser> =>
-      t.get(URLs.user, params),
+    get: (params: GetUserPathParams): Promise<Core_TrustedUser> => t.get(URLs.user, params),
 
-    me: (): Promise<Core_MeReference> =>
-      t.get(URLs.me),
+    me: (): Promise<Core_MeReference> => t.get(URLs.me),
   } as const
 }

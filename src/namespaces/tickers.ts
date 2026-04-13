@@ -12,7 +12,6 @@ export function createTickers(t: TypedTransport) {
     list: (queryParams?: GetTickersQueryParams): Promise<Core_TickersCollection> =>
       t.get(URLs.tickers, undefined, queryParams),
 
-    get: (params: GetTickerPathParams): Promise<Core_ApiTicker> =>
-      t.get(URLs.ticker, params),
+    get: (params: GetTickerPathParams): Promise<Core_ApiTicker> => t.get(URLs.ticker, params),
   } as const
 }

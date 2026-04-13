@@ -29,14 +29,14 @@ export function createTransactions(t: TypedTransport) {
     ): Promise<Core_TrustedTransactionOrdersCollection> =>
       t.get(URLs.transactionOrders, params, query),
 
-    order: (params: GetTransactionOrderDetailsPathParams): Promise<Core_TrustedTransactionOrderDetails> =>
-      t.get(URLs.transactionOrder, params),
+    order: (
+      params: GetTransactionOrderDetailsPathParams,
+    ): Promise<Core_TrustedTransactionOrderDetails> => t.get(URLs.transactionOrder, params),
 
     transfers: (
       params: TransferTransactionOrderPathParams,
       query?: TransferTransactionOrderQueryParams,
-    ): Promise<Core_TransfersCollection> =>
-      t.get(URLs.transactionTransfers, params, query),
+    ): Promise<Core_TransfersCollection> => t.get(URLs.transactionTransfers, params, query),
 
     transfer: (params: GetTransferDetailsPathParams): Promise<Core_TransferDetails> =>
       t.get(URLs.transactionTransfer, params),
@@ -44,8 +44,7 @@ export function createTransactions(t: TypedTransport) {
     transactions: (
       params: GetTransactionsPathParams,
       query?: GetTransactionsQueryParams,
-    ): Promise<Core_TransactionsCollection> =>
-      t.get(URLs.transactions, params, query),
+    ): Promise<Core_TransactionsCollection> => t.get(URLs.transactions, params, query),
 
     transaction: (params: GetTransactionDetailsPathParams): Promise<Core_TransactionDetails> =>
       t.get(URLs.transaction, params),
@@ -53,7 +52,6 @@ export function createTransactions(t: TypedTransport) {
     dryRun: (
       params: DryRunTransactionPathParams,
       body: Core_DryRunTransactionParameters,
-    ): Promise<Core_TransactionDryRun> =>
-      t.post(URLs.transactionsDryRun, body, params),
+    ): Promise<Core_TransactionDryRun> => t.post(URLs.transactionsDryRun, body, params),
   } as const
 }

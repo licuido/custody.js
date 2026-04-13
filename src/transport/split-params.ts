@@ -27,7 +27,8 @@ export function splitParams<T extends Record<string, unknown>>(
   }
 
   return {
-    url: Object.keys(pathParams).length > 0 ? replacePathParams(urlTemplate, pathParams) : urlTemplate,
+    url:
+      Object.keys(pathParams).length > 0 ? replacePathParams(urlTemplate, pathParams) : urlTemplate,
     query: Object.keys(query).length > 0 ? query : undefined,
   }
 }

@@ -19,8 +19,7 @@ export function createLedgers(t: TypedTransport) {
     list: (queryParams?: GetLedgersQueryParams): Promise<Core_TrustedLedgersCollection> =>
       t.get(URLs.ledgers, undefined, queryParams ?? {}),
 
-    get: (params: GetLedgerPathParams): Promise<Core_TrustedLedger> =>
-      t.get(URLs.ledger, params),
+    get: (params: GetLedgerPathParams): Promise<Core_TrustedLedger> => t.get(URLs.ledger, params),
 
     fees: (params: GetLedgerFeePathParams): Promise<Core_CurrentFees> =>
       t.get(URLs.ledgerFees, params),
@@ -28,13 +27,14 @@ export function createLedgers(t: TypedTransport) {
     processEthereumContractCall: (
       params: ProcessEthereumContractCallPathParams,
       body: ProcessEthereumContractCallBody,
-    ): Promise<Core_EthereumCallResponse> =>
-      t.post(URLs.ledgerEthereumCall, body, params),
+    ): Promise<Core_EthereumCallResponse> => t.post(URLs.ledgerEthereumCall, body, params),
 
     trusted: (params: GetTrustedLedgerPathParams): Promise<Core_TrustedLedger> =>
       t.get(URLs.trustedLedger, params),
 
-    trustedList: (queryParams?: GetTrustedLedgersQueryParams): Promise<Core_TrustedLedgersCollection> =>
+    trustedList: (
+      queryParams?: GetTrustedLedgersQueryParams,
+    ): Promise<Core_TrustedLedgersCollection> =>
       t.get(URLs.trustedLedgers, undefined, queryParams ?? {}),
   } as const
 }

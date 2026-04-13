@@ -1,5 +1,4 @@
 import type { Batch, SubmittableTransaction } from "xrpl"
-import type { RippleCustodyClientOptions } from "./ripple-custody.types.js"
 import {
   createAccounts,
   createDomains,
@@ -12,6 +11,7 @@ import {
   createUsers,
   createVaults,
 } from "./namespaces/index.js"
+import type { RippleCustodyClientOptions } from "./ripple-custody.types.js"
 import { ApiService } from "./services/apis/index.js"
 import { AuthService } from "./services/auth/index.js"
 import type { Core_IntentResponse } from "./services/intents/intents.types.js"

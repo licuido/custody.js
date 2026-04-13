@@ -3,9 +3,9 @@ import type { Batch, SubmittableTransaction } from "xrpl"
 import { encodeForSigningBatch, hashes } from "xrpl"
 import { CustodyError } from "../../models/index.js"
 import * as accountsNamespace from "../../namespaces/accounts.js"
+import type { TypedTransport } from "../../transport/index.js"
 import type { ApiService } from "../apis/index.js"
 import { DomainResolverService } from "../domain-resolver/index.js"
-import type { TypedTransport } from "../../transport/index.js"
 import { XrplService } from "./xrpl.service.js"
 import type {
   CustodyAccountSet,

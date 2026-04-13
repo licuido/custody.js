@@ -108,11 +108,15 @@ export function createIntents(t: TypedTransport) {
     reject: (params: Core_RejectIntentBody): Promise<Core_IntentResponse> =>
       t.post(URLs.intentsReject, params),
 
-    get: (params: Core_GetIntentPathParams, query?: Core_GetIntentsQueryParams): Promise<Core_TrustedIntent> =>
-      t.get(URLs.getIntent, params, query),
+    get: (
+      params: Core_GetIntentPathParams,
+      query?: Core_GetIntentsQueryParams,
+    ): Promise<Core_TrustedIntent> => t.get(URLs.getIntent, params, query),
 
-    list: (params: Core_GetIntentsPathParams, query?: Core_GetIntentsQueryParams): Promise<Core_IntentResponse> =>
-      t.get(URLs.domainIntents, params, query),
+    list: (
+      params: Core_GetIntentsPathParams,
+      query?: Core_GetIntentsQueryParams,
+    ): Promise<Core_IntentResponse> => t.get(URLs.domainIntents, params, query),
 
     dryRun: (params: Core_IntentDryRunRequest): Promise<Core_IntentDryRunResponse> =>
       t.post(URLs.intentsDryRun, params),
@@ -120,13 +124,11 @@ export function createIntents(t: TypedTransport) {
     remainingUsers: (
       params: Core_RemainingUsersIntentPathParams,
       query?: Core_RemainingUsersIntentQueryParams,
-    ): Promise<Core_RemainingDomainUsers> =>
-      t.get(URLs.intentRemainingUsers, params, query),
+    ): Promise<Core_RemainingDomainUsers> => t.get(URLs.intentRemainingUsers, params, query),
 
     getAndWait: (
       params: Core_GetIntentPathParams,
       options?: WaitForExecutionOptions,
-    ): Promise<WaitForExecutionResult> =>
-      waitForExecution(t, params, options),
+    ): Promise<WaitForExecutionResult> => waitForExecution(t, params, options),
   } as const
 }
