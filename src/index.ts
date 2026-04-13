@@ -184,6 +184,7 @@ export type {
   CustodyMpTokenIssuanceSet,
   CustodyOfferCreate,
   CustodyPayment,
+  CustodyTicketCreate,
   CustodyTrustline,
   RawSignAndWaitOptions,
   RawSignAndWaitResult,
