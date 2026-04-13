@@ -27,7 +27,7 @@ Install directly from the GitHub repository:
 npm install github:florent-uzio/custody.js
 ```
 
-Tedt
+Tedt2
 
 ## Quick Start
 
