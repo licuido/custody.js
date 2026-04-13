@@ -1,28 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { CustodyError } from "../../models/index.js"
-import type { ApiService } from "../apis/index.js"
-import { UsersService } from "../users/index.js"
+import type { TypedTransport } from "../../transport/index.js"
 import { DomainResolverService } from "./domain-resolver.service.js"
 
 describe("DomainResolverService", () => {
   let domainResolverService: DomainResolverService
-  let mockApiService: ApiService
-  let mockUsersService: UsersService
+  let mockTransport: TypedTransport
 
   const mockDomainId = "domain-123"
   const mockUserId = "user-123"
 
   beforeEach(() => {
-    mockApiService = {} as ApiService
+    mockTransport = {
+      get: vi.fn(),
+      post: vi.fn(),
+    } as unknown as TypedTransport
 
-    mockUsersService = {
-      getMe: vi.fn(),
-    } as unknown as UsersService
-
-    domainResolverService = new DomainResolverService(mockApiService)
-
-    // @ts-expect-error - accessing private property for testing
-    domainResolverService.usersService = mockUsersService
+    domainResolverService = new DomainResolverService(mockTransport)
   })
 
   describe("validateUser", () => {
@@ -160,7 +154,7 @@ describe("DomainResolverService", () => {
         domains: [{ id: mockDomainId, userReference: { id: mockUserId } }],
       }
 
-      vi.mocked(mockUsersService.getMe).mockResolvedValue(mockMe as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(mockMe)
 
       const result = await domainResolverService.resolve()
 
@@ -180,7 +174,7 @@ describe("DomainResolverService", () => {
         ],
       }
 
-      vi.mocked(mockUsersService.getMe).mockResolvedValue(mockMe as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(mockMe)
 
       const result = await domainResolverService.resolve({ domainId: providedDomainId })
 
@@ -194,7 +188,7 @@ describe("DomainResolverService", () => {
         domains: [{ id: mockDomainId, userReference: { id: mockUserId } }],
       }
 
-      vi.mocked(mockUsersService.getMe).mockResolvedValue(mockMe as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(mockMe)
 
       await expect(domainResolverService.resolve()).rejects.toThrow("User has no login ID")
     })

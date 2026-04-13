@@ -1,6 +1,7 @@
+import { URLs } from "../../constants/urls.js"
 import { CustodyError } from "../../models/index.js"
-import type { ApiService } from "../apis/index.js"
-import { UsersService, type Core_MeReference } from "../users/index.js"
+import type { Core_MeReference } from "../users/users.types.js"
+import type { TypedTransport } from "../../transport/index.js"
 import type { DomainResolveOptions, DomainUserReference } from "./domain-resolver.types.js"
 
 /**
@@ -9,11 +10,7 @@ import type { DomainResolveOptions, DomainUserReference } from "./domain-resolve
  * that can be shared across different chain services (XRPL, EVM, etc.).
  */
 export class DomainResolverService {
-  private readonly usersService: UsersService
-
-  constructor(apiService: ApiService) {
-    this.usersService = new UsersService(apiService)
-  }
+  constructor(private readonly transport: TypedTransport) {}
 
   /**
    * Resolves the domain and user IDs in one call.
@@ -24,7 +21,7 @@ export class DomainResolverService {
    * @throws {CustodyError} If validation fails or domain resolution fails
    */
   async resolve(options: DomainResolveOptions = {}): Promise<DomainUserReference> {
-    const me = await this.usersService.getMe()
+    const me = await this.transport.get<Core_MeReference>(URLs.me)
     this.validateUser(me)
     return this.resolveDomainAndUser(me, options.domainId)
   }

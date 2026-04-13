@@ -1,0 +1,136 @@
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { TypedTransport } from "./typed-transport.js"
+
+const mockApiService = {
+  get: vi.fn(),
+  post: vi.fn(),
+}
+
+describe("TypedTransport", () => {
+  let transport: TypedTransport
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    transport = new TypedTransport(mockApiService as any)
+  })
+
+  describe("get", () => {
+    it("should call api.get with plain URL when no params provided", async () => {
+      mockApiService.get.mockResolvedValue({ data: [] })
+
+      await transport.get("/v1/tickers")
+
+      expect(mockApiService.get).toHaveBeenCalledWith("/v1/tickers", undefined)
+    })
+
+    it("should call api.get with query params when no path params", async () => {
+      mockApiService.get.mockResolvedValue({ data: [] })
+
+      await transport.get("/v1/tickers", undefined, { limit: 10 })
+
+      expect(mockApiService.get).toHaveBeenCalledWith("/v1/tickers", { limit: 10 })
+    })
+
+    it("should resolve path params from URL template", async () => {
+      mockApiService.get.mockResolvedValue({ data: {} })
+
+      await transport.get("/v1/domains/{domainId}", { domainId: "d-123" })
+
+      expect(mockApiService.get).toHaveBeenCalledWith("/v1/domains/d-123", undefined)
+    })
+
+    it("should resolve path params and pass query separately", async () => {
+      mockApiService.get.mockResolvedValue({ data: [] })
+
+      await transport.get(
+        "/v1/domains/{domainId}/accounts",
+        { domainId: "d-123" },
+        { limit: 5 },
+      )
+
+      expect(mockApiService.get).toHaveBeenCalledWith("/v1/domains/d-123/accounts", { limit: 5 })
+    })
+
+    it("should resolve multiple path params", async () => {
+      mockApiService.get.mockResolvedValue({ data: {} })
+
+      await transport.get("/v1/domains/{domainId}/intents/{intentId}", {
+        domainId: "d-123",
+        intentId: "i-456",
+      })
+
+      expect(mockApiService.get).toHaveBeenCalledWith(
+        "/v1/domains/d-123/intents/i-456",
+        undefined,
+      )
+    })
+
+    it("should separate mixed path and non-path params in pathParams", async () => {
+      mockApiService.get.mockResolvedValue({ data: [] })
+
+      // When path params object contains extra keys that aren't in the URL template
+      await transport.get("/v1/domains/{domainId}/accounts", {
+        domainId: "d-123",
+        limit: 5,
+      })
+
+      // The extra 'limit' from pathParams should be merged into query
+      expect(mockApiService.get).toHaveBeenCalledWith("/v1/domains/d-123/accounts", { limit: 5 })
+    })
+
+    it("should return the data from api.get", async () => {
+      const mockData = { data: [{ id: "1" }], pagination: { total: 1 } }
+      mockApiService.get.mockResolvedValue(mockData)
+
+      const result = await transport.get("/v1/tickers")
+
+      expect(result).toEqual(mockData)
+    })
+  })
+
+  describe("post", () => {
+    it("should call api.post with URL and body", async () => {
+      const body = { request: { type: "Propose" } }
+      mockApiService.post.mockResolvedValue({ data: {} })
+
+      await transport.post("/v1/intents", body)
+
+      expect(mockApiService.post).toHaveBeenCalledWith("/v1/intents", body, undefined)
+    })
+
+    it("should resolve path params before posting", async () => {
+      const body = { data: "test" }
+      mockApiService.post.mockResolvedValue({})
+
+      await transport.post("/v1/ledgers/{ledgerId}/ethereum/call", body, { ledgerId: "eth-1" })
+
+      expect(mockApiService.post).toHaveBeenCalledWith(
+        "/v1/ledgers/eth-1/ethereum/call",
+        body,
+        undefined,
+      )
+    })
+
+    it("should forward config to api.post", async () => {
+      mockApiService.post.mockResolvedValue({})
+      const config = { headers: { "Content-Type": "multipart/form-data" } }
+
+      await transport.post("/v1/vaults/operations/signed", "files", undefined, config)
+
+      expect(mockApiService.post).toHaveBeenCalledWith(
+        "/v1/vaults/operations/signed",
+        "files",
+        config,
+      )
+    })
+
+    it("should return the data from api.post", async () => {
+      const mockResponse = { id: "intent-123", status: "Open" }
+      mockApiService.post.mockResolvedValue(mockResponse)
+
+      const result = await transport.post("/v1/intents", { request: {} })
+
+      expect(result).toEqual(mockResponse)
+    })
+  })
+})

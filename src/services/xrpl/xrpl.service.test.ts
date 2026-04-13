@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { Batch, SubmittableTransaction } from "xrpl"
 import { encodeForSigningBatch, hashes } from "xrpl"
 import { CustodyError } from "../../models/index.js"
-import { AccountsService } from "../accounts/index.js"
+import * as accountsNamespace from "../../namespaces/accounts.js"
 import type { ApiService } from "../apis/index.js"
 import { DomainResolverService } from "../domain-resolver/index.js"
-import { IntentsService } from "../intents/index.js"
+import type { TypedTransport } from "../../transport/index.js"
 import { XrplService } from "./xrpl.service.js"
 import type {
   CustodyAccountSet,
@@ -36,8 +36,8 @@ describe("XrplService", () => {
   let xrplService: XrplService
   let mockApiService: ApiService
   let mockDomainResolver: DomainResolverService
-  let mockAccountsService: AccountsService
-  let mockIntentsService: IntentsService
+  let mockTransport: TypedTransport
+  let mockFindByAddress: ReturnType<typeof vi.fn>
 
   const mockDomainId = "domain-123"
   const mockUserId = "user-123"
@@ -72,34 +72,35 @@ describe("XrplService", () => {
   }
 
   beforeEach(() => {
-    // Create mock API service
-    mockApiService = {} as ApiService
+    // Create mock API service with get/post methods (used by TypedTransport)
+    mockApiService = {
+      get: vi.fn(),
+      post: vi.fn(),
+    } as unknown as ApiService
 
-    // Create mock service instances with spies
+    // Create mock transport with get/post spies
+    mockTransport = {
+      get: vi.fn(),
+      post: vi.fn(),
+    } as unknown as TypedTransport
+
+    // Create mock domain resolver
     mockDomainResolver = {
       resolve: vi.fn(),
     } as unknown as DomainResolverService
 
-    mockAccountsService = {
-      findByAddress: vi.fn(),
-      getAccount: vi.fn(),
-      getManifest: vi.fn(),
-    } as unknown as AccountsService
-
-    mockIntentsService = {
-      proposeIntent: vi.fn(),
-    } as unknown as IntentsService
+    // Mock the findByAddress module function
+    mockFindByAddress = vi.fn()
+    vi.spyOn(accountsNamespace, "findByAddress").mockImplementation(mockFindByAddress)
 
     // Create XrplService instance
     xrplService = new XrplService(mockApiService)
 
     // Replace internal services with mocks
     // @ts-expect-error - accessing private property for testing
+    xrplService.transport = mockTransport
+    // @ts-expect-error - accessing private property for testing
     xrplService.domainResolver = mockDomainResolver
-    // @ts-expect-error - accessing private property for testing
-    xrplService.accountsService = mockAccountsService
-    // @ts-expect-error - accessing private property for testing
-    xrplService.intentService = mockIntentsService
   })
 
   describe("sendPayment", () => {
@@ -109,20 +110,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.sendPayment(mockPayment)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       if (intentCall.request.payload.type === "v0_CreateTransactionOrder") {
@@ -151,14 +152,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.sendPayment(mockPayment, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -176,8 +177,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -186,9 +187,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -263,7 +264,7 @@ describe("XrplService", () => {
 
     it("should throw error when sender account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -289,14 +290,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.sendPayment(paymentWithCurrency)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -315,15 +316,15 @@ describe("XrplService", () => {
 
     it("should set expiry date correctly based on expiryDays option", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       const expiryDays = 5
       await xrplService.sendPayment(mockPayment, { expiryDays })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       const expiryDate = new Date(intentCall.request.expiryAt)
       const expectedDate = new Date()
       expectedDate.setDate(expectedDate.getDate() + expiryDays)
@@ -334,8 +335,8 @@ describe("XrplService", () => {
 
     it("should use different fee priorities correctly", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -344,14 +345,14 @@ describe("XrplService", () => {
       for (const priority of priorities) {
         vi.clearAllMocks()
         vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-        vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-        vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+        vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+        vi.mocked(mockTransport.post).mockResolvedValue({
           requestId: "request-123",
         } as any)
 
         await xrplService.sendPayment(mockPayment, { feePriority: priority })
 
-        const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+        const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
         if (
           intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
           intentCall.request.payload.parameters.type === "XRPL" &&
@@ -368,8 +369,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-payment-payload-id-123"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -378,7 +379,7 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -404,20 +405,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.createTrustline(mockTrustline)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -447,14 +448,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.createTrustline(mockTrustline, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -472,14 +473,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.createTrustline(trustlineWithRippling)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -496,8 +497,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -506,9 +507,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -526,7 +527,7 @@ describe("XrplService", () => {
 
     it("should throw error when sender account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -541,8 +542,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-trustline-payload-id-456"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -551,7 +552,7 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -571,14 +572,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.createTrustline(trustlineWithMultipleFlags)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -622,20 +623,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.depositPreauth(mockDepositPreauthAuthorize)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -658,14 +659,14 @@ describe("XrplService", () => {
 
     it("should successfully create a deposit preauth with unauthorize", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.depositPreauth(mockDepositPreauthUnauthorize)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -688,14 +689,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.depositPreauth(mockDepositPreauthAuthorize, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -712,8 +713,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -722,9 +723,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -744,7 +745,7 @@ describe("XrplService", () => {
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -778,20 +779,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.clawback(mockClawback)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -824,14 +825,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.clawback(mockClawback, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -857,14 +858,14 @@ describe("XrplService", () => {
     //   }
 
     //   vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-    //   vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-    //   vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+    //   vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+    //   vi.mocked(mockTransport.post).mockResolvedValue({
     //     requestId: "request-123",
     //   } as any)
 
     //   await xrplService.clawback(clawbackWithMpt)
 
-    //   const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+    //   const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
     //   if (
     //     intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
     //     intentCall.request.payload.parameters.type === "XRPL" &&
@@ -884,8 +885,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -894,9 +895,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -912,7 +913,7 @@ describe("XrplService", () => {
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -927,8 +928,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-clawback-payload-id-789"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -937,7 +938,7 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -959,20 +960,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.mpTokenAuthorize(mockMpTokenAuthorize)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -1007,14 +1008,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenAuthorize(mpTokenUnauthorize)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1033,14 +1034,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenAuthorize(mockMpTokenAuthorize, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1057,8 +1058,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -1067,9 +1068,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -1087,7 +1088,7 @@ describe("XrplService", () => {
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -1102,8 +1103,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-mptauthorize-payload-id-7890"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -1112,7 +1113,7 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -1141,20 +1142,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.offerCreate(mockOfferCreate)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -1186,14 +1187,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.offerCreate(offerWithSellFlag)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1211,14 +1212,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.offerCreate(offerWithIocFlag)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1238,14 +1239,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.offerCreate(offerWithFokFlag)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1279,14 +1280,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.offerCreate(tokenToTokenOffer)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1310,14 +1311,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.offerCreate(mockOfferCreate, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1334,8 +1335,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -1344,9 +1345,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -1362,7 +1363,7 @@ describe("XrplService", () => {
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -1377,8 +1378,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-offercreate-payload-id-789"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -1387,7 +1388,7 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -1404,20 +1405,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.accountSet(mockAccountSet)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -1442,14 +1443,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.accountSet(accountSetWithFlag)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1467,14 +1468,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.accountSet(accountSetWithGlobalFreeze)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1492,14 +1493,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.accountSet(accountSetWithClawback)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1519,14 +1520,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.accountSet(accountSetWithClearFlag)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1544,14 +1545,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.accountSet(accountSetWithTransferRate)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1570,14 +1571,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.accountSet(accountSetWithMultipleFields)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1597,14 +1598,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.accountSet(mockAccountSet, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1621,8 +1622,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -1631,9 +1632,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -1649,7 +1650,7 @@ describe("XrplService", () => {
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -1664,8 +1665,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-accountset-payload-id-7890"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -1674,7 +1675,7 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -1692,20 +1693,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.mpTokenIssuanceCreate(mockMpTokenIssuanceCreate)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -1738,14 +1739,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenIssuanceCreate(fullMpTokenIssuanceCreate)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1773,14 +1774,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenIssuanceCreate(mpTokenWithEscrowAndLock)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1802,14 +1803,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenIssuanceCreate(mockMpTokenIssuanceCreate, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1826,8 +1827,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -1838,9 +1839,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -1860,7 +1861,7 @@ describe("XrplService", () => {
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -1877,8 +1878,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-mptissuancecreate-payload-id-123"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -1887,7 +1888,7 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -1909,20 +1910,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.mpTokenIssuanceSet(mockMpTokenIssuanceSet)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -1957,14 +1958,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenIssuanceSet(mpTokenIssuanceSetWithLock)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -1986,14 +1987,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenIssuanceSet(mpTokenIssuanceSetWithUnlock)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -2019,14 +2020,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenIssuanceSet(mpTokenIssuanceSetWithHolder)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -2049,14 +2050,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenIssuanceSet(mockMpTokenIssuanceSet, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -2073,8 +2074,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -2083,9 +2084,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -2105,7 +2106,7 @@ describe("XrplService", () => {
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -2122,8 +2123,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-mptissuanceset-payload-id-456"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -2132,7 +2133,7 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -2153,20 +2154,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.mpTokenIssuanceDestroy(mockMpTokenIssuanceDestroy)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -2199,14 +2200,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenIssuanceDestroy(mockMpTokenIssuanceDestroy, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -2223,8 +2224,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -2235,9 +2236,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -2257,7 +2258,7 @@ describe("XrplService", () => {
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -2274,8 +2275,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-mptissuancedestroy-payload-id-789"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -2284,7 +2285,7 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -2300,14 +2301,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.mpTokenIssuanceDestroy(mpTokenDestroyDifferentId)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
         intentCall.request.payload.parameters.type === "XRPL" &&
@@ -2334,20 +2335,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.ticketCreate(mockTicketCreate)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -2370,8 +2371,8 @@ describe("XrplService", () => {
       const customPayloadId = "custom-ticketcreate-payload-id-123"
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -2380,14 +2381,14 @@ describe("XrplService", () => {
         payloadId: customPayloadId,
       })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -2414,20 +2415,20 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue(mockIntentResponse as any)
 
       const result = await xrplService.rawSign(mockXrplTransaction)
 
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: undefined,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
-      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
+      expect(mockTransport.post).toHaveBeenCalledOnce()
       expect(result).toEqual(mockIntentResponse)
 
       // Verify intent structure
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(mockDomainId)
       expect(intentCall.request.author.id).toBe(mockUserId)
       expect(intentCall.request.type).toBe("Propose")
@@ -2451,14 +2452,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.rawSign(mockXrplTransaction, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.customProperties).toEqual({ reference: "raw-sign-test" })
       expect(intentCall.request.expiryAt).toBeDefined()
     })
@@ -2472,14 +2473,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.rawSign(mockXrplTransaction, options)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.id).toBe(customRequestId)
       expect(intentCall.request.payload.id).toBe(customPayloadId)
     })
@@ -2490,8 +2491,8 @@ describe("XrplService", () => {
         domainId: providedDomainId,
         userId: "user-456",
       })
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
@@ -2500,9 +2501,9 @@ describe("XrplService", () => {
       expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
         domainId: providedDomainId,
       })
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.author.domainId).toBe(providedDomainId)
       expect(intentCall.request.author.id).toBe("user-456")
     })
@@ -2521,14 +2522,14 @@ describe("XrplService", () => {
       }
 
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.rawSign(trustSetTransaction)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (intentCall.request.payload.type === "v0_SignManifest") {
         expect(intentCall.request.payload.content.type).toBe("Unsafe")
         if (intentCall.request.payload.content.type === "Unsafe") {
@@ -2557,7 +2558,7 @@ describe("XrplService", () => {
 
     it("should throw error when account is not found", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+      vi.mocked(mockFindByAddress).mockRejectedValue(
         new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
       )
 
@@ -2569,15 +2570,15 @@ describe("XrplService", () => {
 
     it("should set expiry date correctly based on expiryDays option", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       const expiryDays = 5
       await xrplService.rawSign(mockXrplTransaction, { expiryDays })
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       const expiryDate = new Date(intentCall.request.expiryAt)
       const expectedDate = new Date()
       expectedDate.setDate(expectedDate.getDate() + expiryDays)
@@ -2588,14 +2589,14 @@ describe("XrplService", () => {
 
     it("should encode transaction content as base64", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({
         requestId: "request-123",
       } as any)
 
       await xrplService.rawSign(mockXrplTransaction)
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       if (
         intentCall.request.payload.type === "v0_SignManifest" &&
         intentCall.request.payload.content.type === "Unsafe"
@@ -2649,17 +2650,17 @@ describe("XrplService", () => {
     }
 
     it("should return the compressed public key for a Vault account", async () => {
-      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(mockVaultAccountResponse as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(mockVaultAccountResponse as any)
 
       const result = await xrplService.getPublicKey({
         domainId: mockDomainId,
         accountId: mockAccountId,
       })
 
-      expect(mockAccountsService.getAccount).toHaveBeenCalledWith({
-        domainId: mockDomainId,
-        accountId: mockAccountId,
-      })
+      expect(mockTransport.get).toHaveBeenCalledWith(
+        "/v1/domains/{domainId}/accounts/{accountId}",
+        { domainId: mockDomainId, accountId: mockAccountId },
+      )
       expect(result).toBe(expectedCompressedKey)
     })
 
@@ -2681,7 +2682,7 @@ describe("XrplService", () => {
         signingKey: "key-123",
       }
 
-      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(externalAccountResponse as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(externalAccountResponse as any)
 
       await expect(
         xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
@@ -2711,7 +2712,7 @@ describe("XrplService", () => {
         },
       }
 
-      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(accountWithoutKey as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(accountWithoutKey as any)
 
       await expect(
         xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
@@ -2732,7 +2733,7 @@ describe("XrplService", () => {
         },
       }
 
-      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(accountWithoutKeys as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(accountWithoutKeys as any)
 
       await expect(
         xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
@@ -2757,7 +2758,7 @@ describe("XrplService", () => {
         },
       }
 
-      vi.mocked(mockAccountsService.getAccount).mockResolvedValue(accountWithKeyNoPublicKey as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(accountWithKeyNoPublicKey as any)
 
       await expect(
         xrplService.getPublicKey({ domainId: mockDomainId, accountId: mockAccountId }),
@@ -2791,10 +2792,10 @@ describe("XrplService", () => {
 
     it("should auto-set SigningPubKey and return signature", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
       vi.spyOn(xrplService, "getPublicKey").mockResolvedValue(mockSigningPubKey)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
-      vi.mocked(mockAccountsService.getManifest).mockResolvedValue(mockManifestWithSignature as any)
+      vi.mocked(mockTransport.post).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(mockManifestWithSignature as any)
 
       const tx = { ...mockXrplTransaction }
       const result = await xrplService.rawSignAndWait(tx, {
@@ -2808,9 +2809,9 @@ describe("XrplService", () => {
 
     it("should not override SigningPubKey if already set", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
-      vi.mocked(mockAccountsService.getManifest).mockResolvedValue(mockManifestWithSignature as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(mockManifestWithSignature as any)
 
       const tx = { ...mockXrplTransaction, SigningPubKey: "EXISTING_PUB_KEY" }
       const result = await xrplService.rawSignAndWait(tx, {
@@ -2818,16 +2819,20 @@ describe("XrplService", () => {
       })
 
       expect(result.signingPubKey).toBe("EXISTING_PUB_KEY")
-      // getAccount should NOT have been called since SigningPubKey was already set
-      expect(mockAccountsService.getAccount).not.toHaveBeenCalled()
+      // getPublicKey should NOT have been called since SigningPubKey was already set
+      // mockTransport.get IS called for getManifest, but not for getAccount
+      expect(mockTransport.get).not.toHaveBeenCalledWith(
+        "/v1/domains/{domainId}/accounts/{accountId}",
+        expect.anything(),
+      )
     })
 
     it("should throw CustodyError on timeout", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({ requestId: "r-1" } as any)
       // Manifest has no value yet (not signed)
-      vi.mocked(mockAccountsService.getManifest).mockResolvedValue({
+      vi.mocked(mockTransport.get).mockResolvedValue({
         data: { value: undefined },
       } as any)
 
@@ -2841,9 +2846,9 @@ describe("XrplService", () => {
 
     it("should call onAttempt callback", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
-      vi.mocked(mockAccountsService.getManifest)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockTransport.get)
         .mockResolvedValueOnce({ data: {} } as any)
         .mockResolvedValueOnce(mockManifestWithSignature as any)
 
@@ -2860,9 +2865,9 @@ describe("XrplService", () => {
 
     it("should retry on 404 manifest", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
-      vi.mocked(mockAccountsService.getManifest)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockTransport.get)
         .mockRejectedValueOnce(new CustodyError({ reason: "Not found" }, 404))
         .mockResolvedValueOnce(mockManifestWithSignature as any)
 
@@ -2897,8 +2902,8 @@ describe("XrplService", () => {
 
     it("should propose a raw sign intent with batch-encoded bytes", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({ requestId: "r-1" } as any)
 
       await xrplService.rawSignInnerBatch(mockBatch, mockAddress)
 
@@ -2910,7 +2915,7 @@ describe("XrplService", () => {
         }),
       )
 
-      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      const intentCall = vi.mocked(mockTransport.post).mock.calls[0][1]
       expect(intentCall.request.type).toBe("Propose")
       if (intentCall.request.payload.type === "v0_SignManifest") {
         expect(intentCall.request.payload.content.type).toBe("Unsafe")
@@ -2924,13 +2929,13 @@ describe("XrplService", () => {
 
     it("should resolve context using signerAddress, not batch Account", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockTransport.post).mockResolvedValue({ requestId: "r-1" } as any)
 
       await xrplService.rawSignInnerBatch(mockBatch, mockAddress)
 
       // Should resolve with the inner account address, not the batch submitter
-      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockFindByAddress).toHaveBeenCalledWith(mockTransport, mockAddress)
     })
 
     it("should throw if signerAddress is not in any inner transaction", async () => {
@@ -2973,10 +2978,10 @@ describe("XrplService", () => {
 
     it("should sign batch envelope and return signature with signingPubKey", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
       vi.spyOn(xrplService, "getPublicKey").mockResolvedValue(mockSigningPubKey)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
-      vi.mocked(mockAccountsService.getManifest).mockResolvedValue(mockManifestWithSignature as any)
+      vi.mocked(mockTransport.post).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockTransport.get).mockResolvedValue(mockManifestWithSignature as any)
 
       const result = await xrplService.rawSignInnerBatchAndWait(mockBatch, mockAddress, {
         polling: { maxRetries: 1, intervalMs: 0 },
@@ -2988,10 +2993,10 @@ describe("XrplService", () => {
 
     it("should throw CustodyError on timeout", async () => {
       vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
-      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockFindByAddress).mockResolvedValue(mockAccountRef)
       vi.spyOn(xrplService, "getPublicKey").mockResolvedValue(mockSigningPubKey)
-      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({ requestId: "r-1" } as any)
-      vi.mocked(mockAccountsService.getManifest).mockResolvedValue({
+      vi.mocked(mockTransport.post).mockResolvedValue({ requestId: "r-1" } as any)
+      vi.mocked(mockTransport.get).mockResolvedValue({
         data: { value: undefined },
       } as any)
 

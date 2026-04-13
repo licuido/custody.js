@@ -8,16 +8,14 @@ import {
   type Batch,
   type SubmittableTransaction,
 } from "xrpl"
+import { URLs } from "../../constants/urls.js"
 import { sleep } from "../../helpers/async/async.js"
 import { CustodyError } from "../../models/index.js"
-import { AccountsService } from "../accounts/index.js"
-import type { ApiService } from "../apis/index.js"
+import { findByAddress } from "../../namespaces/accounts.js"
+import type { Core_ApiAccount, Core_ApiManifest } from "../accounts/accounts.types.js"
 import { DomainResolverService } from "../domain-resolver/index.js"
-import {
-  IntentsService,
-  type Core_IntentResponse,
-  type Core_ProposeIntentBody,
-} from "../intents/index.js"
+import type { Core_IntentResponse, Core_ProposeIntentBody } from "../intents/intents.types.js"
+import { TypedTransport } from "../../transport/index.js"
 import type {
   BuildTransactionIntentProps,
   Core_XrplOperation,
@@ -42,14 +40,12 @@ import type {
 } from "./xrpl.types.js"
 
 export class XrplService {
-  private readonly intentService: IntentsService
+  private readonly transport: TypedTransport
   private readonly domainResolver: DomainResolverService
-  private readonly accountsService: AccountsService
 
-  constructor(apiService: ApiService) {
-    this.intentService = new IntentsService(apiService)
-    this.domainResolver = new DomainResolverService(apiService)
-    this.accountsService = new AccountsService(apiService)
+  constructor(apiService: import("../apis/api.service.js").ApiService) {
+    this.transport = new TypedTransport(apiService)
+    this.domainResolver = new DomainResolverService(this.transport)
   }
 
   /**
@@ -237,7 +233,7 @@ export class XrplService {
     domainId: string
     accountId: string
   }): Promise<string> {
-    const account = await this.accountsService.getAccount({ domainId, accountId })
+    const account = await this.transport.get<Core_ApiAccount>(URLs.account, { domainId, accountId })
 
     const { providerDetails } = account.data
 
@@ -406,7 +402,7 @@ export class XrplService {
     options: { domainId?: string } = {},
   ): Promise<IntentContext> {
     const { domainId, userId } = await this.domainResolver.resolve(options)
-    const account = await this.accountsService.findByAddress(address)
+    const account = await findByAddress(this.transport, address)
     return { domainId, userId, ...account }
   }
 
@@ -487,7 +483,7 @@ export class XrplService {
       options,
     })
 
-    return this.intentService.proposeIntent(intent)
+    return this.transport.post<Core_IntentResponse>(URLs.intents, intent)
   }
 
   /**
@@ -530,7 +526,7 @@ export class XrplService {
       },
     }
 
-    const intentResponse = await this.intentService.proposeIntent(intent)
+    const intentResponse = await this.transport.post<Core_IntentResponse>(URLs.intents, intent)
     return { intentResponse, payloadId }
   }
 
@@ -589,7 +585,7 @@ export class XrplService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        return await this.accountsService.getManifest(params)
+        return await this.transport.get<Core_ApiManifest>(URLs.accountManifest, params)
       } catch (error) {
         if (error instanceof CustodyError && error.statusCode === 404) {
           lastError = error
