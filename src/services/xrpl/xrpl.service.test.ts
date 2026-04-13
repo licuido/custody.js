@@ -17,6 +17,7 @@ import type {
   CustodyMpTokenIssuanceSet,
   CustodyOfferCreate,
   CustodyPayment,
+  CustodyTicketCreate,
   CustodyTrustline,
   IntentContext,
   XrplIntentOptions,
@@ -2318,6 +2319,82 @@ describe("XrplService", () => {
           differentIssuanceId,
         )
       }
+    })
+  })
+
+  describe("ticketCreate", () => {
+    const mockTicketCreate: CustodyTicketCreate = {
+      Account: mockAddress,
+      ticketCount: 5,
+    }
+
+    it("should successfully create a ticketCreate with default options", async () => {
+      const mockIntentResponse = {
+        requestId: "request-123",
+      }
+
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue(mockIntentResponse as any)
+
+      const result = await xrplService.ticketCreate(mockTicketCreate)
+
+      expect(mockDomainResolver.resolve).toHaveBeenCalledWith({
+        domainId: undefined,
+      })
+      expect(mockAccountsService.findByAddress).toHaveBeenCalledWith(mockAddress)
+      expect(mockIntentsService.proposeIntent).toHaveBeenCalledOnce()
+      expect(result).toEqual(mockIntentResponse)
+
+      // Verify intent structure
+      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      expect(intentCall.request.author.domainId).toBe(mockDomainId)
+      expect(intentCall.request.author.id).toBe(mockUserId)
+      expect(intentCall.request.type).toBe("Propose")
+
+      if (
+        intentCall.request.payload.type === "v0_CreateTransactionOrder" &&
+        intentCall.request.payload.parameters.type === "XRPL"
+      ) {
+        expect(intentCall.request.payload.accountId).toBe(mockAccountId)
+        expect(intentCall.request.payload.ledgerId).toBe(mockLedgerId)
+        expect(intentCall.request.payload.parameters.operation).toEqual({
+          type: "TicketCreate",
+          ticketCount: 5,
+        })
+      }
+    })
+
+    it("should use provided requestId and payloadId when specified", async () => {
+      const customRequestId = "custom-ticketcreate-request-id-123"
+      const customPayloadId = "custom-ticketcreate-payload-id-123"
+
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockResolvedValue(mockAccountRef)
+      vi.mocked(mockIntentsService.proposeIntent).mockResolvedValue({
+        requestId: "request-123",
+      } as any)
+
+      await xrplService.ticketCreate(mockTicketCreate, {
+        requestId: customRequestId,
+        payloadId: customPayloadId,
+      })
+
+      const intentCall = vi.mocked(mockIntentsService.proposeIntent).mock.calls[0][0]
+      expect(intentCall.request.id).toBe(customRequestId)
+      expect(intentCall.request.payload.id).toBe(customPayloadId)
+    })
+
+    it("should throw error when account is not found", async () => {
+      vi.mocked(mockDomainResolver.resolve).mockResolvedValue(mockDomainUserRef)
+      vi.mocked(mockAccountsService.findByAddress).mockRejectedValue(
+        new CustodyError({ reason: `Account not found for address ${mockAddress}` }),
+      )
+
+      await expect(xrplService.ticketCreate(mockTicketCreate)).rejects.toThrow(CustodyError)
+      await expect(xrplService.ticketCreate(mockTicketCreate)).rejects.toThrow(
+        `Account not found for address ${mockAddress}`,
+      )
     })
   })
 

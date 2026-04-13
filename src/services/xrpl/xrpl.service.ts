@@ -31,6 +31,7 @@ import type {
   CustodyMpTokenIssuanceSet,
   CustodyOfferCreate,
   CustodyPayment,
+  CustodyTicketCreate,
   CustodyTrustline,
   IntentContext,
   RawSignAndWaitOptions,
@@ -147,6 +148,20 @@ export class XrplService {
     options: XrplIntentOptions = {},
   ): Promise<Core_IntentResponse> {
     return this.proposeXrplIntent({ ...accountSet, type: "AccountSet" }, options)
+  }
+
+  /**
+   * Creates and proposes a TicketCreate intent for an XRPL TicketCreate transaction.
+   * @param ticketCreate - The TicketCreate transaction details
+   * @param options - Optional configuration for the TicketCreate intent
+   * @returns The proposed intent response
+   * @throws {CustodyError} If validation fails or the sender account is not found
+   */
+  public async ticketCreate(
+    ticketCreate: CustodyTicketCreate,
+    options: XrplIntentOptions = {},
+  ): Promise<Core_IntentResponse> {
+    return this.proposeXrplIntent({ ...ticketCreate, type: "TicketCreate" }, options)
   }
 
   /**

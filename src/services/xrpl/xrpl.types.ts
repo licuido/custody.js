@@ -9,6 +9,7 @@ import type {
   MPTokenIssuanceSet,
   OfferCreate,
   Payment,
+  TicketCreate,
   TrustSet,
 } from "xrpl"
 import type { components } from "../../models/custody-types.js"
@@ -88,6 +89,14 @@ export type CustodyMpTokenIssuanceDestroy = Prettify<
 export type Core_XrplOperation_OfferCreate = components["schemas"]["Core_XrplOperation_OfferCreate"]
 export type CustodyOfferCreate = Prettify<
   Pick<OfferCreate, "Account"> & Omit<Core_XrplOperation_OfferCreate, "type">
+>
+
+// TicketCreate
+
+export type Core_XrplOperation_TicketCreate =
+  components["schemas"]["Core_XrplOperation_TicketCreate"]
+export type CustodyTicketCreate = Prettify<
+  Pick<TicketCreate, "Account"> & Omit<Core_XrplOperation_TicketCreate, "type">
 >
 
 // AccountSet
