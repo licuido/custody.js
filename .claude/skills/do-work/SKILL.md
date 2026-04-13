@@ -36,8 +36,7 @@ Each test should target one thin vertical slice through the system. Do not write
 Run the feedback loops and fix any issues. Repeat until both pass cleanly.
 
 ```
-pnpm run typecheck
-pnpm run test
+npm run ci
 ```
 
 ### 5. Commit
