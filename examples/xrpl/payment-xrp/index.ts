@@ -29,15 +29,18 @@ const sendXrpPayment = async () => {
 
     // Submit the payment transaction to Ripple Custody
     // The payment will be queued as an "intent" and processed asynchronously
-    await custody.xrpl.sendPayment(
+    await custody.xrpl.proposeIntent(
       {
         Account: "r...", // Your Ripple Custody account address (the sender)
-        destination: {
-          address: "r...", // Replace with the recipient's XRP Ledger address
-          type: "Address",
+        operation: {
+          type: "Payment",
+          destination: {
+            address: "r...", // Replace with the recipient's XRP Ledger address
+            type: "Address",
+          },
+          amount: "20", // Amount of XRP in drops
+          // Do not include the currency field for XRP payments
         },
-        amount: "20", // Amount of XRP in drops
-        // Do not include the currency field for XRP payments
       },
       {
         // Optional: Provide an intentId to track this transaction

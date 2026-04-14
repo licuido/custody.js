@@ -1,0 +1,91 @@
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { CustodyError } from "../../models/index.js"
+import { findByAddress } from "../accounts.js"
+
+const mockTransport = {
+  get: vi.fn(),
+  post: vi.fn(),
+}
+
+describe("findByAddress", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("should return account reference when address is found", async () => {
+    mockTransport.get.mockResolvedValue({
+      items: [
+        {
+          address: "rAddress123",
+          accountId: "acc-1",
+          ledgerId: "xrpl-mainnet",
+        },
+      ],
+    })
+
+    const result = await findByAddress(mockTransport as any, "rAddress123")
+
+    expect(result).toEqual({
+      accountId: "acc-1",
+      ledgerId: "xrpl-mainnet",
+      address: "rAddress123",
+    })
+    expect(mockTransport.get).toHaveBeenCalledWith("/v1/addresses", undefined, {
+      address: "rAddress123",
+    })
+  })
+
+  it("should return empty string for ledgerId when ledgerId is null", async () => {
+    mockTransport.get.mockResolvedValue({
+      items: [
+        {
+          address: "rAddress123",
+          accountId: "acc-1",
+          ledgerId: null,
+        },
+      ],
+    })
+
+    const result = await findByAddress(mockTransport as any, "rAddress123")
+
+    expect(result.ledgerId).toBe("")
+  })
+
+  it("should throw CustodyError when address is not found", async () => {
+    mockTransport.get.mockResolvedValue({
+      items: [
+        {
+          address: "rOtherAddress",
+          accountId: "acc-2",
+          ledgerId: "xrpl-mainnet",
+        },
+      ],
+    })
+
+    await expect(findByAddress(mockTransport as any, "rAddress123")).rejects.toThrow(CustodyError)
+    await expect(findByAddress(mockTransport as any, "rAddress123")).rejects.toThrow(
+      "Account not found for address rAddress123",
+    )
+  })
+
+  it("should throw CustodyError when items array is empty", async () => {
+    mockTransport.get.mockResolvedValue({ items: [] })
+
+    await expect(findByAddress(mockTransport as any, "rAddress123")).rejects.toThrow(CustodyError)
+  })
+
+  it("should find exact match among multiple addresses", async () => {
+    mockTransport.get.mockResolvedValue({
+      items: [
+        { address: "rAddress111", accountId: "acc-1", ledgerId: "l-1" },
+        { address: "rAddress123", accountId: "acc-2", ledgerId: "l-2" },
+        { address: "rAddress999", accountId: "acc-3", ledgerId: "l-3" },
+      ],
+    })
+
+    const result = await findByAddress(mockTransport as any, "rAddress123")
+
+    expect(result.accountId).toBe("acc-2")
+    expect(result.ledgerId).toBe("l-2")
+  })
+})

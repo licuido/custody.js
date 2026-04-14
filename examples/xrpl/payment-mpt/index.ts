@@ -29,17 +29,20 @@ const sendMptPayment = async () => {
 
     // Submit the payment transaction to Ripple Custody
     // The payment will be queued as an "intent" and processed asynchronously
-    await custody.xrpl.sendPayment(
+    await custody.xrpl.proposeIntent(
       {
         Account: "r...", // Your Ripple Custody account address (the sender)
-        destination: {
-          address: "r...", // Replace with the recipient's XRP Ledger address
-          type: "Address",
-        },
-        amount: "20", // Amount of MPT units
-        currency: {
-          type: "MultiPurposeToken",
-          issuanceId: "1234...",
+        operation: {
+          type: "Payment",
+          destination: {
+            address: "r...", // Replace with the recipient's XRP Ledger address
+            type: "Address",
+          },
+          amount: "20", // Amount of MPT units
+          currency: {
+            type: "MultiPurposeToken",
+            issuanceId: "1234...",
+          },
         },
       },
       {

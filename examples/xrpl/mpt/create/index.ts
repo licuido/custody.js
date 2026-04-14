@@ -23,25 +23,28 @@ const createMpt = async () => {
     // Can be used to filter the transactions
     const orderReferenceId = crypto.randomUUID()
 
-    // Submit the payment transaction to Ripple Custody
-    // The payment will be queued as an "intent" and processed asynchronously
-    await custody.xrpl.mpTokenIssuanceCreate(
+    // Submit the MPTokenIssuanceCreate transaction to Ripple Custody
+    // The transaction will be queued as an "intent" and processed asynchronously
+    await custody.xrpl.proposeIntent(
       {
         Account: "r...", // Your Ripple Custody account address (the sender)
-        metadata: {
-          value: encodeMPTokenMetadata({
-            ticker: "ABC",
-            name: "Token ABC",
-            desc: "This is a token ABC",
-            icon: "https://link.com",
-            asset_class: "rwa",
-            issuer_name: "your name",
-          }),
-          type: "HexEncodedMetadata",
+        operation: {
+          type: "MPTokenIssuanceCreate",
+          metadata: {
+            value: encodeMPTokenMetadata({
+              ticker: "ABC",
+              name: "Token ABC",
+              desc: "This is a token ABC",
+              icon: "https://link.com",
+              asset_class: "rwa",
+              issuer_name: "your name",
+            }),
+            type: "HexEncodedMetadata",
+          },
+          flags: ["tfMPTCanTransfer", "tfMPTCanLock"],
+          assetScale: 2,
+          transferFee: 5000,
         },
-        flags: ["tfMPTCanTransfer", "tfMPTCanLock"],
-        assetScale: 2,
-        transferFee: 5000,
       },
       {
         // Optional: Provide a payloadId to track this transaction
