@@ -141,7 +141,12 @@ const ref = await custody.accounts.findByAddress("rAddress...")
 // Transaction Operations
 const orders = await custody.transactions.orders({ domainId: "domain-id" }, { limit: 10 })
 const transfers = await custody.transactions.transfers({ domainId: "domain-id" })
-const dryRun = await custody.transactions.dryRun({ domainId: "domain-id" }, { /* params */ })
+const dryRun = await custody.transactions.dryRun(
+  { domainId: "domain-id" },
+  {
+    /* params */
+  },
+)
 
 // User Operations
 const me = await custody.users.me()
@@ -177,15 +182,15 @@ See the [`examples/xrpl/`](./examples/xrpl/) directory for working code:
 
 All XRPL methods accept an optional second parameter with these options:
 
-| Option                      | Type                          | Default | Description                                       |
-| --------------------------- | ----------------------------- | ------- | ------------------------------------------------- |
-| `domainId`                  | `string`                      | -       | Domain ID (required if user has multiple domains) |
-| `feePriority`               | `"Low" \| "Medium" \| "High"` | `"Low"` | Transaction fee priority                          |
-| `expiryDays`                | `number`                      | `1`     | Days until the intent expires                     |
-| `requestCustomProperties`   | `Record<string, string>`      | `{}`    | Custom metadata on the request                    |
-| `payloadCustomProperties`   | `Record<string, string>`      | `{}`    | Custom metadata on the payload                    |
-| `requestId`                 | `string`                      | auto    | Override the auto-generated request ID            |
-| `payloadId`                 | `string`                      | auto    | Override the auto-generated payload ID            |
+| Option                    | Type                          | Default | Description                                       |
+| ------------------------- | ----------------------------- | ------- | ------------------------------------------------- |
+| `domainId`                | `string`                      | -       | Domain ID (required if user has multiple domains) |
+| `feePriority`             | `"Low" \| "Medium" \| "High"` | `"Low"` | Transaction fee priority                          |
+| `expiryDays`              | `number`                      | `1`     | Days until the intent expires                     |
+| `requestCustomProperties` | `Record<string, string>`      | `{}`    | Custom metadata on the request                    |
+| `payloadCustomProperties` | `Record<string, string>`      | `{}`    | Custom metadata on the payload                    |
+| `requestId`               | `string`                      | auto    | Override the auto-generated request ID            |
+| `payloadId`               | `string`                      | auto    | Override the auto-generated payload ID            |
 
 ## Error Handling
 
