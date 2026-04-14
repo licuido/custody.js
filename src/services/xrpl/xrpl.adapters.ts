@@ -9,6 +9,7 @@ import {
   OfferCreateFlags,
   TrustSetFlags,
 } from "xrpl"
+import { isString } from "../../helpers/index.js"
 import type {
   CustodyAccountSetFlag,
   CustodyBatchSigner,
@@ -140,21 +141,29 @@ const mpTokenIssuanceSetFlagsToStrings = (
 const txToOperation = (tx: RawTx): CustodyOperation => {
   switch (tx.TransactionType) {
     case "Payment": {
-      const iou = typeof tx.Amount !== "string" ? (tx.Amount as IssuedCurrencyAmount) : null
+      const amount = tx.Amount
+      if (isString(amount)) {
+        // XRP drops
+        return {
+          type: "Payment",
+          destination: { type: "Address", address: tx.Destination },
+          amount,
+          ...(tx.DestinationTag !== undefined && { destinationTag: tx.DestinationTag }),
+        }
+      }
+      const isMPT = "mpt_issuance_id" in amount
       return {
         type: "Payment",
         destination: { type: "Address", address: tx.Destination },
-        amount: iou ? iou.value : (tx.Amount as string),
-        ...(tx.DestinationTag !== undefined && {
-          destinationTag: tx.DestinationTag,
-        }),
-        ...(iou && {
-          currency: {
-            type: "Currency",
-            code: iou.currency,
-            issuer: iou.issuer,
-          },
-        }),
+        amount: amount.value,
+        ...(tx.DestinationTag !== undefined && { destinationTag: tx.DestinationTag }),
+        currency: isMPT
+          ? { type: "MultiPurposeToken" as const, issuanceId: amount.mpt_issuance_id }
+          : {
+              type: "Currency" as const,
+              code: (amount as IssuedCurrencyAmount).currency,
+              issuer: (amount as IssuedCurrencyAmount).issuer,
+            },
       }
     }
     case "OfferCreate":

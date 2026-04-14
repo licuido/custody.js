@@ -131,6 +131,22 @@ describe("rawTransactionsToInnerTransactions", () => {
       const [result] = rawTransactionsToInnerTransactions(makeRawTransactions(tx))
       expect(result.operation).not.toHaveProperty("destinationTag")
     })
+
+    it("converts MPT payment", () => {
+      const tx: RawTx = {
+        ...baseTx,
+        TransactionType: "Payment",
+        Destination: "rDest456",
+        Amount: { mpt_issuance_id: "00000001ABC123", value: "500" },
+      }
+      const [result] = rawTransactionsToInnerTransactions(makeRawTransactions(tx))
+      expect(result.operation).toEqual({
+        type: "Payment",
+        destination: { type: "Address", address: "rDest456" },
+        amount: "500",
+        currency: { type: "MultiPurposeToken", issuanceId: "00000001ABC123" },
+      })
+    })
   })
 
   describe("OfferCreate", () => {
