@@ -14,7 +14,7 @@ A comprehensive JavaScript/Typescript SDK for interacting with the Ripple Custod
 - **User & Invitation Management**: Manage users, roles, and invitations
 - **Vault Operations**: Export and import prepared operations
 - **Type Safety**: Full TypeScript support with types derived from the OpenAPI specification
-- **XRPL Wrappers**: Simplified, high-level API for creating XRPL transaction intents (Payment, TrustSet, DepositPreauth, Clawback, OfferCreate, AccountSet, TicketCreate, Batch, MPToken operations)
+- **XRPL Intent Proposal**: Single `proposeIntent()` method for all XRPL transaction types (Payment, TrustSet, DepositPreauth, Clawback, OfferCreate, AccountSet, TicketCreate, Batch, MPToken operations) using a type-safe discriminated union
 - **Raw Signing**: Sign arbitrary XRPL transactions and Batch inner transactions via Custody
 
 ## Architecture
@@ -24,7 +24,7 @@ The SDK is built around a few key layers:
 - **`TypedTransport`** — wraps the HTTP client with automatic URL template interpolation and path/query parameter splitting.
 - **Namespace factories** (`createDomains`, `createAccounts`, etc.) — return plain objects that map method names to typed transport calls. Each factory is a thin, stateless function.
 - **`RippleCustody`** — the public client class that assembles all namespaces in its constructor. Consumers interact exclusively through `client.domains.list()`, `client.accounts.get()`, etc.
-- **`XrplService`** — builds XRPL transaction intents, handles domain/account resolution, and supports raw signing with manifest polling.
+- **`XrplService`** — builds XRPL transaction intents via a single `proposeIntent()` entry point, handles domain/account resolution through injected I/O ports (`XrplPorts`), and supports raw signing with manifest polling.
 
 ## Installation
 
@@ -166,7 +166,38 @@ const states = await custody.requests.userStates()
 
 ## XRPL Service
 
-The XRPL service provides a simplified, high-level API for creating XRPL transaction intents. Instead of manually building complex intent payloads, you can use intuitive methods that handle user validation, domain resolution, and account lookup automatically.
+The XRPL service provides a simplified, high-level API for creating XRPL transaction intents. Instead of manually building complex intent payloads, use `proposeIntent()` with a discriminated union — it handles user validation, domain resolution, and account lookup automatically.
+
+### Usage
+
+```typescript
+// Propose any XRPL transaction — the `type` field selects the operation.
+// TypeScript autocomplete shows available types and their fields.
+await custody.xrpl.proposeIntent({
+  Account: "rSenderAddress...",
+  operation: {
+    type: "Payment",
+    destination: { address: "rDestAddress...", type: "Address" },
+    amount: "1000000",
+  },
+})
+
+// TrustSet
+await custody.xrpl.proposeIntent({
+  Account: "rSenderAddress...",
+  operation: {
+    type: "TrustSet",
+    limitAmount: {
+      currency: { code: "USD", type: "Currency", issuer: "rIssuer..." },
+      value: "10000",
+    },
+    flags: [],
+  },
+})
+
+// Raw sign and wait for signature
+const { signature, signingPubKey } = await custody.xrpl.rawSignAndWait(autofilledTx)
+```
 
 ### Examples
 
@@ -180,7 +211,7 @@ See the [`examples/xrpl/`](./examples/xrpl/) directory for working code:
 
 ### Options
 
-All XRPL methods accept an optional second parameter with these options:
+`proposeIntent()` and the raw-sign methods accept an optional second parameter with these options:
 
 | Option                    | Type                          | Default | Description                                       |
 | ------------------------- | ----------------------------- | ------- | ------------------------------------------------- |
