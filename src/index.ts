@@ -131,8 +131,8 @@ export type {
   RenewUserInvitationPathParams,
 } from "./services/user-invitations/index.js"
 
-// domain resolver types
-export type { DomainResolveOptions, DomainUserReference } from "./services/domain-resolver/index.js"
+// domain resolver types (DomainUserReference kept for callers who need it)
+export type { DomainUserReference } from "./services/domain-resolver/index.js"
 
 // tickers types
 export type {
@@ -174,6 +174,7 @@ export {
   rawTransactionsToInnerTransactions,
 } from "./services/xrpl/index.js"
 export type {
+  Core_XrplOperation,
   CustodyAccountSet,
   CustodyBatch,
   CustodyClawback,
@@ -191,6 +192,7 @@ export type {
   RawSignInnerBatchOptions,
   WaitForSignatureOptions,
   XrplIntentOptions,
+  XrplPorts,
 } from "./services/xrpl/index.js"
 
 // errors types

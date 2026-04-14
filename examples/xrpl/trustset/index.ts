@@ -27,20 +27,23 @@ const createTrustline = async () => {
     // This allows you to retrieve the transaction status later
     const intentId = "e004adfe-667c-415e-be33-ce3d9684e76b"
 
-    // Submit the payment transaction to Ripple Custody
-    // The payment will be queued as an "intent" and processed asynchronously
-    await custody.xrpl.createTrustline(
+    // Submit the trustline transaction to Ripple Custody
+    // The transaction will be queued as an "intent" and processed asynchronously
+    await custody.xrpl.proposeIntent(
       {
         Account: "r...", // Your Ripple Custody account address (the sender)
-        limitAmount: {
-          currency: {
-            code: "ABC",
-            type: "Currency",
-            issuer: "r...",
+        operation: {
+          type: "TrustSet",
+          limitAmount: {
+            currency: {
+              code: "ABC",
+              type: "Currency",
+              issuer: "r...",
+            },
+            value: "10000",
           },
-          value: "10000",
+          flags: [],
         },
-        flags: [],
       },
       {
         // Optional: Provide an intentId to track this transaction

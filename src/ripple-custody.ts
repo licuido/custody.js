@@ -16,19 +16,9 @@ import { ApiService } from "./services/apis/index.js"
 import { AuthService } from "./services/auth/index.js"
 import type { Core_IntentResponse } from "./services/intents/intents.types.js"
 import {
+  createHttpPorts,
   XrplService,
-  type CustodyAccountSet,
-  type CustodyBatch,
-  type CustodyClawback,
-  type CustodyDepositPreauth,
-  type CustodyMpTokenAuthorize,
-  type CustodyMpTokenIssuanceCreate,
-  type CustodyMpTokenIssuanceDestroy,
-  type CustodyMpTokenIssuanceSet,
-  type CustodyOfferCreate,
-  type CustodyPayment,
-  type CustodyTicketCreate,
-  type CustodyTrustline,
+  type Core_XrplOperation,
   type RawSignAndWaitOptions,
   type RawSignAndWaitResult,
   type RawSignInnerBatchOptions,
@@ -46,7 +36,7 @@ export class RippleCustody {
   private _xrplService?: XrplService
 
   private get xrplService(): XrplService {
-    return (this._xrplService ??= new XrplService(this.apiService))
+    return (this._xrplService ??= new XrplService(createHttpPorts(this.transport)))
   }
 
   // Namespace objects built from factory functions
@@ -106,136 +96,20 @@ export class RippleCustody {
   // Xrpl namespace
   public readonly xrpl = {
     /**
-     * Send an XRPL Payment. If you want to send XRP, do not specify the currency field.
-     * @param params - The payment transaction details
-     * @param options - Optional configuration for the payment intent
+     * Propose any XRPL transaction as a custody intent.
+     *
+     * The `operation` uses a discriminated union on `type` — callers specify
+     * which transaction type to propose (e.g. `{ type: "Payment", ... }`).
+     * TypeScript autocomplete shows all available operation types and their fields.
+     *
+     * @param params - The Account address and XRPL operation
+     * @param options - Optional configuration for the intent
      * @returns The proposed intent response
      */
-    sendPayment: async (
-      params: CustodyPayment,
+    proposeIntent: async (
+      params: { Account: string; operation: Core_XrplOperation },
       options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.sendPayment(params, options),
-
-    /**
-     * Create an XRPL TrustSet.
-     * @param params - The trustline transaction details
-     * @param options - Optional configuration for the trustline intent
-     * @returns The proposed intent response
-     */
-    createTrustline: async (
-      params: CustodyTrustline,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.createTrustline(params, options),
-
-    /**
-     * Create an XRPL DepositPreauth.
-     * @param params - The deposit preauth transaction details
-     * @param options - Optional configuration for the deposit preauth intent
-     * @returns The proposed intent response
-     */
-    depositPreauth: async (
-      params: CustodyDepositPreauth,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.depositPreauth(params, options),
-
-    /**
-     * Create an XRPL Clawback.
-     * @param params - The clawback transaction details
-     * @param options - Optional configuration for the clawback intent
-     * @returns The proposed intent response
-     */
-    clawback: async (
-      params: CustodyClawback,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.clawback(params, options),
-
-    /**
-     * Create an XRPL MPTokenIssuanceCreate.
-     * @param params - The MPTokenIssuanceCreate transaction details
-     * @param options - Optional configuration for the MPTokenIssuanceCreate intent
-     * @returns The proposed intent response
-     */
-    mpTokenIssuanceCreate: async (
-      params: CustodyMpTokenIssuanceCreate,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.mpTokenIssuanceCreate(params, options),
-
-    /**
-     * Create an XRPL MPTokenIssuanceSet.
-     * @param params - The MPTokenIssuanceSet transaction details
-     * @param options - Optional configuration for the MPTokenIssuanceSet intent
-     * @returns The proposed intent response
-     */
-    mpTokenIssuanceSet: async (
-      params: CustodyMpTokenIssuanceSet,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.mpTokenIssuanceSet(params, options),
-
-    /**
-     * Create an XRPL MPTokenIssuanceDestroy.
-     * @param params - The MPTokenIssuanceDestroy transaction details
-     * @param options - Optional configuration for the MPTokenIssuanceDestroy intent
-     * @returns The proposed intent response
-     */
-    mpTokenIssuanceDestroy: async (
-      params: CustodyMpTokenIssuanceDestroy,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.mpTokenIssuanceDestroy(params, options),
-
-    /**
-     * Create an XRPL MPTokenAuthorize.
-     * @param params - The MPTokenAuthorize transaction details
-     * @param options - Optional configuration for the MPTokenAuthorize intent
-     * @returns The proposed intent response
-     */
-    mpTokenAuthorize: async (
-      params: CustodyMpTokenAuthorize,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.mpTokenAuthorize(params, options),
-
-    /**
-     * Create an XRPL OfferCreate.
-     * @param params - The OfferCreate transaction details
-     * @param options - Optional configuration for the OfferCreate intent
-     * @returns The proposed intent response
-     */
-    offerCreate: async (
-      params: CustodyOfferCreate,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.offerCreate(params, options),
-
-    /**
-     * Create an XRPL AccountSet.
-     * @param params - The AccountSet transaction details
-     * @param options - Optional configuration for the AccountSet intent
-     * @returns The proposed intent response
-     */
-    accountSet: async (
-      params: CustodyAccountSet,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.accountSet(params, options),
-
-    /**
-     * Create an XRPL TicketCreate transaction.
-     * @param params - The TicketCreate transaction details
-     * @param options - Optional configuration for the TicketCreate intent
-     * @returns The proposed intent response
-     */
-    ticketCreate: async (
-      params: CustodyTicketCreate,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.ticketCreate(params, options),
-
-    /**
-     * Create an XRPL Batch transaction.
-     * @param params - The Batch transaction details
-     * @param options - Optional configuration for the Batch intent
-     * @returns The proposed intent response
-     */
-    batch: async (
-      params: CustodyBatch,
-      options?: XrplIntentOptions,
-    ): Promise<Core_IntentResponse> => this.xrplService.batch(params, options),
+    ): Promise<Core_IntentResponse> => this.xrplService.proposeIntent(params, options),
 
     /**
      * Create an XRPL raw sign.

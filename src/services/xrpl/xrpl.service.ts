@@ -8,29 +8,13 @@ import {
   type Batch,
   type SubmittableTransaction,
 } from "xrpl"
-import { URLs } from "../../constants/urls.js"
 import { sleep } from "../../helpers/async/async.js"
 import { CustodyError } from "../../models/index.js"
-import { findByAddress } from "../../namespaces/accounts.js"
-import { TypedTransport } from "../../transport/index.js"
-import type { Core_ApiAccount, Core_ApiManifest } from "../accounts/accounts.types.js"
-import { DomainResolverService } from "../domain-resolver/index.js"
 import type { Core_IntentResponse, Core_ProposeIntentBody } from "../intents/intents.types.js"
+import type { XrplPorts } from "./xrpl.ports.js"
 import type {
   BuildTransactionIntentProps,
   Core_XrplOperation,
-  CustodyAccountSet,
-  CustodyBatch,
-  CustodyClawback,
-  CustodyDepositPreauth,
-  CustodyMpTokenAuthorize,
-  CustodyMpTokenIssuanceCreate,
-  CustodyMpTokenIssuanceDestroy,
-  CustodyMpTokenIssuanceSet,
-  CustodyOfferCreate,
-  CustodyPayment,
-  CustodyTicketCreate,
-  CustodyTrustline,
   IntentContext,
   RawSignAndWaitOptions,
   RawSignAndWaitResult,
@@ -40,183 +24,38 @@ import type {
 } from "./xrpl.types.js"
 
 export class XrplService {
-  private readonly transport: TypedTransport
-  private readonly domainResolver: DomainResolverService
-
-  constructor(apiService: import("../apis/api.service.js").ApiService) {
-    this.transport = new TypedTransport(apiService)
-    this.domainResolver = new DomainResolverService(this.transport)
-  }
+  constructor(private readonly ports: XrplPorts) {}
 
   /**
-   * Creates and proposes a payment intent for an XRPL payment transaction.
-   * @param payment - The payment transaction details
-   * @param options - Optional configuration for the payment intent
+   * Proposes any XRPL transaction intent.
+   *
+   * Replaces the individual per-type methods (sendPayment, createTrustline, etc.).
+   * The `operation` parameter is a discriminated union — callers specify the
+   * transaction type via the `type` field (e.g. `{ type: "Payment", ... }`).
+   *
+   * Internally: resolves domain/user context from the Account address,
+   * builds the intent envelope, and submits it to the Custody API.
+   *
+   * @param params - The Account address and XRPL operation
+   * @param options - Optional configuration for the intent
    * @returns The proposed intent response
    * @throws {CustodyError} If validation fails or the sender account is not found
    */
-  public async sendPayment(
-    payment: CustodyPayment,
+  public async proposeIntent(
+    params: { Account: string; operation: Core_XrplOperation },
     options: XrplIntentOptions = {},
   ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...payment, type: "Payment" }, options)
-  }
+    const context = await this.ports.resolveContext(params.Account, {
+      domainId: options.domainId,
+    })
 
-  /**
-   * Creates and proposes a trustline intent for an XRPL TrustSet transaction.
-   * @param trustline - The trustline transaction details
-   * @param options - Optional configuration for the trustline intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async createTrustline(
-    trustline: CustodyTrustline,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...trustline, type: "TrustSet" }, options)
-  }
-
-  /**
-   * Creates and proposes a deposit preauth intent for an XRPL DepositPreauth transaction.
-   * @param depositPreauth - The deposit preauth transaction details
-   * @param options - Optional configuration for the deposit preauth intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async depositPreauth(
-    depositPreauth: CustodyDepositPreauth,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...depositPreauth, type: "DepositPreauth" }, options)
-  }
-
-  /**
-   * Creates and proposes a clawback intent for an XRPL Clawback transaction.
-   * @param clawback - The clawback transaction details
-   * @param options - Optional configuration for the clawback intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async clawback(
-    clawback: CustodyClawback,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...clawback, type: "Clawback" }, options)
-  }
-
-  /**
-   * Creates and proposes a MPTokenAuthorize intent for an XRPL MPTokenAuthorize transaction.
-   * @param mpTokenAuthorize - The MPTokenAuthorize transaction details
-   * @param options - Optional configuration for the MPTokenAuthorize intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async mpTokenAuthorize(
-    mpTokenAuthorize: CustodyMpTokenAuthorize,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...mpTokenAuthorize, type: "MPTokenAuthorize" }, options)
-  }
-
-  /**
-   * Creates and proposes a OfferCreate intent for an XRPL OfferCreate transaction.
-   * @param offerCreate - The OfferCreate transaction details
-   * @param options - Optional configuration for the OfferCreate intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async offerCreate(
-    offerCreate: CustodyOfferCreate,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...offerCreate, type: "OfferCreate" }, options)
-  }
-
-  /**
-   * Creates and proposes a AccountSet intent for an XRPL AccountSet transaction.
-   * @param accountSet - The AccountSet transaction details
-   * @param options - Optional configuration for the AccountSet intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async accountSet(
-    accountSet: CustodyAccountSet,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...accountSet, type: "AccountSet" }, options)
-  }
-
-  /**
-   * Creates and proposes a TicketCreate intent for an XRPL TicketCreate transaction.
-   * @param ticketCreate - The TicketCreate transaction details
-   * @param options - Optional configuration for the TicketCreate intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async ticketCreate(
-    ticketCreate: CustodyTicketCreate,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...ticketCreate, type: "TicketCreate" }, options)
-  }
-
-  /**
-   * Creates and proposes a batch intent for an XRPL Batch transaction.
-   * @param batch - The batch transaction details
-   * @param options - Optional configuration for the batch intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async batch(
-    batch: CustodyBatch,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...batch, type: "Batch" }, options)
-  }
-
-  /**
-   * Creates and proposes a MPTokenIssuanceCreate intent for an XRPL MPTokenIssuanceCreate transaction.
-   * @param mpTokenIssuanceCreate - The MPTokenIssuanceCreate transaction details
-   * @param options - Optional configuration for the MPTokenIssuanceCreate intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async mpTokenIssuanceCreate(
-    mpTokenIssuanceCreate: CustodyMpTokenIssuanceCreate,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent(
-      { ...mpTokenIssuanceCreate, type: "MPTokenIssuanceCreate" },
+    const intent = this.buildTransactionIntent({
+      operation: params.operation,
+      context,
       options,
-    )
-  }
+    })
 
-  /**
-   * Creates and proposes a MPTokenIssuanceSet intent for an XRPL MPTokenIssuanceSet transaction.
-   * @param params - The MPTokenIssuanceSet transaction details
-   * @param options - Optional configuration for the MPTokenIssuanceSet intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async mpTokenIssuanceSet(
-    params: CustodyMpTokenIssuanceSet,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...params, type: "MPTokenIssuanceSet" }, options)
-  }
-
-  /**
-   * Creates and proposes a MPTokenIssuanceDestroy intent for an XRPL MPTokenIssuanceDestroy transaction.
-   * @param params - The MPTokenIssuanceDestroy transaction details
-   * @param options - Optional configuration for the MPTokenIssuanceDestroy intent
-   * @returns The proposed intent response
-   * @throws {CustodyError} If validation fails or the sender account is not found
-   */
-  public async mpTokenIssuanceDestroy(
-    params: CustodyMpTokenIssuanceDestroy,
-    options: XrplIntentOptions = {},
-  ): Promise<Core_IntentResponse> {
-    return this.proposeXrplIntent({ ...params, type: "MPTokenIssuanceDestroy" }, options)
+    return this.ports.submitIntent(intent)
   }
 
   /**
@@ -233,7 +72,7 @@ export class XrplService {
     domainId: string
     accountId: string
   }): Promise<string> {
-    const account = await this.transport.get<Core_ApiAccount>(URLs.account, { domainId, accountId })
+    const account = await this.ports.getAccount(domainId, accountId)
 
     const { providerDetails } = account.data
 
@@ -263,7 +102,7 @@ export class XrplService {
     xrplTransaction: SubmittableTransaction,
     options: XrplIntentOptions = {},
   ): Promise<Core_IntentResponse> {
-    const context = await this.resolveIntentContext(xrplTransaction.Account, {
+    const context = await this.ports.resolveContext(xrplTransaction.Account, {
       domainId: options.domainId,
     })
 
@@ -290,7 +129,7 @@ export class XrplService {
     xrplTransaction: SubmittableTransaction,
     options: RawSignAndWaitOptions = {},
   ): Promise<RawSignAndWaitResult> {
-    const context = await this.resolveIntentContext(xrplTransaction.Account, {
+    const context = await this.ports.resolveContext(xrplTransaction.Account, {
       domainId: options.domainId,
     })
 
@@ -394,19 +233,6 @@ export class XrplService {
   }
 
   /**
-   * Resolves the full intent context by combining domain resolution and account lookup.
-   * @private
-   */
-  private async resolveIntentContext(
-    address: string,
-    options: { domainId?: string } = {},
-  ): Promise<IntentContext> {
-    const { domainId, userId } = await this.domainResolver.resolve(options)
-    const account = await findByAddress(this.transport, address)
-    return { domainId, userId, ...account }
-  }
-
-  /**
    * Resolves the intent context for an inner batch signer.
    * When `accountId` and `ledgerId` are provided in options, skips the address lookup.
    * @private
@@ -416,18 +242,18 @@ export class XrplService {
     options: RawSignInnerBatchOptions,
   ): Promise<IntentContext> {
     if (options.accountId && options.ledgerId) {
-      const { domainId, userId } = await this.domainResolver.resolve({
+      const fullContext = await this.ports.resolveContext(signerAddress, {
         domainId: options.domainId,
       })
       return {
-        domainId,
-        userId,
+        domainId: fullContext.domainId,
+        userId: fullContext.userId,
         accountId: options.accountId,
         ledgerId: options.ledgerId,
         address: signerAddress,
       }
     }
-    return this.resolveIntentContext(signerAddress, { domainId: options.domainId })
+    return this.ports.resolveContext(signerAddress, { domainId: options.domainId })
   }
 
   /**
@@ -459,31 +285,6 @@ export class XrplService {
     } as unknown as Batch)
 
     return Buffer.from(batchEncodedHex, "hex").toString("base64")
-  }
-
-  /**
-   * Generic method to propose an XRPL intent with the common flow.
-   * Handles context resolution and intent submission.
-   * @private
-   */
-  private async proposeXrplIntent(
-    data: Core_XrplOperation & { Account: string },
-    options: XrplIntentOptions,
-  ): Promise<Core_IntentResponse> {
-    const context = await this.resolveIntentContext(data.Account, {
-      domainId: options.domainId,
-    })
-
-    // Remove Account from operation data (it's only used to find the sender)
-    const { Account, ...operation } = data
-
-    const intent = this.buildTransactionIntent({
-      operation,
-      context,
-      options,
-    })
-
-    return this.transport.post<Core_IntentResponse>(URLs.intents, intent)
   }
 
   /**
@@ -526,7 +327,7 @@ export class XrplService {
       },
     }
 
-    const intentResponse = await this.transport.post<Core_IntentResponse>(URLs.intents, intent)
+    const intentResponse = await this.ports.submitIntent(intent)
     return { intentResponse, payloadId }
   }
 
@@ -585,7 +386,7 @@ export class XrplService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        return await this.transport.get<Core_ApiManifest>(URLs.accountManifest, params)
+        return await this.ports.getManifest(params.domainId, params.accountId, params.manifestId)
       } catch (error) {
         if (error instanceof CustodyError && error.statusCode === 404) {
           lastError = error

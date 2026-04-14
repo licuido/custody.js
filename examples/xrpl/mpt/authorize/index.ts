@@ -22,16 +22,19 @@ const authorizeMpt = async () => {
     // Can be used to filter the transactions
     const orderReferenceId = crypto.randomUUID()
 
-    // Submit the payment transaction to Ripple Custody
-    // The payment will be queued as an "intent" and processed asynchronously
-    await custody.xrpl.mpTokenAuthorize(
+    // Submit the MPTokenAuthorize transaction to Ripple Custody
+    // The transaction will be queued as an "intent" and processed asynchronously
+    await custody.xrpl.proposeIntent(
       {
         Account: "r...", // Your Ripple Custody account address (the sender)
-        tokenIdentifier: {
-          type: "MPTokenIssuanceId",
-          issuanceId: "...",
+        operation: {
+          type: "MPTokenAuthorize",
+          tokenIdentifier: {
+            type: "MPTokenIssuanceId",
+            issuanceId: "...",
+          },
+          flags: [],
         },
-        flags: [],
       },
       {
         // Optional: Provide a payloadId to track this transaction
