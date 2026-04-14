@@ -9,6 +9,7 @@ import {
   OfferCreateFlags,
   TrustSetFlags,
 } from "xrpl"
+import { isString } from "../../helpers/index.js"
 import type {
   CustodyAccountSetFlag,
   CustodyBatchSigner,
@@ -141,7 +142,7 @@ const txToOperation = (tx: RawTx): CustodyOperation => {
   switch (tx.TransactionType) {
     case "Payment": {
       const amount = tx.Amount
-      if (typeof amount === "string") {
+      if (isString(amount)) {
         // XRP drops
         return {
           type: "Payment",
