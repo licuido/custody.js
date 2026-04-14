@@ -1,5 +1,11 @@
 # custody
 
+## 1.0.1
+
+### Patch Changes
+
+- dbbfca7: Handle MPT (Multi-Purpose Token) amounts in the Payment operation converter.
+
 ## 1.0.0
 
 ### Major Changes
@@ -34,7 +40,6 @@
   New XRPL transaction types are supported automatically when the OpenAPI spec is regenerated — no new SDK method required.
 
   ### Other changes
-
   - `XrplService` now accepts an `XrplPorts` interface for I/O dependencies, enabling simpler testing with in-memory adapters instead of mock-heavy setups.
   - `DomainResolverService` has been removed. Its domain resolution and user validation logic is now internal to the HTTP port adapter.
   - `rawSign`, `rawSignAndWait`, `rawSignInnerBatch`, `rawSignInnerBatchAndWait`, and `getPublicKey` are unchanged.
